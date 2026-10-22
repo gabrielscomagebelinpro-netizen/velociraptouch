@@ -1,0 +1,19 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+
+    App\Service\ContactMessageStore:
+        arguments:
+            $file: '%kernel.project_dir%/var/data/messages.json'
+
+    App\Service\ContactMessageMailer:
+        arguments:
+            $recipient: '%env(CONTACT_RECIPIENT)%'
+
+    App\Controller\AdminController:
+        arguments:
+            $eventPhotoDirectory: '%kernel.project_dir%/var/uploads/events'

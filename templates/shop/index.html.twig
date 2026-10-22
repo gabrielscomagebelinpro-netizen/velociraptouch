@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Boutique — Vélociraptouch{% endblock %}
+{% block meta_description %}La boutique des Vélociraptouch : équipement et tenues pour le touch rugby.{% endblock %}
+
+{% block navigation %}
+  <a href="{{ path('site_home') }}">Retour à l’accueil <span>↗</span></a>
+  <a href="#contact">Contact</a>
+{% endblock %}
+
+{% block body %}
+    <main>
+      <section class="shop-hero">
+        <div>
+          <p class="eyebrow"><span class="live-dot"></span> Équipement · terrain · collectif</p>
+          <h1>La boutique<br /><em>des vélos.</em></h1>
+          <p>Des essentiels imaginés pour courir, plonger et représenter les Vélociraptouch avec style. Produits fictifs, prix indicatifs : la boutique arrive bientôt.</p>
+        </div>
+        <div class="shop-hero-sticker"><img class="lightbox-trigger" src="/assets/images/brand/logo-velo-svg.png" alt="Logo Vélociraptouch" tabindex="0" /></div>
+      </section>
+
+      <section class="shop-section">
+        <div class="section-heading heading-row"><div><p class="eyebrow">01 — la tenue</p><h2>Prêt·e à<br /><span>jouer.</span></h2></div><p class="shop-intro">Des pièces légères et résistantes pour garder toute sa liberté de mouvement sur le terrain.</p></div>
+        <div class="product-grid">
+          <article class="product-card product-card-wide"><div class="product-art product-art-orange product-drawing-jersey"><b>VR</b><span>01</span><strong>HOME<br />KIT</strong></div><div class="product-info"><p class="product-type">Maillot officiel</p><h3>Maillot touch « Home »</h3><p>Coupe mixte, tissu respirant et numéro personnalisable. Le maillot pour les jours de match comme pour l’apéro d’après.</p><div class="product-bottom"><strong>45 €</strong><button class="button button-primary" type="button">Bientôt disponible <span>→</span></button></div></div></article>
+          <article class="product-card"><div class="product-art product-art-lime product-drawing-shorts"><b>V</b><span>02</span><strong>MOVE<br />FAST</strong></div><div class="product-info"><p class="product-type">Bas technique</p><h3>Short « Fast Lane »</h3><p>Short souple avec poche zippée discrète pour courir sans rien perdre.</p><div class="product-bottom"><strong>32 €</strong><button class="button button-outline" type="button">Précommande <span>→</span></button></div></div></article>
+          <article class="product-card"><div class="product-art product-art-ink product-drawing-socks"><b>VT</b><span>03</span><strong>STEP<br />UP</strong></div><div class="product-info"><p class="product-type">Accessoire</p><h3>Chaussettes « Step Up »</h3><p>Maintien renforcé, motif turquoise et semelle confortable pour les longues sessions.</p><div class="product-bottom"><strong>12 €</strong><button class="button button-outline" type="button">Précommande <span>→</span></button></div></div></article>
+        </div>
+      </section>
+
+      <section class="shop-section shop-equipment">
+        <div class="section-heading heading-row"><div><p class="eyebrow">02 — le matériel utile</p><h2>Bien équipé,<br /><span>bien lancé.</span></h2></div><p class="shop-intro">Le matériel simple qui aide à préparer une séance, un tournoi ou une initiation entre amis.</p></div>
+        <div class="equipment-grid">
+          <article><span class="equipment-number">04</span><div class="equipment-icon equipment-ball"></div><p class="product-type">Entraînement</p><h3>Ballon touch T5</h3><p>Grip souple et bonne tenue en main, même après une séance humide.</p><strong>25 €</strong></article>
+          <article><span class="equipment-number">05</span><div class="equipment-icon equipment-cones"></div><p class="product-type">Terrain</p><h3>Kit de plots plats</h3><p>Un lot de 20 plots colorés pour baliser les ateliers et les petits terrains.</p><strong>18 €</strong></article>
+          <article><span class="equipment-number">06</span><div class="equipment-icon equipment-bottle"></div><p class="product-type">Récupération</p><h3>Gourde « Hydrate »</h3><p>Gourde 750 ml réutilisable, graduée et facile à glisser dans le sac.</p><strong>15 €</strong></article>
+          <article><span class="equipment-number">07</span><div class="equipment-icon equipment-bag"></div><p class="product-type">Organisation</p><h3>Sac de terrain</h3><p>Un compartiment chaussures, une poche ballon et assez de place pour l’après-match.</p><strong>55 €</strong></article>
+        </div>
+      </section>
+
+      <section class="shop-tips">
+        <p class="eyebrow">03 — conseils d’utilisation</p>
+        <div class="tips-grid">
+          <article><b>01</b><h3>Avant de jouer</h3><p>Choisis une tenue qui ne gêne pas les appuis. Vérifie tes lacets, remplis ta gourde et garde une couche sèche dans ton sac.</p></article>
+          <article><b>02</b><h3>Pendant la séance</h3><p>Hydrate-toi régulièrement, surtout entre les ateliers. Les plots servent à créer des repères : laisse toujours une zone de sécurité autour.</p></article>
+          <article><b>03</b><h3>Après le terrain</h3><p>Rince le ballon et les accessoires à l’eau claire. Lave le textile à 30 °C, à l’envers, et évite le sèche-linge pour préserver les impressions.</p></article>
+        </div>
+      </section>
+
+      <section class="section contact" id="contact">
+        <div class="contact-copy"><p class="eyebrow">04 — parlons-nous</p><h2>Une question ?<br /><span>Un produit ?</span></h2><p>Une question sur une taille, une précommande ou l’équipement adapté à votre pratique ? Retrouvez-nous sur nos réseaux.</p><div class="social-links"><a class="social-link" href="https://www.instagram.com/velocirap.touch/" target="_blank" rel="noreferrer"><svg class="social-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg> @velocirap.touch <span>↗</span></a><a class="social-link" href="https://www.tiktok.com/@velocirap.touch?_r=1&_t=ZN-9AkDFSuwcw2" target="_blank" rel="noreferrer"><svg class="social-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 4v10.2a4.8 4.8 0 1 1-4-4.74"></path><path d="M14 4c.5 2.7 2.1 4.2 5 4.5"></path></svg> @velocirap.touch <span>↗</span></a></div></div>
+        <form class="contact-form needs-validation" id="shop-contact-form" method="post" action="{{ path('site_contact') }}"><input type="hidden" name="_token" value="{{ csrf_token }}" /><label for="shop-name">Votre nom et prénom</label><input class="form-control" id="shop-name" name="name" value="{{ app.user ? app.user.firstName ~ ' ' ~ app.user.lastName : '' }}" required placeholder="Noa Martin" /><label for="shop-email">Votre email</label><input class="form-control" id="shop-email" name="email" type="email" value="{{ app.user ? app.user.email : '' }}" required placeholder="Noa@email.com" /><label for="shop-message">Votre message</label><textarea class="form-control" id="shop-message" name="message" required rows="3" placeholder="Bonjour, j’ai une question sur un produit..."></textarea><button class="button button-primary btn" type="submit">Envoyer le message <span>↗</span></button><p class="form-note" id="shop-contact-status">{{ message_error ?: message_success }}</p></form>
+      </section>
+    </main>
+{% endblock %}

@@ -1,0 +1,20 @@
+services:
+    database:
+        image: mysql:8.0
+        environment:
+            MYSQL_DATABASE: velociraptouch
+            MYSQL_USER: velociraptouch
+            MYSQL_PASSWORD: velociraptouch
+            MYSQL_ROOT_PASSWORD: root
+        ports:
+            - "3310:3306"
+        volumes:
+            - database_data:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uvelociraptouch", "-pvelociraptouch"]
+            interval: 5s
+            timeout: 5s
+            retries: 20
+
+volumes:
+    database_data:

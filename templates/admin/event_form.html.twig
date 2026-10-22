@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un événement{% endblock %}
+
+{% block body %}
+<main class="admin-page-main">
+    <div class="admin-page-header admin-edit-header">
+        <p class="eyebrow">Espace administration</p>
+        <a class="button button-outline" href="{{ path('admin_dashboard') }}">← Retour au panel</a>
+    </div>
+    <h1>Modifier <span>l’événement.</span></h1>
+    {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
+    <section class="admin-card admin-edit-card">
+        {{ form_start(form, {attr: {class: 'contact-form'}}) }}
+        {{ form_row(form.date, {attr: {class: 'form-control'}}) }}
+        {{ form_row(form.title, {attr: {class: 'form-control'}}) }}
+        {{ form_row(form.description, {attr: {class: 'form-control'}}) }}
+        <div class="admin-form-actions">
+            <button class="button button-primary btn" type="submit">Enregistrer <span>↗</span></button>
+            <a class="button button-outline" href="{{ path('admin_dashboard') }}">Annuler</a>
+        </div>
+        {{ form_end(form) }}
+    </section>
+    <section class="admin-card admin-photos-card" id="event-photos">
+        <h2>Photos de l’événement</h2>
+        <p class="field-help">Les fichiers originaux sont conservés sans compression. JPEG, PNG, WebP, HEIC ou HEIF, 25 Mo maximum par photo.</p>
+        <form class="event-photo-upload" method="post" action="{{ path('admin_event_photos_upload', {id: event.id}) }}" enctype="multipart/form-data">
+            <input type="hidden" name="_token" value="{{ csrf_token('event-photos-' ~ event.id) }}">
+            <label class="photo-dropzone" for="event-photos">
+                <strong>Dépose tes photos ici</strong>
+                <span>ou appuie pour les choisir depuis ton téléphone</span>
+                <input id="event-photos" name="photos[]" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+            </label>
+            <div class="photo-upload-status" aria-live="polite">Aucune photo sélectionnée</div>
+            <div class="photo-upload-preview" aria-live="polite"></div>
+            <button class="button button-primary btn" type="submit">Ajouter les photos <span>↗</span></button>
+        </form>
+        {% if photos is not empty %}
+            <div class="event-photo-grid">
+                {% for photo in photos %}
+                    <figure>
+                        <img src="{{ path('admin_event_photo_view', {id: event.id, filename: photo.filename}) }}" alt="{{ photo.originalName|e }}">
+                        <figcaption>
+                            <span>{{ photo.originalName }}</span>
+                            <form method="post" action="{{ path('admin_event_photo_delete', {id: event.id, photoId: photo.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete-event-photo-' ~ photo.id) }}">
+                                <button class="text-button" type="submit">Supprimer</button>
+                            </form>
+                        </figcaption>
+                    </figure>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="field-help">Aucune photo pour cet événement.</p>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

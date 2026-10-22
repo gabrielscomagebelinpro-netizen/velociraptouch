@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un compte{% endblock %}
+
+{% block body %}
+<main class="admin-page-main">
+    <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
+    <p class="eyebrow">Nouveau membre</p>
+    <h1>Créer un <span>compte.</span></h1>
+    {% for message in app.flashes('error') %}<p class="form-note">{{ message }}</p>{% endfor %}
+    <div class="contact-form mt-5" style="max-width: 480px">
+        {{ form_start(form) }}
+        {{ form_row(form.firstName, {attr: {class: 'form-control', autocomplete: 'given-name'}}) }}
+        {{ form_row(form.lastName, {attr: {class: 'form-control', autocomplete: 'family-name'}}) }}
+        {{ form_row(form.email, {attr: {class: 'form-control'}}) }}
+        {{ form_row(form.plainPassword, {attr: {class: 'form-control'}}) }}
+        <button class="button button-primary btn mt-4" type="submit">S’inscrire <span>↗</span></button>
+        {{ form_end(form) }}
+    </div>
+    <p class="field-help mt-4">Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a></p>
+</main>
+{% endblock %}

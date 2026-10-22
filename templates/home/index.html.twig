@@ -1,0 +1,129 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Les Vélociraptouch — Rugby, vitesse & convivialité{% endblock %}
+{% block meta_description %}Les Vélociraptouch — association de rugby touch, de sport et de convivialité.{% endblock %}
+
+{% block navigation %}
+  <a href="#collectif">Le collectif</a>
+  <a href="#histoire">Notre histoire</a>
+  <a href="#agenda">Agenda</a>
+  <a href="{{ path('site_shop') }}">Boutique <span>↗</span></a>
+  <a href="#sponsors">Sponsors</a>
+  <a href="#contact">Contact</a>
+{% endblock %}
+
+{% block body %}
+    <main>
+      <section class="hero" id="accueil">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="live-dot"></span> Rugby touch · Montpellier & alentours</p>
+          <h1>On court.<br /><em>On joue.</em><br />On recommence.</h1>
+          <p class="hero-intro">Une bande de passionné·es qui met de la vitesse, du style et beaucoup de bonne humeur sur tous les terrains.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#agenda">Voir les prochains entrainements ou tournois<span>↗</span></a>
+            <a class="text-link" href="#collectif">Découvrir le collectif <span>→</span></a>
+          </div>
+        </div>
+        <div class="hero-art" aria-label="Photo de l'équipe des Vélociraptouch">
+          <img class="lightbox-trigger" src="/assets/images/editorial/team-photo.jpg" alt="Les Vélociraptouch réunis sur un terrain" tabindex="0" />
+          <div class="hero-art-overlay"></div>
+          <div class="art-label">RUGBY<br /><strong>TOUCH</strong></div>
+          <div class="art-caption">LAISSEZ-NOUS<br />NOUS<br />PRÉSENTER</div>
+        </div>
+        <div class="hero-stamp"><img class="lightbox-trigger" src="/assets/images/brand/logo-velo-svg.png" alt="Logo Vélociraptouch" tabindex="0" /></div>
+      </section>
+
+      <section class="ticker" aria-label="Valeurs du club">
+        <div class="ticker-track">CONVIVIALITÉ <i>✳</i> AMITIÉ <i>✳</i> MIXITÉ <i>✳</i> PLAISIR</div>
+      </section>
+
+      <section class="section collective container-fluid" id="collectif">
+        <div class="section-heading">
+          <p class="eyebrow">01 — qui sommes-nous ?</p>
+          <h2>Plus qu’un sport,<br /><span>un état d’esprit.</span></h2>
+        </div>
+        <div class="collective-content">
+          <p class="large-copy">Les Vélociraptouch, c’est un collectif mixte où l’on vient pour jouer au rugby touch, progresser ensemble et rester boire un verre après.</p>
+          <div class="value-grid row g-4">
+            <article><b>01</b><h3>Accessible</h3><p>Pas besoin d’être un expert. On apprend, on partage et on fait de la place à tout le monde.</p></article>
+            <article><b>02</b><h3>Engagé</h3><p>Sur le terrain comme en dehors, on défend un sport inclusif, joyeux et responsable.</p></article>
+            <article><b>03</b><h3>Déterminé</h3><p>On se donne à fond, avec le sourire. La compétition oui, mais jamais sans le collectif.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section story" id="histoire">
+        <div class="section-heading heading-row">
+          <div><p class="eyebrow">02 — notre histoire</p><h2>Du parc<br /><span>aux trophées.</span></h2></div>
+          <p class="story-lead">Une aventure née entre amis, construite autour du Touch et portée par une même envie : jouer, apprendre et partager avec tout le monde.</p>
+        </div>
+        <div class="story-grid">
+          <article class="story-step"><span class="story-number">01</span><div><p class="eyebrow">L'étincelle</p><h3>Commencer simplement.</h3><p>Au départ, nous étions 4 amis animés par une idée : initier au rugby, mais à travers le Touch, pour garantir un maximum d'inclusivité et de mixité. Les débuts se font à 7 ou 8 copains pour des entraînements improvisés dans un parc. Pourtant, la magie opère et nous remportons notre premier tournoi universitaire.</p></div></article>
+          <article class="story-step"><span class="story-number">02</span><div><p class="eyebrow">La structuration</p><h3>Ouvrir les portes.</h3><p>La deuxième année, nous officialisons l'aventure. Avec un vrai lieu d'entraînement et un rendez-vous par semaine, nous ouvrons les portes à plus de monde. Rapidement, nous atteignons 20 présents par séance. C’est une superbe réussite, faite de chouettes rencontres. Nous nous lançons dans nos premiers tournois : les résultats sportifs sont encore modestes, mais l'amusement et les bons moments sont bien là.</p></div></article>
+          <article class="story-step"><span class="story-number">03</span><div><p class="eyebrow">L'accomplissement</p><h3>Grandir sans changer.</h3><p>Pour cette troisième année, la dynamique s'accélère. De nouveaux joueurs et de nouvelles joueuses nous rejoignent pour atteindre les 30 présents. Sur le terrain, tout bascule : nous multiplions les tournois et nous gagnons tout, décrochant le titre de champion départemental et une 4e place régionale.</p></div></article>
+        </div>
+        <p class="story-closing">Malgré cette réussite, rien n'a changé. Notre priorité reste la même : garder un haut seuil d'inclusivité, de partage, d'apprentissage et de rigolade.</p>
+      </section>
+
+      <section class="section agenda" id="agenda">
+        <div class="section-heading heading-row">
+          <div><p class="eyebrow">03 — le calendrier</p><h2>À vos agendas<span>.</span></h2></div>
+        </div>
+        {% for message in app.flashes('attendance') %}<p class="form-note">{{ message }}</p>{% endfor %}
+        <div class="events-list container-fluid px-0" id="events-list">
+          {% for event in events %}
+            <article class="event">
+              <div class="event-date"><strong>{{ event.date|date('d') }}</strong>{{ event.date|format_datetime(pattern='EEEE MMM', locale='fr')|upper }}</div>
+              <div class="event-main"><h3>{{ event.title }}</h3><p>{{ event.date|format_datetime(pattern='EEEE d MMMM y', locale='fr')|capitalize }} · {{ event.description }}</p></div>
+              <span class="event-tag">Agenda</span>
+              {% if app.user %}
+                <form method="post" action="{{ path('event_attendance_toggle', {id: event.id}) }}" class="event-rsvp-form">
+                  <input type="hidden" name="_token" value="{{ csrf_token('attendance-' ~ event.id) }}">
+                  <button class="rsvp btn btn-link {{ event.id in attendance_event_ids ? 'confirmed' : '' }}" type="submit">
+                    {{ event.id in attendance_event_ids ? 'Annuler ma présence' : 'Je serai là' }} <span>{{ event.id in attendance_event_ids ? '×' : '＋' }}</span>
+                  </button>
+                </form>
+              {% else %}
+                <a class="rsvp btn btn-link" href="{{ path('app_login') }}">Se connecter pour participer</a>
+              {% endif %}
+            </article>
+          {% else %}
+            <p class="empty-state">Aucun événement à venir pour le moment.</p>
+          {% endfor %}
+        </div>
+        <article class="training-location">
+          <div><p class="eyebrow">Lieu habituel</p><h3>Stade Eric Béchu</h3><p>Rue Gustave Flaubert, 34071 Montpellier · entraînements le mardi à 19h30</p></div>
+          <div class="map-actions"><a class="button button-outline" href="https://www.google.com/maps/search/?api=1&query=Stade+Eric-B%C3%A9chu%2C+Rue+Gustave+Flaubert%2C+34071+Montpellier" target="_blank" rel="noreferrer">Ouvrir dans Google Maps <span>↗</span></a><a class="text-link" href="https://www.google.com/maps/dir/?api=1&destination=Stade+Eric-B%C3%A9chu%2C+Rue+Gustave+Flaubert%2C+34071+Montpellier" target="_blank" rel="noreferrer">Itinéraire</a></div>
+          <iframe title="Localisation du Stade Eric Béchu à Montpellier" src="https://www.google.com/maps?q=Stade+Eric-B%C3%A9chu%2C+Rue+Gustave+Flaubert%2C+34071+Montpellier&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </article>
+      </section>
+
+      <section class="section sponsors" id="sponsors">
+        <div class="section-heading heading-row"><div><p class="eyebrow">04 — nos partenaires</p><h2>Ils font vivre<br /><span>le collectif.</span></h2></div><p class="sponsor-intro">Merci aux partenaires qui soutiennent le rugby touch et les moments partagés à Montpellier.</p></div>
+        <div class="sponsor-featured-grid">
+          <article class="sponsor-card sponsor-card-featured">
+            <div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-featured" src="/assets/images/sponsors/ethik-sport-club.jpeg" alt="Photo du profil Ethik Sport Club Montpellier" tabindex="0" /></div>
+            <div class="sponsor-details"><p class="eyebrow">Partenaire principal</p><h3>Ethik Sport Club</h3><p>Le sport, la santé et le collectif à Montpellier.</p><a class="sponsor-link" href="https://www.instagram.com/ethiksportclub_montpellier/" target="_blank" rel="noreferrer">@ethiksportclub_montpellier <span>↗</span></a></div>
+          </article>
+          <article class="sponsor-card sponsor-card-featured">
+            <div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-featured" src="/assets/images/sponsors/little-matt-panuozzo.jpeg" alt="Photo du profil Little Matt Panuozzo" tabindex="0" /></div>
+            <div class="sponsor-details"><p class="eyebrow">Partenaire principal</p><h3>Little Matt Panuozzo</h3><p>Panuozzi italiens et gourmandise au cœur de Montpellier.</p><a class="sponsor-link" href="https://www.instagram.com/littlemattpanuozzo/" target="_blank" rel="noreferrer">@littlemattpanuozzo <span>↗</span></a></div>
+          </article>
+        </div>
+        <div class="sponsor-grid sponsor-grid-secondary">
+          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger" src="/assets/images/sponsors/logo-beers-montpellier.png" alt="Logo BEERS! Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire convivialité</p><h3>BEERS! Montpellier</h3><p>Same place, more fun.</p><a class="sponsor-link" href="https://www.instagram.com/beers_montpellier/" target="_blank" rel="noreferrer">@beers_montpellier <span>↗</span></a></div></article>
+          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-lowres" src="/assets/images/sponsors/logo-la-fumerie-montpellier.jpg" alt="Logo La Fumerie Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire convivialité</p><h3>La Fumerie Montpellier</h3><p>Vodka bar · 8 rue de l’Aiguillerie · Montpellier</p><a class="sponsor-link" href="https://www.instagram.com/lafumerie_mtp/?hl=fr" target="_blank" rel="noreferrer">@lafumerie_mtp <span>↗</span></a></div></article>
+        </div>
+        <div class="sponsor-grid sponsor-grid-tertiary">
+          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-lowres" src="/assets/images/sponsors/le-tord-boyaux.jpg" alt="Photo du profil Le Tord Boyaux Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire</p><h3>Le Tord Boyaux</h3><p>Bar et convivialité à Montpellier.</p><a class="sponsor-link" href="https://www.instagram.com/letordboyauxmontpellier/" target="_blank" rel="noreferrer">@letordboyauxmontpellier <span>↗</span></a></div></article>
+          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-lowres" src="/assets/images/sponsors/tuk-tuk-team.jpg" alt="Photo du profil Tuk Tuk Team Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire</p><h3>Tuk Tuk Team</h3><p>L'équipe Tuk Tuk à Montpellier.</p><a class="sponsor-link" href="https://www.instagram.com/tuktukteamontpellier/" target="_blank" rel="noreferrer">@tuktukteamontpellier <span>↗</span></a></div></article>
+          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger" src="/assets/images/sponsors/logo-sarda-avocat-montpellier.png" alt="Logo Sarda Avocat Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire juridique</p><h3>Sarda Avocat</h3><p>Avocat pénaliste · 6 passage Lonjon · 34000 Montpellier</p><a class="sponsor-link" href="https://avocat-sarda.fr/" target="_blank" rel="noreferrer">avocat-sarda.fr <span>↗</span></a><a class="sponsor-link" href="https://www.instagram.com/sarda_avocat/" target="_blank" rel="noreferrer">@sarda_avocat <span>↗</span></a></div></article>
+        </div>
+      </section>
+
+      <section class="section contact" id="contact">
+        <div class="contact-copy"><p class="eyebrow">06 — parlons-nous</p><h2>Une question ?<br /><span>Un projet ?</span></h2><p>Envie de tester, de nous inviter à un tournoi ou simplement de dire bonjour ? Retrouvez-nous sur nos réseaux.</p><div class="social-links"><a class="social-link" href="https://www.instagram.com/velocirap.touch/" target="_blank" rel="noreferrer"><svg class="social-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg> @velocirap.touch <span>↗</span></a><a class="social-link" href="https://www.tiktok.com/@velocirap.touch?_r=1&_t=ZN-9AkDFSuwcw2" target="_blank" rel="noreferrer"><svg class="social-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 4v10.2a4.8 4.8 0 1 1-4-4.74"></path><path d="M14 4c.5 2.7 2.1 4.2 5 4.5"></path></svg> @velocirap.touch <span>↗</span></a></div></div>
+        <form class="contact-form needs-validation" id="contact-form" method="post" action="{{ path('site_contact') }}"><input type="hidden" name="_token" value="{{ csrf_token }}" /><label for="name">Votre nom et prénom</label><input class="form-control" id="name" name="name" value="{{ app.user ? app.user.firstName ~ ' ' ~ app.user.lastName : '' }}" required placeholder="Noa Martin" /><label for="email">Votre email</label><input class="form-control" id="email" name="email" type="email" value="{{ app.user ? app.user.email : '' }}" required placeholder="Noa@email.com" /><label for="message">Votre message</label><textarea class="form-control" id="message" name="message" required rows="3" placeholder="Bonjour les vélos..."></textarea><button class="button button-primary btn" type="submit">Envoyer le message <span>↗</span></button><p class="form-note" id="contact-status">{{ message_error ?: message_success }}</p></form>
+      </section>
+    </main>
+{% endblock %}

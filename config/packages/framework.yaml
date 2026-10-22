@@ -1,0 +1,10 @@
+framework:
+    secret: '%env(APP_SECRET)%'
+    http_method_override: false
+    handle_all_throwables: true
+    router:
+        utf8: true
+    csrf_protection: true
+    session: true
+    validation:
+        enabled: true

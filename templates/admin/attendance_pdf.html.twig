@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; color: #17202a; font-size: 12px; }
+        h1 { color: #e85d04; margin-bottom: 4px; }
+        .meta { color: #566573; margin-bottom: 24px; }
+        table { border-collapse: collapse; width: 100%; }
+        th { background: #17202a; color: #fff; text-align: left; }
+        th, td { border: 1px solid #ccd1d1; padding: 9px; }
+        tr:nth-child(even) { background: #f4f6f7; }
+        .empty { padding: 16px; background: #f4f6f7; }
+    </style>
+</head>
+<body>
+    <h1>Liste des présences</h1>
+    <div class="meta">
+        <strong>{{ event.title }}</strong><br>
+        {{ event.date|format_datetime(pattern='dd/MM/y', locale='fr') }}<br>
+        {{ attendances|length }} participant{{ attendances|length > 1 ? 's' : '' }}
+    </div>
+
+    {% if attendances is not empty %}
+        <table>
+            <thead>
+                <tr><th>#</th><th>Nom</th><th>Adresse email</th><th>Inscription le</th></tr>
+            </thead>
+            <tbody>
+            {% for attendance in attendances %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ attendance.user.firstName }} {{ attendance.user.lastName }}</td>
+                    <td>{{ attendance.user.email }}</td>
+                    <td>{{ attendance.createdAt|format_datetime(pattern='dd/MM/y à HH:mm', locale='fr') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty">Aucune présence enregistrée pour cet événement.</div>
+    {% endif %}
+</body>
+</html>

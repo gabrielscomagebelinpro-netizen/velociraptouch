@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration — Agenda{% endblock %}
+
+{% block body %}
+<main class="admin-page-main">
+    <div class="admin-page-header">
+        <div>
+            <p class="eyebrow">Espace administration</p>
+            <h1>Gérer <span>le site.</span></h1>
+            <p class="admin-page-intro">Gère ici le contenu du site, les événements et bientôt les produits de la boutique.</p>
+        </div>
+        <div class="admin-header-actions">
+            <a class="button button-outline" href="{{ path('site_home') }}">← Accueil</a>
+            <a class="button button-outline" href="{{ path('site_shop') }}">Boutique</a>
+        </div>
+    </div>
+    {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
+    <div class="admin-page-grid">
+        <section class="admin-card admin-create-card">
+            <h2>Ajouter un événement</h2>
+            {{ form_start(form, {attr: {class: 'contact-form'}}) }}
+            {{ form_row(form.date, {attr: {class: 'form-control'}}) }}
+            {{ form_row(form.title, {attr: {class: 'form-control'}}) }}
+            {{ form_row(form.description, {attr: {class: 'form-control'}}) }}
+            <button class="button button-primary btn" type="submit">Ajouter à l’agenda <span>↗</span></button>
+            {{ form_end(form) }}
+        </section>
+        <section class="admin-card admin-events-card">
+            <h2>Événements à venir</h2>
+            <div class="admin-content-list">
+            {% for event in events %}
+                <article class="admin-event-row">
+                    <div><strong>{{ event.date|format_datetime(pattern='dd/MM/y', locale='fr') }} — {{ event.title }}</strong><span>{{ event.description }}</span></div>
+                    <div class="admin-row-actions">
+                        <a class="button button-primary btn" href="{{ path('admin_event_edit', {id: event.id}) }}#event-photos">Ajouter des photos <span>↗</span></a>
+                        <a class="text-link" href="{{ path('admin_event_edit', {id: event.id}) }}">Modifier <span>→</span></a>
+                        <a class="text-link" href="{{ path('admin_event_attendance_pdf', {id: event.id}) }}">PDF <span>↓</span></a>
+                        <form method="post" action="{{ path('admin_event_delete', {id: event.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete-event-' ~ event.id) }}">
+                            <button class="text-button" type="submit">Supprimer</button>
+                        </form>
+                    </div>
+                </article>
+            {% else %}
+                <p class="field-help">Aucun événement enregistré.</p>
+            {% endfor %}
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

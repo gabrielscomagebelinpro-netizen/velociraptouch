@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block body %}
+<main class="admin-page-main">
+    <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
+    <p class="eyebrow">Espace membre</p>
+    <h1>Connexion <span>à votre compte.</span></h1>
+    {% if error %}<p class="form-note">{{ error.messageKey|trans(error.messageData, 'security') }}</p>{% endif %}
+    <form method="post" action="{{ path('admin_login') }}" class="contact-form mt-5" style="max-width: 480px">
+        <label for="first_name">Prénom</label>
+        <input class="form-control" type="text" id="first_name" name="_first_name" autocomplete="given-name" required>
+        <label for="last_name">Nom</label>
+        <input class="form-control" type="text" id="last_name" name="_last_name" autocomplete="family-name" required>
+        <label for="password">Mot de passe</label>
+        <input class="form-control" type="password" id="password" name="_password" autocomplete="current-password" required>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button class="button button-primary btn mt-4" type="submit">Se connecter <span>↗</span></button>
+    </form>
+    <p class="field-help mt-4">Pas encore de compte ? <a href="{{ path('app_register') }}">Créer un compte</a></p>
+</main>
+{% endblock %}
