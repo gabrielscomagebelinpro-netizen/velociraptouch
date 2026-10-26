@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use App\Repository\AttendanceRepository;
@@ -27,7 +29,7 @@ final class AdminController extends AbstractController
     }
 
     #[Route('', name: 'admin_dashboard', methods: ['GET', 'POST'])]
-    public function dashboard(Request $request, EntityManagerInterface $entityManager, EventRepository $events, AttendanceRepository $attendances): Response
+    public function dashboard(Request $request, EntityManagerInterface $entityManager, EventRepository $events, AttendanceRepository $attendances, EventPhotoRepository $photos): Response
     {
         $attendances->removeForPastEvents(new \DateTimeImmutable('today'));
         $event = new Event();
@@ -44,6 +46,7 @@ final class AdminController extends AbstractController
         return $this->render('admin/dashboard.html.twig', [
             'form' => $form,
             'events' => $events->findUpcoming(),
+            'photoAlbums' => $photos->findEventsWithPhotos(),
         ]);
     }
 
@@ -72,13 +75,12 @@ final class AdminController extends AbstractController
             is_array($files) ? $files : [$files],
             static fn (mixed $file): bool => $file instanceof UploadedFile,
         ));
-        if (!is_array($files) || $files === []) {
-            if ((int) $request->server->get('CONTENT_LENGTH', 0) > 0 && $request->request->all() === []) {
-                $this->addFlash('error', 'Les photos dépassent la taille maximale autorisée. Essaie avec moins de photos à la fois.');
-            } else {
-                $this->addFlash('error', 'Sélectionne au moins une photo.');
-            }
-            return $this->redirectToRoute('admin_event_edit', ['id' => $event->getId()]);
+        if ($files === []) {
+            $error = (int) $request->server->get('CONTENT_LENGTH', 0) > 0 && $request->request->all() === []
+                ? sprintf('Les photos dépassent la taille maximale autorisée par le serveur (%s par envoi).', ini_get('post_max_size'))
+                : 'Sélectionne au moins une photo.';
+
+            return $this->photoUploadResponse($request, $event, 0, [$error]);
         }
 
         if (!is_dir($this->eventPhotoDirectory) && !mkdir($this->eventPhotoDirectory, 0750, true) && !is_dir($this->eventPhotoDirectory)) {
@@ -93,10 +95,18 @@ final class AdminController extends AbstractController
             'image/heif' => 'heif',
         ];
         $uploaded = 0;
+        $errors = [];
 
         foreach ($files as $file) {
-            if (!$file instanceof UploadedFile || !$file->isValid() || $file->getSize() > 25 * 1024 * 1024) {
-                $this->addFlash('error', 'Une photo est invalide ou dépasse la limite de 25 Mo.');
+            $name = $file->getClientOriginalName();
+            if (!$file->isValid()) {
+                $errors[] = in_array($file->getError(), [\UPLOAD_ERR_INI_SIZE, \UPLOAD_ERR_FORM_SIZE], true)
+                    ? sprintf('« %s » dépasse la taille autorisée par le serveur (%s).', $name, ini_get('upload_max_filesize'))
+                    : sprintf('« %s » n’a pas pu être envoyée.', $name);
+                continue;
+            }
+            if ($file->getSize() > 25 * 1024 * 1024) {
+                $errors[] = sprintf('« %s » dépasse la limite de 25 Mo.', $name);
                 continue;
             }
 
@@ -104,28 +114,51 @@ final class AdminController extends AbstractController
             $isSupportedImage = in_array($mimeType, ['image/heic', 'image/heif'], true)
                 || @getimagesize($file->getPathname()) !== false;
             if (!is_string($mimeType) || !isset($allowedTypes[$mimeType]) || !$isSupportedImage) {
-                $this->addFlash('error', 'Seules les images JPEG, PNG, WebP, HEIC ou HEIF sont acceptées.');
+                $errors[] = sprintf('« %s » n’est pas une image JPEG, PNG, WebP, HEIC ou HEIF.', $name);
                 continue;
             }
 
             $filename = bin2hex(random_bytes(16)).'.'.$allowedTypes[$mimeType];
+            // La taille doit être lue avant le déplacement : le fichier temporaire n'existe plus ensuite.
+            $size = (int) $file->getSize();
             $file->move($this->eventPhotoDirectory, $filename);
             $entityManager->persist(new EventPhoto(
                 $event,
                 $filename,
-                mb_substr($file->getClientOriginalName(), 0, 255),
+                mb_substr($name, 0, 255),
                 $mimeType,
-                (int) $file->getSize(),
+                $size,
             ));
             $uploaded++;
         }
 
         $entityManager->flush();
+
+        return $this->photoUploadResponse($request, $event, $uploaded, $errors);
+    }
+
+    /**
+     * Réponse JSON pour l'envoi photo par photo en JavaScript, redirection avec messages flash sinon.
+     *
+     * @param list<string> $errors
+     */
+    private function photoUploadResponse(Request $request, Event $event, int $uploaded, array $errors): Response
+    {
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(
+                ['uploaded' => $uploaded, 'errors' => $errors],
+                $uploaded === 0 && $errors !== [] ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK,
+            );
+        }
+
+        foreach ($errors as $error) {
+            $this->addFlash('error', $error);
+        }
         if ($uploaded > 0) {
             $this->addFlash('success', sprintf('%d photo%s ajoutée%s.', $uploaded, $uploaded > 1 ? 's' : '', $uploaded > 1 ? 's' : ''));
         }
 
-        return $this->redirectToRoute('admin_event_edit', ['id' => $event->getId()]);
+        return $this->redirectToRoute('admin_event_edit', ['id' => $event->getId(), '_fragment' => 'event-photos']);
     }
 
     #[Route('/events/{id}/photos/{filename}', name: 'admin_event_photo_view', methods: ['GET'])]
@@ -142,6 +175,91 @@ final class AdminController extends AbstractController
         }
 
         return new BinaryFileResponse($path, 200, ['Content-Type' => $photo->getMimeType()]);
+    }
+
+    #[Route('/events/{id}/photos/{photoId}/download', name: 'admin_event_photo_download', methods: ['GET'], requirements: ['photoId' => '\d+'])]
+    public function downloadPhoto(Event $event, int $photoId, EventPhotoRepository $photos): BinaryFileResponse
+    {
+        $photo = $photos->find($photoId);
+        $path = $photo instanceof EventPhoto ? $this->eventPhotoDirectory.'/'.$photo->getFilename() : '';
+        if (!$photo instanceof EventPhoto || $photo->getEvent()->getId() !== $event->getId() || !is_file($path)) {
+            throw $this->createNotFoundException('Photo introuvable.');
+        }
+
+        $response = new BinaryFileResponse($path, 200, ['Content-Type' => $photo->getMimeType()]);
+        $response->setContentDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $this->downloadName($photo),
+            $this->asciiName($this->downloadName($photo)),
+        );
+
+        return $response;
+    }
+
+    #[Route('/events/{id}/photos.zip', name: 'admin_event_photos_zip', methods: ['GET'])]
+    public function downloadPhotosZip(Event $event, EventPhotoRepository $photos): BinaryFileResponse
+    {
+        $eventPhotos = $photos->findForEvent($event);
+        if ($eventPhotos === []) {
+            throw $this->createNotFoundException('Aucune photo pour cet événement.');
+        }
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'photos-');
+        $zip = new \ZipArchive();
+        if ($zipPath === false || $zip->open($zipPath, \ZipArchive::OVERWRITE) !== true) {
+            throw new \RuntimeException('L’archive des photos ne peut pas être créée.');
+        }
+
+        $usedNames = [];
+        foreach ($eventPhotos as $photo) {
+            $path = $this->eventPhotoDirectory.'/'.$photo->getFilename();
+            if (!is_file($path)) {
+                continue;
+            }
+            // Deux photos peuvent porter le même nom d'origine : on suffixe les doublons.
+            $name = $this->downloadName($photo);
+            $base = pathinfo($name, PATHINFO_FILENAME);
+            $extension = pathinfo($name, PATHINFO_EXTENSION);
+            for ($i = 2; isset($usedNames[mb_strtolower($name)]); $i++) {
+                $name = sprintf('%s (%d).%s', $base, $i, $extension);
+            }
+            $usedNames[mb_strtolower($name)] = true;
+            $zip->addFile($path, $name);
+            // Les photos sont déjà compressées : on les stocke telles quelles, plus rapide et sans perte.
+            $zip->setCompressionName($name, \ZipArchive::CM_STORE);
+        }
+        $zip->close();
+
+        $eventSlug = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $event->getTitle()) ?: 'evenement';
+        $eventSlug = trim(strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', $eventSlug)), '-') ?: 'evenement';
+        $filename = sprintf('photos-%s-%s.zip', $event->getDate()?->format('Y-m-d') ?? 'sans-date', $eventSlug);
+
+        $response = new BinaryFileResponse($zipPath, 200, ['Content-Type' => 'application/zip']);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename);
+        $response->deleteFileAfterSend();
+
+        return $response;
+    }
+
+    private function downloadName(EventPhoto $photo): string
+    {
+        $extension = pathinfo($photo->getFilename(), PATHINFO_EXTENSION);
+        $name = trim(str_replace(['/', '\\', "\0"], '-', $photo->getOriginalName()));
+        if ($name === '' || $name === '.' || $name === '..') {
+            $name = 'photo';
+        }
+        if (strtolower(pathinfo($name, PATHINFO_EXTENSION)) === '') {
+            $name .= '.'.$extension;
+        }
+
+        return $name;
+    }
+
+    private function asciiName(string $name): string
+    {
+        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $name) ?: 'photo';
+
+        return (string) preg_replace('/[^A-Za-z0-9._ ()-]+/', '-', $ascii);
     }
 
     #[Route('/events/{id}/photos/{photoId}/delete', name: 'admin_event_photo_delete', methods: ['POST'])]

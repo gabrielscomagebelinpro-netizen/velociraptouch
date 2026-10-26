@@ -6,5 +6,9 @@ framework:
         utf8: true
     csrf_protection: true
     session: true
+    # Derrière le proxy HTTPS d'un hébergeur, Symfony doit lire les en-têtes X-Forwarded-*
+    # pour savoir que la page est servie en HTTPS (sinon la protection CSRF bloque les formulaires).
+    trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
     validation:
         enabled: true

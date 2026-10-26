@@ -7,7 +7,7 @@
   <a href="#collectif">Le collectif</a>
   <a href="#histoire">Notre histoire</a>
   <a href="#agenda">Agenda</a>
-  <a href="{{ path('site_shop') }}">Boutique <span>↗</span></a>
+  {% if shop_enabled %}<a href="{{ path('site_shop') }}">Boutique <span>↗</span></a>{% endif %}
   <a href="#sponsors">Sponsors</a>
   <a href="#contact">Contact</a>
 {% endblock %}

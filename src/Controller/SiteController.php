@@ -14,6 +14,8 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -31,6 +33,8 @@ final class SiteController
         private readonly AttendanceRepository $attendanceRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly Security $security,
+        #[Autowire('%app.shop_enabled%')]
+        private readonly bool $shopEnabled,
     ) {
     }
 
@@ -85,6 +89,11 @@ final class SiteController
     #[Route('/boutique', name: 'site_shop', methods: ['GET'])]
     public function shop(Request $request): Response
     {
+        // Boutique conservée telle quelle mais masquée tant que SHOP_ENABLED vaut 0.
+        if (!$this->shopEnabled) {
+            throw new NotFoundHttpException();
+        }
+
         return new Response($this->twig->render('shop/index.html.twig', [
             'csrf_token' => $this->csrfTokens->getToken('contact')->getValue(),
             'message_error' => $request->getSession()->getFlashBag()->get('contact_error')[0] ?? null,

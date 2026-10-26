@@ -91,12 +91,14 @@ Le volume Docker `database_data` conserve les données. Ne pas utiliser `docker 
 Lancer le serveur PHP intégré avec le routeur Symfony :
 
 ```bash
-php -S 127.0.0.1:8000 -t public public/router.php
+php -d upload_max_filesize=30M -d post_max_size=128M -d max_file_uploads=100 -S 127.0.0.1:8000 -t public public/router.php
 ```
 
 Ouvrir ensuite <http://127.0.0.1:8000>.
 
 Le fichier `public/router.php` est important : il permet de servir correctement les fichiers CSS, JavaScript et images tout en transmettant les autres requêtes à Symfony.
+
+Les options `-d` sont nécessaires pour l'import des photos : le serveur intégré de PHP ignore `public/.user.ini`, et la limite par défaut (2 Mo par fichier) refuserait la plupart des photos de téléphone.
 
 Pour arrêter le serveur, revenir dans son terminal et appuyer sur `Ctrl+C`.
 
@@ -171,13 +173,13 @@ GET /admin/events/{id}/attendance.pdf
 
 ## 8. Configurer l'envoi des messages de contact
 
-Le formulaire de contact est disponible sur l'accueil et la boutique. Il envoie les messages à `gabsg66@gmail.com`. Pour un utilisateur connecté, le nom, le prénom et l'email sont préremplis ; son adresse est utilisée comme expéditeur et comme `Reply-To`. Avec Gmail SMTP, Google peut toutefois refuser ou réécrire une adresse `From` différente du compte SMTP authentifié.
+Le formulaire de contact est disponible sur l'accueil et la boutique. Il envoie les messages à `velociraptouch@gmail.com`. Pour un utilisateur connecté, le nom, le prénom et l'email sont préremplis ; son adresse est utilisée comme expéditeur et comme `Reply-To`. Avec Gmail SMTP, Google peut toutefois refuser ou réécrire une adresse `From` différente du compte SMTP authentifié.
 
 ### Créer un mot de passe d'application Gmail
 
 Le mot de passe d'application est différent du mot de passe habituel du compte Gmail. Il autorise uniquement une application comme Symfony à utiliser SMTP.
 
-1. se connecter au compte `gabsg66@gmail.com` ;
+1. se connecter au compte `velociraptouch@gmail.com` ;
 2. ouvrir <https://myaccount.google.com/security> ;
 3. activer la validation en deux étapes ;
 4. rechercher **Mots de passe des applications** ;
@@ -190,8 +192,8 @@ Le mot de passe d'application est différent du mot de passe habituel du compte 
 Créer ou modifier `/home/gabriel/Bureau/Velociraptouch/.env.local` :
 
 ```dotenv
-MAILER_DSN="smtp://gabsg66@gmail.com:MOT_DE_PASSE_APPLICATION@smtp.gmail.com:587?encryption=tls&auth_mode=login"
-CONTACT_RECIPIENT="gabsg66@gmail.com"
+MAILER_DSN="smtp://velociraptouch@gmail.com:REMPLACEZ_PAR_LE_MOT_DE_PASSE_APPLICATION@smtp.gmail.com:587?encryption=tls&auth_mode=login"
+CONTACT_RECIPIENT="velociraptouch@gmail.com"
 ```
 
 Remplacer `MOT_DE_PASSE_APPLICATION` par le code Google. Ne jamais utiliser le mot de passe normal de Gmail, ne jamais le mettre dans `composer.json`, le code PHP ou Git, et ne jamais le publier dans une conversation.
@@ -270,7 +272,7 @@ php bin/console cache:clear
 Utiliser le routeur intégré, et non `public/index.php` directement :
 
 ```bash
-php -S 127.0.0.1:8000 -t public public/router.php
+php -d upload_max_filesize=30M -d post_max_size=128M -d max_file_uploads=100 -S 127.0.0.1:8000 -t public public/router.php
 ```
 
 ### Le formulaire de contact n'envoie pas de mail
@@ -298,24 +300,106 @@ docker compose up -d database
 php bin/console doctrine:migrations:migrate --no-interaction
 ```
 
-## 12. Préparer la production
+## 12. Mettre le site en ligne
 
-Ne pas utiliser le serveur PHP intégré en production. Définir au minimum dans `.env.local` ou dans le gestionnaire de secrets :
+Le projet est prêt pour un hébergement PHP classique (Apache, PHP 8.3 ou plus, MySQL 8) : `public/.htaccess` envoie les requêtes vers Symfony et force le HTTPS, et `public/.user.ini` relève les limites d'upload pour les photos. L'exemple ci-dessous suit un hébergeur mutualisé avec cPanel et accès SSH (o2switch, Infomaniak, PlanetHoster…), le cas le plus courant.
+
+Ne pas utiliser le serveur PHP intégré (`php -S`) en production.
+
+### 12.1. Préparer l'hébergement (une seule fois)
+
+Dans le panneau de l'hébergeur :
+
+1. **Nom de domaine** : rattacher le domaine (ex. `velociraptouch.fr`) à l'hébergement.
+2. **Version de PHP** : choisir PHP 8.3 ou plus (« Sélecteur de version PHP »), avec les extensions `pdo_mysql`, `intl`, `zip`, `gd`, `mbstring`, `fileinfo`, `iconv`, `ctype`.
+3. **Base MySQL** : créer une base et un utilisateur, lui donner tous les droits sur la base. Noter le nom de la base, l'utilisateur, le mot de passe et l'hôte (souvent `localhost`).
+4. **Certificat HTTPS** : activer le certificat gratuit Let's Encrypt (« SSL/TLS Status » ou « AutoSSL »).
+5. **Accès SSH** : l'activer (sur o2switch, autoriser son adresse IP dans « Autorisation SSH »).
+
+### 12.2. Envoyer le code
+
+En SSH sur l'hébergement, récupérer le dépôt GitHub dans un dossier hors de `public_html` :
+
+```bash
+cd ~
+git clone https://github.com/gabrielscomagebelinpro-netizen/velociraptouch.git velociraptouch
+cd velociraptouch
+```
+
+Si le dépôt est privé, utiliser un « Personal access token » GitHub comme mot de passe, ou une clé de déploiement SSH.
+
+Puis, dans cPanel (« Domaines »), faire pointer la **racine du document** du domaine vers `velociraptouch/public`. Seul ce dossier doit être accessible depuis le web : le code, `.env.local` et les photos (`var/uploads`) restent ainsi hors d'atteinte.
+
+### 12.3. Configurer `.env.local` sur le serveur
+
+Créer le fichier `~/velociraptouch/.env.local` (avec l'éditeur de fichiers de cPanel ou `nano .env.local`) :
 
 ```dotenv
 APP_ENV=prod
-APP_SECRET=une-valeur-aleatoire-longue
-DATABASE_URL=...
-MAILER_DSN=...
-CONTACT_RECIPIENT=gabsg66@gmail.com
+APP_DEBUG=0
+APP_SECRET=une-valeur-aleatoire-de-32-caracteres-ou-plus
+DATABASE_URL="mysql://UTILISATEUR:MOT_DE_PASSE@localhost:3306/NOM_DE_LA_BASE?serverVersion=8.0&charset=utf8mb4"
+MAILER_DSN="smtp://velociraptouch@gmail.com:MOT_DE_PASSE_APPLICATION@smtp.gmail.com:587?encryption=tls&auth_mode=login"
+CONTACT_RECIPIENT=velociraptouch@gmail.com
+TRUSTED_PROXIES=127.0.0.1,REMOTE_ADDR
+DEFAULT_URI=https://velociraptouch.fr
+SHOP_ENABLED=0
 ```
 
-Installer les dépendances et vider le cache :
+- `APP_SECRET` : générer une valeur avec `php -r "echo bin2hex(random_bytes(16));"`.
+- `serverVersion` : mettre la version MySQL indiquée par l'hébergeur (ex. `8.0` ou `10.11.2-MariaDB` pour MariaDB).
+- `TRUSTED_PROXIES` : indispensable si l'hébergeur place un proxy HTTPS devant le site ; sans lui, la connexion et les formulaires échouent avec « Invalid CSRF token ».
+- `APP_ENV=prod` est obligatoire : en `dev`, les erreurs détaillées et la barre de debug exposeraient les mots de passe.
+
+### 12.4. Installer et initialiser
 
 ```bash
+cd ~/velociraptouch
 composer install --no-dev --optimize-autoloader
-php bin/console doctrine:migrations:migrate --env=prod --no-interaction
-php bin/console cache:clear --env=prod
+php bin/console doctrine:migrations:migrate --no-interaction
+php bin/console cache:clear
 ```
 
-Configurer ensuite un serveur web (Apache ou Nginx) avec `public/` comme document root, HTTPS, des sauvegardes de la base et une tâche cron pour le nettoyage des présences.
+Si `composer` n'est pas disponible, l'installer dans le projet : `curl -sS https://getcomposer.org/installer | php`, puis utiliser `php composer.phar` à la place de `composer`.
+
+Créer le premier administrateur : s'inscrire sur `https://votre-domaine/inscription` (le prénom et le nom servent à se connecter), puis passer ce compte administrateur :
+
+```bash
+php bin/console app:user:promote-admin email-du-compte@exemple.fr
+```
+
+### 12.5. Tâche planifiée
+
+Dans cPanel (« Tâches Cron »), ajouter une tâche quotidienne (ex. tous les jours à 3 h) :
+
+```bash
+cd ~/velociraptouch && php bin/console app:attendances:cleanup >/dev/null 2>&1
+```
+
+### 12.6. Mettre à jour le site plus tard
+
+Après un `git push` depuis le poste de développement :
+
+```bash
+cd ~/velociraptouch
+git pull
+composer install --no-dev --optimize-autoloader
+php bin/console doctrine:migrations:migrate --no-interaction
+php bin/console cache:clear
+```
+
+### 12.7. Sauvegardes
+
+À sauvegarder régulièrement (la plupart des hébergeurs le font aussi automatiquement) :
+
+- la base MySQL ;
+- le dossier `var/uploads/events` : il contient les photos originales des événements, qui ne sont pas dans Git ;
+- le fichier `.env.local`.
+
+### 12.8. Vérifications après la mise en ligne
+
+- `https://votre-domaine/` s'affiche, et `http://` redirige vers `https://` ;
+- la connexion admin fonctionne ;
+- l'import d'une photo de téléphone (plusieurs Mo) fonctionne, ainsi que son téléchargement ;
+- une adresse inexistante affiche une page d'erreur sobre, sans détails techniques ;
+- un message envoyé depuis le formulaire de contact arrive sur `velociraptouch@gmail.com`.

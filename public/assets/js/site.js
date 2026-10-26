@@ -88,35 +88,49 @@ if (lightboxTriggers.length) {
     });
 }
 
-const photoInput = document.querySelector("#event-photos");
+const photoInput = document.querySelector("#event-photos-input");
 const photoDropzone = document.querySelector(".photo-dropzone");
 const photoPreview = document.querySelector(".photo-upload-preview");
 const photoStatus = document.querySelector(".photo-upload-status");
 const photoForm = document.querySelector(".event-photo-upload");
 
 if (photoInput && photoDropzone && photoPreview && photoStatus && photoForm) {
+    const isImage = (file) => file.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name);
+    const plural = (count, word) => `${count} ${word}${count > 1 ? "s" : ""}`;
+    const submitButton = photoForm.querySelector("button[type='submit']");
+    // Les photos choisies en plusieurs fois (sélections ou dépôts successifs) s'accumulent ici.
+    let selectedFiles = [];
+
     const renderPhotoPreview = () => {
         photoPreview.replaceChildren();
-        const files = Array.from(photoInput.files).filter((file) => file.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name));
-        photoStatus.textContent = files.length === 0
+        photoStatus.textContent = selectedFiles.length === 0
             ? "Aucune photo sélectionnée"
-            : `${files.length} photo${files.length > 1 ? "s" : ""} prête${files.length > 1 ? "s" : ""} à être ajoutée${files.length > 1 ? "s" : ""}`;
-        files.forEach((file, index) => {
-            if (files.length > 5) {
-                const name = document.createElement("span");
-                name.className = "photo-preview-name";
-                name.textContent = file.name;
-                photoPreview.append(name);
-                return;
-            }
-            const image = document.createElement("img");
-            image.alt = file.name;
-            image.src = URL.createObjectURL(file);
-            photoPreview.append(image);
+            : `${plural(selectedFiles.length, "photo")} prête${selectedFiles.length > 1 ? "s" : ""} à être ajoutée${selectedFiles.length > 1 ? "s" : ""}`;
+        selectedFiles.forEach((file) => {
+            const name = document.createElement("span");
+            name.className = "photo-preview-name";
+            name.textContent = file.name;
+            photoPreview.append(name);
         });
     };
 
-    photoInput.addEventListener("change", renderPhotoPreview);
+    const addFiles = (files) => {
+        const known = new Set(selectedFiles.map((file) => `${file.name}|${file.size}|${file.lastModified}`));
+        Array.from(files).filter(isImage).forEach((file) => {
+            const key = `${file.name}|${file.size}|${file.lastModified}`;
+            if (!known.has(key)) {
+                known.add(key);
+                selectedFiles.push(file);
+            }
+        });
+        renderPhotoPreview();
+    };
+
+    photoInput.addEventListener("change", () => {
+        addFiles(photoInput.files);
+        // Vide le champ pour pouvoir rouvrir le sélecteur et ajouter d'autres photos.
+        photoInput.value = "";
+    });
     ["dragenter", "dragover"].forEach((eventName) => {
         photoDropzone.addEventListener(eventName, (event) => {
             event.preventDefault();
@@ -130,18 +144,119 @@ if (photoInput && photoDropzone && photoPreview && photoStatus && photoForm) {
         });
     });
     photoDropzone.addEventListener("drop", (event) => {
-        const droppedFiles = Array.from(event.dataTransfer.files);
-        if (droppedFiles.length) {
-            const dataTransfer = new DataTransfer();
-            droppedFiles.forEach((file) => dataTransfer.items.add(file));
-            photoInput.files = dataTransfer.files;
-            renderPhotoPreview();
-        }
+        if (event.dataTransfer?.files.length) addFiles(event.dataTransfer.files);
     });
-    photoForm.addEventListener("submit", (event) => {
-        if (!photoInput.files.length) {
-            event.preventDefault();
+
+    // Chaque photo part dans sa propre requête : aucune limite de nombre ni de taille totale par envoi.
+    const uploadPhoto = async (file) => {
+        const data = new FormData();
+        data.append("_token", photoForm.querySelector("input[name='_token']").value);
+        data.append("photos[]", file, file.name);
+        try {
+            const response = await fetch(photoForm.action, {
+                method: "POST",
+                body: data,
+                headers: {"X-Requested-With": "XMLHttpRequest", "Accept": "application/json"},
+                credentials: "same-origin",
+            });
+            const result = await response.json().catch(() => null);
+            if (result) return result;
+            return {uploaded: 0, errors: [response.status === 413
+                ? `« ${file.name} » est trop lourde pour le serveur.`
+                : `« ${file.name} » n'a pas pu être envoyée (erreur ${response.status}).`]};
+        } catch {
+            return {uploaded: 0, errors: [`« ${file.name} » n'a pas pu être envoyée (connexion interrompue).`]};
+        }
+    };
+
+    photoForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!selectedFiles.length) {
             photoStatus.textContent = "Sélectionne au moins une photo avant de valider.";
+            return;
         }
+
+        const files = selectedFiles;
+        let uploaded = 0;
+        const errors = [];
+        if (submitButton) submitButton.disabled = true;
+        for (const [index, file] of files.entries()) {
+            photoStatus.textContent = `Envoi de la photo ${index + 1} sur ${files.length}…`;
+            const result = await uploadPhoto(file);
+            uploaded += result.uploaded ?? 0;
+            errors.push(...(result.errors ?? []));
+        }
+
+        if (errors.length === 0) {
+            window.location.reload();
+            return;
+        }
+
+        // En cas d'erreur, on garde le détail affiché ; les photos réussies sont déjà enregistrées.
+        selectedFiles = [];
+        renderPhotoPreview();
+        if (submitButton) submitButton.disabled = false;
+        photoStatus.textContent = `${plural(uploaded, "photo")} ajoutée${uploaded > 1 ? "s" : ""}, ${plural(errors.length, "erreur")}. Recharge la page pour voir les photos ajoutées.`;
+        errors.forEach((message) => {
+            const line = document.createElement("span");
+            line.className = "photo-preview-name";
+            line.textContent = message;
+            photoPreview.append(line);
+        });
     });
+}
+
+// Après un clic sur un bouton (formulaire envoyé, lien-bouton…), on revient à la même hauteur de page
+// au lieu de remonter en haut, y compris quand on revient plus tard sur une page quittée par un bouton.
+const SCROLL_POSITIONS_KEY = "velociraptouch:scroll-positions";
+const SCROLL_POSITION_TTL = 30 * 60 * 1000;
+const readScrollPositions = () => {
+    try {
+        return JSON.parse(sessionStorage.getItem(SCROLL_POSITIONS_KEY) || "{}");
+    } catch {
+        return {};
+    }
+};
+const writeScrollPositions = (positions) => {
+    try {
+        sessionStorage.setItem(SCROLL_POSITIONS_KEY, JSON.stringify(positions));
+    } catch {
+        // Stockage indisponible (navigation privée…) : on garde le comportement par défaut.
+    }
+};
+
+let pendingScrollPosition = null;
+const rememberScrollPosition = () => {
+    pendingScrollPosition = {path: window.location.pathname, y: window.scrollY, at: Date.now()};
+};
+
+document.addEventListener("submit", rememberScrollPosition, true);
+document.addEventListener("click", (event) => {
+    const button = event.target.closest("button, .button, .btn, .text-button, .text-link");
+    if (!button) return;
+    const href = button.getAttribute("href");
+    // Les ancres internes (#agenda…) déplacent volontairement la page.
+    if (href && new URL(href, window.location.href).pathname === window.location.pathname && href.includes("#")) return;
+    rememberScrollPosition();
+}, true);
+// La position n'est enregistrée que si la page est réellement quittée (pas pour un téléchargement).
+window.addEventListener("pagehide", () => {
+    if (!pendingScrollPosition || Date.now() - pendingScrollPosition.at > 10000) return;
+    const positions = readScrollPositions();
+    positions[pendingScrollPosition.path] = {y: pendingScrollPosition.y, at: pendingScrollPosition.at};
+    writeScrollPositions(positions);
+});
+
+const savedScrollPositions = readScrollPositions();
+const savedScrollPosition = savedScrollPositions[window.location.pathname];
+if (savedScrollPosition) {
+    delete savedScrollPositions[window.location.pathname];
+    writeScrollPositions(savedScrollPositions);
+    if (Date.now() - savedScrollPosition.at < SCROLL_POSITION_TTL) {
+        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+        const restore = () => window.scrollTo({top: savedScrollPosition.y, behavior: "instant"});
+        restore();
+        // Les images chargées après coup peuvent décaler la page : on réajuste une fois tout chargé.
+        window.addEventListener("load", restore, {once: true});
+    }
 }

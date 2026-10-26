@@ -27,22 +27,26 @@
         <p class="field-help">Les fichiers originaux sont conservés sans compression. JPEG, PNG, WebP, HEIC ou HEIF, 25 Mo maximum par photo.</p>
         <form class="event-photo-upload" method="post" action="{{ path('admin_event_photos_upload', {id: event.id}) }}" enctype="multipart/form-data">
             <input type="hidden" name="_token" value="{{ csrf_token('event-photos-' ~ event.id) }}">
-            <label class="photo-dropzone" for="event-photos">
+            <label class="photo-dropzone" for="event-photos-input">
                 <strong>Dépose tes photos ici</strong>
                 <span>ou appuie pour les choisir depuis ton téléphone</span>
-                <input id="event-photos" name="photos[]" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+                <input id="event-photos-input" name="photos[]" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
             </label>
             <div class="photo-upload-status" aria-live="polite">Aucune photo sélectionnée</div>
             <div class="photo-upload-preview" aria-live="polite"></div>
             <button class="button button-primary btn" type="submit">Ajouter les photos <span>↗</span></button>
         </form>
         {% if photos is not empty %}
+            <div class="admin-form-actions">
+                <a class="button button-outline" href="{{ path('admin_event_photos_zip', {id: event.id}) }}">Télécharger toutes les photos ({{ photos|length }}) <span>↓</span></a>
+            </div>
             <div class="event-photo-grid">
                 {% for photo in photos %}
                     <figure>
                         <img src="{{ path('admin_event_photo_view', {id: event.id, filename: photo.filename}) }}" alt="{{ photo.originalName|e }}">
                         <figcaption>
                             <span>{{ photo.originalName }}</span>
+                            <a class="text-button" href="{{ path('admin_event_photo_download', {id: event.id, photoId: photo.id}) }}">Télécharger</a>
                             <form method="post" action="{{ path('admin_event_photo_delete', {id: event.id, photoId: photo.id}) }}">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete-event-photo-' ~ photo.id) }}">
                                 <button class="text-button" type="submit">Supprimer</button>
