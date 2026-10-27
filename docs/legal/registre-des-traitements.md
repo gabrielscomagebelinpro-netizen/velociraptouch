@@ -3,7 +3,7 @@
 Document interne exigé par l’article 30 du RGPD. Il doit être tenu à jour et pouvoir être présenté à la CNIL sur demande. Il n’est pas publié sur le site.
 
 - **Responsable du traitement** : association VELOCIRAP’TOUCH (« Les Vélociraptouch »), loi 1901, déclarée à la préfecture de l’Hérault le 17/03/2024 — siège : 64 allée Victor Schoelcher, 34070 Montpellier — RNA W343032161 — SIRET 932 697 329 00013
-- **Représentant** : [À COMPLÉTER : président ou présidente]
+- **Représentant** : Liam Navarro, président
 - **Contact RGPD** : velociraptouch@gmail.com
 - **Délégué à la protection des données** : non désigné (non obligatoire pour l’association)
 - **Dernière mise à jour** : 27 octobre 2026
