@@ -1,6 +1,15 @@
 # Envoie toutes les requêtes vers index.php (front controller Symfony) sur un hébergement Apache.
 DirectoryIndex index.php
 
+# En-têtes de sécurité (protection des données des visiteurs).
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
 # Manifeste de l'application (ajout à l'écran d'accueil) : certains hébergeurs ne connaissent pas ce type.
 <IfModule mod_mime.c>
     AddType application/manifest+json .webmanifest

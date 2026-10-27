@@ -1,6 +1,26 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
     strict_variables: '%kernel.debug%'
+    # Dates affichées à l'heure de Paris (le serveur peut être en UTC).
+    date:
+        timezone: 'Europe/Paris'
     globals:
         shop_enabled: '%app.shop_enabled%'
         image_rights_url: 'https://docs.google.com/forms/d/e/1FAIpQLScnQRGjvyv02XVdlD9zs4aPA9aiKCxUdf6hLBGr5fUWBlOnKQ/viewform'
+        # Informations légales affichées dans les mentions légales et la politique de confidentialité.
+        # Remplacer chaque « [À COMPLÉTER …] » par la vraie valeur (voir les statuts et le récépissé de la préfecture).
+        # Sources : Journal officiel des associations (annonce de création du 9 avril 2024) et répertoire SIRENE.
+        legal:
+            name: 'Les Vélociraptouch'
+            official_name: 'VELOCIRAP’TOUCH'
+            legal_form: 'Association déclarée régie par la loi du 1er juillet 1901'
+            declaration: 'déclarée à la préfecture de l’Hérault le 17 mars 2024 (Journal officiel du 9 avril 2024)'
+            address: '64 allée Victor Schoelcher, 34070 Montpellier'
+            rna: 'W343032161'
+            siret: '932 697 329 00013'
+            publication_director: '[À COMPLÉTER : prénom et nom du président ou de la présidente]'
+            email: 'velociraptouch@gmail.com'
+            host_name: '[À COMPLÉTER : nom de l’hébergeur]'
+            host_address: '[À COMPLÉTER : adresse de l’hébergeur]'
+            host_phone: '[À COMPLÉTER : téléphone de l’hébergeur]'
+            updated_at: '27 octobre 2026'

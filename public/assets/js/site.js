@@ -1,7 +1,19 @@
 const menuToggle = document.querySelector(".menu-toggle");
 const navigation = document.querySelector(".main-nav");
 
-menuToggle?.addEventListener("click", () => navigation?.classList.toggle("open"));
+// Le bouton annonce aux lecteurs d'écran si le menu est ouvert ou fermé ; Échap le referme.
+const setMenuOpen = (open) => {
+    navigation?.classList.toggle("open", open);
+    menuToggle?.setAttribute("aria-expanded", String(open));
+    menuToggle?.setAttribute("aria-label", open ? "Fermer le menu" : "Ouvrir le menu");
+};
+menuToggle?.addEventListener("click", () => setMenuOpen(!navigation?.classList.contains("open")));
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && navigation?.classList.contains("open")) {
+        setMenuOpen(false);
+        menuToggle?.focus();
+    }
+});
 
 const animatedElements = document.querySelectorAll(
     ".section-heading, .collective-content, .story-step, .event, .sponsor-card, .training-location, .contact-copy, .contact-form"
@@ -57,17 +69,32 @@ if (lightboxTriggers.length) {
     document.body.append(lightbox);
 
     const lightboxImage = lightbox.querySelector("img");
+    const closeButton = lightbox.querySelector(".lightbox-close");
+    // Le focus entre dans la fenêtre à l'ouverture et revient sur l'image cliquée à la fermeture.
+    let lastTrigger = null;
     const closeLightbox = () => {
+        if (!lightbox.classList.contains("is-open")) return;
         lightbox.classList.remove("is-open");
         document.body.classList.remove("lightbox-open");
+        lastTrigger?.focus();
     };
 
     const openLightbox = (image) => {
+        lastTrigger = image;
         lightboxImage.src = image.src;
         lightboxImage.alt = image.alt;
         lightbox.classList.add("is-open");
         document.body.classList.add("lightbox-open");
+        closeButton.focus();
     };
+
+    // Seul élément interactif de la fenêtre : Tab reste dessus tant qu'elle est ouverte.
+    lightbox.addEventListener("keydown", (event) => {
+        if (event.key === "Tab") {
+            event.preventDefault();
+            closeButton.focus();
+        }
+    });
 
     lightboxTriggers.forEach((image) => {
         image.addEventListener("click", () => openLightbox(image));
@@ -79,7 +106,7 @@ if (lightboxTriggers.length) {
         });
     });
 
-    lightbox.querySelector(".lightbox-close").addEventListener("click", closeLightbox);
+    closeButton.addEventListener("click", closeLightbox);
     lightbox.addEventListener("click", (event) => {
         if (event.target === lightbox) closeLightbox();
     });
@@ -260,3 +287,15 @@ if (savedScrollPosition) {
         window.addEventListener("load", restore, {once: true});
     }
 }
+
+// RGPD : la carte Google Maps n'est chargée qu'au clic, jamais à l'ouverture de la page.
+document.querySelectorAll(".map-consent").forEach((placeholder) => {
+    placeholder.querySelector("button")?.addEventListener("click", () => {
+        const iframe = document.createElement("iframe");
+        iframe.title = placeholder.dataset.mapTitle || "Carte";
+        iframe.src = placeholder.dataset.mapSrc;
+        iframe.loading = "lazy";
+        iframe.referrerPolicy = "no-referrer-when-downgrade";
+        placeholder.replaceWith(iframe);
+    });
+});

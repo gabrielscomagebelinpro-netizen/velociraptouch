@@ -38,7 +38,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private string $password = '';
 
+    // RGPD : sert à supprimer automatiquement les comptes inactifs depuis 3 ans.
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastLoginAt = null;
+
     public function getId(): ?int { return $this->id; }
+    public function getLastLoginAt(): ?\DateTimeImmutable { return $this->lastLoginAt; }
+    public function setLastLoginAt(?\DateTimeImmutable $lastLoginAt): self { $this->lastLoginAt = $lastLoginAt; return $this; }
     public function getUserIdentifier(): string { return $this->email; }
     public function getRoles(): array { return array_values(array_unique(array_merge($this->roles, ['ROLE_USER']))); }
     public function setRoles(array $roles): self { $this->roles = $roles; return $this; }

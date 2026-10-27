@@ -1,0 +1,2 @@
+{# Affiche une information légale ; une valeur encore à compléter est surlignée pour ne pas passer inaperçue. #}
+{% macro value(text) %}{% if text starts with '[' %}<mark class="legal-todo">{{ text }}</mark>{% else %}{{ text }}{% endif %}{% endmacro %}

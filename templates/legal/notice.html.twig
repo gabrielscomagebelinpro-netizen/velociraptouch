@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+{% import 'legal/_macros.html.twig' as l %}
+
+{% block title %}Mentions légales — Vélociraptouch{% endblock %}
+{% block meta_description %}Mentions légales du site des Vélociraptouch : éditeur, hébergeur, propriété intellectuelle.{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main legal-page">
+    <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
+    <p class="eyebrow">Informations légales</p>
+    <h1>Mentions <span>légales.</span></h1>
+    <p class="legal-updated">Dernière mise à jour : {{ legal.updated_at }}</p>
+
+    <section>
+        <h2>1. Éditeur du site</h2>
+        <p>
+            Le présent site est édité par l’association <strong>{{ legal.official_name }}</strong> (« {{ legal.name }} »), {{ legal.legal_form|lower }}, {{ legal.declaration }}.<br>
+            Siège social : {{ l.value(legal.address) }}<br>
+            Numéro RNA : {{ l.value(legal.rna) }}<br>
+            {% if legal.siret %}SIRET : {{ l.value(legal.siret) }}<br>{% endif %}
+            Adresse email : <a href="mailto:{{ legal.email }}">{{ legal.email }}</a>
+        </p>
+        <p>Directeur ou directrice de la publication : {{ l.value(legal.publication_director) }}, en qualité de représentant légal de l’association.</p>
+    </section>
+
+    <section>
+        <h2>2. Hébergeur</h2>
+        <p>
+            {{ l.value(legal.host_name) }}<br>
+            {{ l.value(legal.host_address) }}<br>
+            Téléphone : {{ l.value(legal.host_phone) }}
+        </p>
+    </section>
+
+    <section>
+        <h2>3. Propriété intellectuelle</h2>
+        <p>Les textes, le logo, les photographies et la mise en page de ce site sont la propriété de {{ legal.name }} ou font l’objet d’une autorisation d’utilisation. Toute reproduction, représentation ou diffusion, totale ou partielle, sans autorisation écrite préalable de l’association est interdite (articles L. 335-2 et suivants du Code de la propriété intellectuelle).</p>
+        <p>Les logos et marques des partenaires restent la propriété de leurs titulaires respectifs et sont reproduits avec leur accord.</p>
+        <p>Les polices de caractères Barlow Condensed, DM Sans, Pinyon Script et Racing Sans One sont distribuées sous licence SIL Open Font License 1.1 et hébergées directement sur ce site.</p>
+    </section>
+
+    <section>
+        <h2>4. Données personnelles et cookies</h2>
+        <p>Le traitement de vos données personnelles et l’utilisation des cookies sont détaillés dans notre <a href="{{ path('legal_privacy') }}">politique de confidentialité</a>.</p>
+    </section>
+
+    <section>
+        <h2>5. Liens externes</h2>
+        <p>Le site contient des liens vers des sites tiers (réseaux sociaux, partenaires, Google Maps, Google Forms). {{ legal.name }} n’exerce aucun contrôle sur ces sites et décline toute responsabilité quant à leur contenu et à leurs pratiques en matière de données personnelles.</p>
+    </section>
+
+    <section>
+        <h2>6. Responsabilité</h2>
+        <p>L’association s’efforce de fournir des informations exactes et à jour, sans pouvoir en garantir l’exhaustivité. Elle ne saurait être tenue responsable d’une interruption du site, d’un dysfonctionnement ou de l’usage fait des informations publiées.</p>
+        <p>Pour signaler un contenu illicite ou une erreur, écrivez à <a href="mailto:{{ legal.email }}">{{ legal.email }}</a>.</p>
+    </section>
+
+    <section>
+        <h2>7. Droit applicable</h2>
+        <p>Les présentes mentions légales sont régies par le droit français. En cas de litige, et à défaut de résolution amiable, les tribunaux français sont seuls compétents.</p>
+    </section>
+</main>
+{% endblock %}

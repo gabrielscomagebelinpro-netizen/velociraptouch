@@ -3,7 +3,7 @@
 {% block title %}Créer un compte{% endblock %}
 
 {% block body %}
-<main class="admin-page-main">
+<main id="contenu" tabindex="-1" class="admin-page-main">
     <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
     <p class="eyebrow">Nouveau membre</p>
     <h1>Créer un <span>compte.</span></h1>
@@ -15,8 +15,11 @@
             {{ form_widget(form[field], {attr: {class: 'form-control', autocomplete: autocomplete}}) }}
             {% for error in form[field].vars.errors %}<p class="form-note">{{ error.message }}</p>{% endfor %}
         {% endfor %}
+        <p class="privacy-notice mt-0">Au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un caractère spécial.</p>
         {% for error in form.vars.errors %}<p class="form-note">{{ error.message }}</p>{% endfor %}
         <button class="button button-primary btn mt-4" type="submit">S’inscrire <span>↗</span></button>
+        {# RGPD : information des personnes au moment de la collecte (art. 13). #}
+        <p class="privacy-notice">{{ legal.name }} utilise ces informations pour gérer ton compte et l’organisation des entraînements. Elles sont réservées aux responsables de l’association et supprimées après 3 ans sans connexion. Tu peux les consulter, les corriger, les télécharger ou supprimer ton compte à tout moment depuis « Mon compte ». En savoir plus : <a href="{{ path('legal_privacy') }}">politique de confidentialité</a>.</p>
     {{ form_end(form) }}
     <p class="field-help mt-4">Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a></p>
 </main>

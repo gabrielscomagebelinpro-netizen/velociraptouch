@@ -1315,6 +1315,31 @@ dialog {
     filter: saturate(.75)
 }
 
+.map-consent {
+    grid-column: 1 / -1;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px;
+    border: 1px dashed #0e7e8e
+}
+
+.training-location .map-consent p {
+    max-width: 520px
+}
+
+.map-consent a {
+    color: #8ed4d5
+}
+
+.agenda .map-consent .button-outline {
+    color: var(--paper);
+    border-color: #7dbfc1
+}
+
 .image-rights {
     margin-top: 24px;
     border: 1px solid #0e7e8e;
@@ -2902,9 +2927,13 @@ body {
         margin: 48px -6vw 0
     }
 
+    /* Sur téléphone, le logo passe en bas à gauche de la photo pour ne pas cacher « Laissez-nous nous présenter ». */
     .hero-stamp {
-        bottom: 5%;
-        right: 8%
+        bottom: 4%;
+        left: 5%;
+        right: auto;
+        width: 92px;
+        height: 92px
     }
 
     .section {
@@ -3164,4 +3193,249 @@ footer a,
 
 .text-link {
     white-space: nowrap
+}
+
+/* Bandeau des informations légales, sous le pied de page. */
+.footer-legal {
+    background: var(--ink);
+    border-top: 1px solid rgba(125, 191, 193, .25);
+    padding: 14px 5vw;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 22px;
+    font-size: 12px;
+    color: #7dbfc1
+}
+
+.footer-legal span {
+    margin-right: auto
+}
+
+.footer-legal a {
+    color: var(--paper);
+    text-decoration: none
+}
+
+.footer-legal a:hover {
+    text-decoration: underline
+}
+
+/* Pages légales : texte long lisible. */
+.legal-page {
+    max-width: 900px
+}
+
+.legal-page section {
+    margin-top: 44px
+}
+
+.legal-page h2 {
+    font-size: 24px;
+    letter-spacing: -.03em;
+    margin-bottom: 14px
+}
+
+.legal-page p,
+.legal-page li {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink)
+}
+
+.legal-page a {
+    color: var(--orange)
+}
+
+.legal-updated {
+    color: var(--muted) !important;
+    font-size: 13px !important
+}
+
+.legal-todo {
+    background: #ffe9a8;
+    padding: 0 4px
+}
+
+.legal-table-wrapper {
+    overflow-x: auto;
+    margin: 18px 0
+}
+
+.legal-table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    font-size: 13px;
+    line-height: 1.5
+}
+
+.legal-table th,
+.legal-table td {
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    vertical-align: top;
+    text-align: left
+}
+
+.legal-table th {
+    background: rgba(22, 53, 69, .06);
+    font-weight: 600
+}
+
+/* Mention d'information sous les formulaires qui collectent des données. */
+.privacy-notice {
+    font-size: 12px !important;
+    line-height: 1.5;
+    color: var(--muted) !important;
+    margin-top: 14px;
+    max-width: 480px
+}
+
+.privacy-notice a {
+    color: inherit;
+    text-decoration: underline
+}
+
+.site-flash {
+    margin: 0;
+    padding: 14px 5vw;
+    background: rgba(1, 175, 181, .1)
+}
+
+@media (max-width: 760px) {
+    /* Bandeau légal sur téléphone : copyright sur sa ligne, liens alignés dessous. */
+    .footer-legal {
+        padding: 16px 6vw 20px;
+        gap: 10px 18px
+    }
+
+    .footer-legal span {
+        flex-basis: 100%;
+        margin-right: 0
+    }
+}
+
+@media (max-width: 760px) {
+    /* Pied de page sur téléphone : tous les éléments centrés. */
+    footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        text-align: center
+    }
+
+    footer p {
+        margin: 0
+    }
+
+    footer div {
+        justify-content: center
+    }
+
+    .footer-legal {
+        justify-content: center;
+        text-align: center
+    }
+
+    .footer-legal span {
+        text-align: center
+    }
+}
+
+/* ===== Accessibilité WCAG 2.1 AA ===== */
+
+/* 1.4.3 Contraste : turquoise assombri sur fond clair (4,87:1 sur le fond, 5:1 pour le texte blanc des boutons)… */
+:root {
+    --turquoise: #007c81;
+    --orange: var(--turquoise);
+    --lime: var(--turquoise);
+    --teal: var(--turquoise)
+}
+
+/* … et turquoise clair sur les sections bleu foncé (4,79:1). */
+.story,
+.agenda,
+.ticker,
+.sponsor-card,
+footer,
+.footer-legal {
+    --turquoise: #01afb5;
+    --orange: #01afb5;
+    --lime: #01afb5;
+    --teal: #01afb5
+}
+
+/* Lien « Itinéraire » : il était bleu foncé sur fond bleu foncé (invisible). */
+.agenda .text-link {
+    color: var(--paper)
+}
+
+/* Texte posé sur la photo d'accueil : couleur plus claire et ombre renforcée pour rester lisible. */
+.hero-art .art-label strong {
+    color: #5ed0d4
+}
+
+.hero-art .art-label,
+.hero-art .art-caption {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .75), 0 2px 14px rgba(0, 0, 0, .55)
+}
+
+/* 2.4.7 Focus visible : contour net et contrasté (au moins 3:1) pour la navigation au clavier. */
+:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px
+}
+
+.story :focus-visible,
+.agenda :focus-visible,
+.sponsor-card :focus-visible,
+footer :focus-visible,
+.footer-legal :focus-visible,
+.lightbox :focus-visible {
+    outline-color: var(--paper)
+}
+
+/* Les champs avaient leur contour supprimé : on marque le champ actif par un contour turquoise. */
+.contact-form input:focus-visible,
+.contact-form textarea:focus-visible,
+.contact-form select:focus-visible,
+.admin-panel input:focus-visible,
+.admin-panel select:focus-visible {
+    outline: 3px solid var(--turquoise);
+    outline-offset: 4px
+}
+
+/* Zone d'import de photos : le vrai champ fichier est masqué, c'est la zone qui montre le focus. */
+.photo-dropzone:focus-within {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px
+}
+
+/* Lien d'évitement : invisible jusqu'à ce qu'on le sélectionne au clavier. */
+.skip-link {
+    position: absolute;
+    left: 12px;
+    top: -60px;
+    z-index: 100;
+    padding: 10px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+    font-weight: 600
+}
+
+.skip-link:focus {
+    top: 12px
+}
+
+/* La cible du lien « Aller au contenu » reçoit le focus sans afficher de cadre autour de toute la page. */
+main:focus {
+    outline: none
+}
+
+/* Flèches décoratives des boutons pleins : même couleur que le texte du bouton. */
+.button-primary span {
+    color: inherit !important
 }

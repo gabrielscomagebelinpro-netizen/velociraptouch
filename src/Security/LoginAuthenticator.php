@@ -61,6 +61,12 @@ final class LoginAuthenticator extends AbstractLoginFormAuthenticator
         TokenInterface $token,
         string $firewallName,
     ): ?Response {
+        $user = $token->getUser();
+        if ($user instanceof User) {
+            $user->setLastLoginAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+        }
+
         return new RedirectResponse($this->urlGenerator->generate('site_home'));
     }
 

@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte — Vélociraptouch{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main legal-page">
+    <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
+    <p class="eyebrow">Espace membre</p>
+    <h1>Mon <span>compte.</span></h1>
+    {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
+
+    <section>
+        <h2>Mes informations</h2>
+        <p>Tu peux corriger ces informations à tout moment.</p>
+        {{ form_start(form, {attr: {class: 'contact-form', style: 'max-width: 480px'}}) }}
+            {% for field, autocomplete in {firstName: 'given-name', lastName: 'family-name', email: 'email'} %}
+                {{ form_label(form[field]) }}
+                {{ form_widget(form[field], {attr: {class: 'form-control', autocomplete: autocomplete}}) }}
+                {% for error in form[field].vars.errors %}<p class="form-note">{{ error.message }}</p>{% endfor %}
+            {% endfor %}
+            <button class="button button-primary btn" type="submit">Enregistrer <span>↗</span></button>
+        {{ form_end(form) }}
+    </section>
+
+    <section>
+        <h2>Mes présences</h2>
+        {% if attendances is empty %}
+            <p>Tu n’es inscrit·e à aucun événement à venir. Les présences sont supprimées automatiquement une fois l’événement passé.</p>
+        {% else %}
+            <ul>
+                {% for attendance in attendances %}
+                    <li>{{ attendance.event.title }}{% if attendance.event.date %} — {{ attendance.event.date|format_datetime(pattern='EEEE d MMMM y', locale='fr') }}{% endif %}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+    <section>
+        <h2>Télécharger mes données</h2>
+        <p>Récupère toutes les données liées à ton compte dans un document PDF (droit d’accès et de portabilité).</p>
+        <a class="button button-outline" href="{{ path('account_export') }}">Télécharger mes données (PDF) <span>↓</span></a>
+    </section>
+
+    <section id="supprimer">
+        <h2>Supprimer mon compte</h2>
+        <p>La suppression est définitive : ton compte et tes inscriptions aux événements sont effacés immédiatement. Pour les photos ou l’autorisation de droit à l’image, écris à <a href="mailto:{{ legal.email }}">{{ legal.email }}</a>.</p>
+        <form class="contact-form" style="max-width: 480px" method="post" action="{{ path('account_delete') }}" onsubmit="return confirm('Supprimer définitivement ton compte ?')">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete-account') }}">
+            <label for="delete-password">Confirme avec ton mot de passe</label>
+            <input class="form-control" type="password" id="delete-password" name="password" autocomplete="current-password" required>
+            <button class="button button-outline btn" type="submit">Supprimer mon compte</button>
+        </form>
+    </section>
+
+    <p class="privacy-notice mt-5">Pour en savoir plus sur l’utilisation de tes données : <a href="{{ path('legal_privacy') }}">politique de confidentialité</a>.</p>
+</main>
+{% endblock %}

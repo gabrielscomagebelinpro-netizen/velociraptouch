@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accessibilité — Vélociraptouch{% endblock %}
+{% block meta_description %}Déclaration d’accessibilité du site des Vélociraptouch (WCAG 2.1 niveau AA).{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main legal-page">
+    <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
+    <p class="eyebrow">Informations légales</p>
+    <h1>Accessi<span>bilité.</span></h1>
+    <p class="legal-updated">Dernière mise à jour : {{ legal.updated_at }}</p>
+
+    <p>{{ legal.name }} veut que son site soit utilisable par toutes et tous, y compris avec un lecteur d’écran, au clavier ou avec un affichage agrandi.</p>
+
+    <section>
+        <h2>État de conformité</h2>
+        <p>Ce site vise la conformité aux <strong>règles WCAG 2.1, niveau AA</strong>. Un audit interne réalisé le 27 octobre 2026 sur l’ensemble des pages (accueil, inscription, connexion, Mon compte, pages légales et espace d’administration) n’a relevé aucune non-conformité sur les critères vérifiés : contrastes, alternatives textuelles des images, libellés des formulaires, messages d’erreur, navigation au clavier et focus visible, structure des titres, langue de la page, adaptation aux petits écrans et au zoom, réduction des animations.</p>
+        <p>Cet audit n’a pas été réalisé par un organisme indépendant.</p>
+    </section>
+
+    <section>
+        <h2>Contenus non maîtrisés</h2>
+        <ul>
+            <li>La carte Google Maps et le formulaire Google Forms de droit à l’image sont fournis par Google : leur accessibilité dépend de ce service.</li>
+            <li>Les pages Instagram et TikTok de l’association, accessibles par des liens, dépendent de ces plateformes.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Aménagements disponibles</h2>
+        <ul>
+            <li>Un lien « Aller au contenu » permet de passer directement au contenu principal au clavier (touche Tab en début de page).</li>
+            <li>Le site respecte le réglage « réduire les animations » de votre système.</li>
+            <li>Le texte peut être agrandi jusqu’à 200 % sans perte de contenu.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Signaler un problème</h2>
+        <p>Si vous rencontrez une difficulté pour accéder à un contenu ou à un service, écrivez à <a href="mailto:{{ legal.email }}">{{ legal.email }}</a> : nous vous proposerons une alternative et corrigerons le problème.</p>
+        <p>Si vous n’obtenez pas de réponse satisfaisante, vous pouvez saisir le Défenseur des droits : <a href="https://www.defenseurdesdroits.fr" target="_blank" rel="noreferrer">www.defenseurdesdroits.fr</a>.</p>
+    </section>
+</main>
+{% endblock %}

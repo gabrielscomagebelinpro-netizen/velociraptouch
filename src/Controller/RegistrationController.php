@@ -35,8 +35,13 @@ final class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = (string) $form->get('plainPassword')->getData();
-            if (mb_strlen($plainPassword) < 8) {
-                $this->addFlash('error', 'Le mot de passe doit contenir au moins 8 caractères.');
+            // Recommandation CNIL (délibération n° 2022-100) : 12 caractères mêlant 4 types de caractères.
+            if (mb_strlen($plainPassword) < 12
+                || !preg_match('/\p{Lu}/u', $plainPassword)
+                || !preg_match('/\p{Ll}/u', $plainPassword)
+                || !preg_match('/\d/', $plainPassword)
+                || !preg_match('/[^\p{L}\d]/u', $plainPassword)) {
+                $this->addFlash('error', 'Le mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un caractère spécial.');
             } else {
                 $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
                 $entityManager->persist($user);

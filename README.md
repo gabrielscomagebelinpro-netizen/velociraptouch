@@ -370,11 +370,17 @@ php bin/console app:user:promote-admin email-du-compte@exemple.fr
 
 ### 12.5. Tâche planifiée
 
-Dans cPanel (« Tâches Cron »), ajouter une tâche quotidienne (ex. tous les jours à 3 h) :
+Dans cPanel (« Tâches Cron »), ajouter une tâche quotidienne (ex. tous les jours à 3 h). Elle applique les durées de conservation annoncées dans la politique de confidentialité (présences passées, comptes inactifs depuis 3 ans, photos de plus de 3 ans, messages de contact de plus d’un an) : **elle est obligatoire pour respecter le RGPD**.
 
 ```bash
-cd ~/velociraptouch && php bin/console app:attendances:cleanup >/dev/null 2>&1
+cd ~/velociraptouch && php bin/console app:rgpd:purge >/dev/null 2>&1
 ```
+
+Pour voir ce qui serait supprimé sans rien effacer : `php bin/console app:rgpd:purge --dry-run`.
+
+### Informations légales
+
+Avant la mise en ligne, compléter le bloc `legal` de `config/packages/twig.yaml` (adresse du siège, numéro RNA, président·e, hébergeur). Les valeurs manquantes apparaissent surlignées en jaune sur `/mentions-legales` et `/confidentialite`. La liste complète des obligations légales et fiscales est dans `docs/legal/conformite.md`, et le registre des traitements dans `docs/legal/registre-des-traitements.md`.
 
 ### 12.6. Mettre à jour le site plus tard
 

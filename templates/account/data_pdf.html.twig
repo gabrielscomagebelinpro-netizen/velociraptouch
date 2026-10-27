@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; color: #163545; font-size: 11px; line-height: 1.5; }
+        h1 { color: #163545; font-size: 20px; margin: 0 0 4px; }
+        h2 { color: #01afb5; font-size: 13px; margin: 26px 0 8px; text-transform: uppercase; }
+        .meta { color: #266d82; margin-bottom: 10px; }
+        table { border-collapse: collapse; width: 100%; }
+        th { background: #163545; color: #fff; text-align: left; }
+        th, td { border: 1px solid #c9dfe3; padding: 7px 9px; vertical-align: top; }
+        td.label { width: 34%; background: #f2f8f9; font-weight: bold; }
+        .empty { padding: 12px; background: #f2f8f9; }
+        .note { color: #266d82; font-size: 10px; margin-top: 30px; border-top: 1px solid #c9dfe3; padding-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Mes données personnelles</h1>
+    <div class="meta">
+        {{ legal.name }} — document généré le {{ exportedAt|format_datetime(pattern="d MMMM y 'à' HH:mm", locale='fr') }}<br>
+        Copie des données personnelles détenues par l’association (articles 15 et 20 du RGPD).
+    </div>
+
+    <h2>Compte</h2>
+    <table>
+        <tr><td class="label">Prénom</td><td>{{ user.firstName }}</td></tr>
+        <tr><td class="label">Nom</td><td>{{ user.lastName }}</td></tr>
+        <tr><td class="label">Adresse email</td><td>{{ user.email }}</td></tr>
+        <tr><td class="label">Rôle</td><td>{{ 'ROLE_ADMIN' in user.roles ? 'Administrateur' : 'Membre' }}</td></tr>
+        <tr><td class="label">Dernière connexion</td><td>{{ user.lastLoginAt ? user.lastLoginAt|format_datetime(pattern="d MMMM y 'à' HH:mm", locale='fr') : '—' }}</td></tr>
+        <tr><td class="label">Mot de passe</td><td>Stocké sous forme chiffrée irréversible : il n’est connu de personne et ne peut pas être affiché.</td></tr>
+    </table>
+
+    <h2>Inscriptions aux événements</h2>
+    {% if attendances is not empty %}
+        <table>
+            <thead><tr><th>Événement</th><th>Date</th><th>Inscription le</th></tr></thead>
+            <tbody>
+            {% for attendance in attendances %}
+                <tr>
+                    <td>{{ attendance.event.title }}</td>
+                    <td>{{ attendance.event.date ? attendance.event.date|format_datetime(pattern='d MMMM y', locale='fr') : '—' }}</td>
+                    <td>{{ attendance.createdAt|format_datetime(pattern="d MMMM y 'à' HH:mm", locale='fr') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty">Aucune inscription en cours. Les inscriptions sont supprimées automatiquement une fois l’événement passé.</div>
+    {% endif %}
+
+    <div class="note">
+        Durées de conservation : compte supprimé automatiquement après 3 ans sans connexion ; inscriptions supprimées après l’événement.<br>
+        Les messages envoyés via le formulaire de contact, les photos et l’autorisation de droit à l’image ne sont pas rattachés à votre compte : pour en obtenir une copie ou leur suppression, écrivez à {{ legal.email }}.<br>
+        Vous pouvez corriger ces informations ou supprimer votre compte depuis la page « Mon compte ». Politique de confidentialité : {{ url('legal_privacy') }}
+    </div>
+</body>
+</html>

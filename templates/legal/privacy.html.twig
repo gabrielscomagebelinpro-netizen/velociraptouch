@@ -1,0 +1,124 @@
+{% extends 'base.html.twig' %}
+{% import 'legal/_macros.html.twig' as l %}
+
+{% block title %}Confidentialité et cookies — Vélociraptouch{% endblock %}
+{% block meta_description %}Politique de confidentialité et de cookies du site des Vélociraptouch : données collectées, durées de conservation et droits.{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main legal-page">
+    <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
+    <p class="eyebrow">Vos données</p>
+    <h1>Confidentialité <span>et cookies.</span></h1>
+    <p class="legal-updated">Dernière mise à jour : {{ legal.updated_at }}</p>
+
+    <p>Cette politique explique quelles données personnelles {{ legal.name }} collecte sur ce site, pourquoi, combien de temps elles sont conservées et comment exercer vos droits, conformément au Règlement général sur la protection des données (RGPD) et à la loi Informatique et Libertés.</p>
+
+    <section>
+        <h2>1. Responsable du traitement</h2>
+        <p>
+            Association {{ legal.official_name }} (« {{ legal.name }} »), {{ legal.legal_form|lower }}<br>
+            RNA : {{ l.value(legal.rna) }}{% if legal.siret %} — SIRET : {{ l.value(legal.siret) }}{% endif %}<br>
+            Siège social : {{ l.value(legal.address) }}<br>
+            Représentée par : {{ l.value(legal.publication_director) }}<br>
+            Contact pour toute question sur vos données : <a href="mailto:{{ legal.email }}">{{ legal.email }}</a>
+        </p>
+        <p>L’association n’est pas tenue de désigner un délégué à la protection des données ; les demandes sont traitées par les membres du bureau.</p>
+    </section>
+
+    <section>
+        <h2>2. Données collectées, finalités et durées de conservation</h2>
+        <div class="legal-table-wrapper">
+            <table class="legal-table">
+                <thead>
+                    <tr><th>Traitement</th><th>Données</th><th>Finalité</th><th>Base légale</th><th>Durée de conservation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Compte membre</td>
+                        <td>Prénom, nom, adresse email, mot de passe (stocké chiffré de manière irréversible), date de dernière connexion</td>
+                        <td>Créer et gérer votre compte, vous connecter, organiser les entraînements et événements</td>
+                        <td>Exécution des mesures liées à votre adhésion ou demande d’inscription (art. 6.1.b RGPD)</td>
+                        <td>Jusqu’à la suppression du compte ; suppression automatique après 3 ans sans connexion</td>
+                    </tr>
+                    <tr>
+                        <td>Inscription aux événements</td>
+                        <td>Votre présence annoncée à un entraînement ou un tournoi</td>
+                        <td>Prévoir l’organisation et établir la liste des participants</td>
+                        <td>Exécution des mesures liées à votre adhésion (art. 6.1.b RGPD)</td>
+                        <td>Suppression automatique une fois l’événement passé</td>
+                    </tr>
+                    <tr>
+                        <td>Formulaire de contact</td>
+                        <td>Nom, adresse email, contenu du message</td>
+                        <td>Répondre à votre demande</td>
+                        <td>Intérêt légitime de l’association à répondre aux demandes qui lui sont adressées (art. 6.1.f RGPD)</td>
+                        <td>1 an après la réception du message</td>
+                    </tr>
+                    <tr>
+                        <td>Photos des événements</td>
+                        <td>Image des personnes photographiées lors des entraînements et événements</td>
+                        <td>Garder des souvenirs de la vie de l’association et communiquer sur ses activités</td>
+                        <td>Votre consentement (autorisation de droit à l’image), retirable à tout moment (art. 6.1.a RGPD)</td>
+                        <td>3 ans après l’événement, ou suppression immédiate sur simple demande</td>
+                    </tr>
+                    <tr>
+                        <td>Autorisation de droit à l’image</td>
+                        <td>Informations saisies dans le formulaire Google Forms (identité, choix d’autorisation)</td>
+                        <td>Recueillir et prouver votre accord avant toute utilisation de votre image</td>
+                        <td>Obligation de recueillir votre consentement et de pouvoir le démontrer (art. 7 RGPD)</td>
+                        <td>Pendant la validité de l’autorisation, puis 3 ans après votre dernière participation</td>
+                    </tr>
+                    <tr>
+                        <td>Sécurité et fonctionnement du site</td>
+                        <td>Cookie de session, adresse IP et journaux techniques de l’hébergeur</td>
+                        <td>Maintenir votre connexion, protéger les formulaires, assurer la sécurité du site</td>
+                        <td>Intérêt légitime (art. 6.1.f RGPD) et obligations légales de l’hébergeur</td>
+                        <td>Cookie : durée de la visite ; journaux : 1 an maximum</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p>Les données marquées comme obligatoires dans les formulaires sont nécessaires pour traiter votre demande ; sans elles, l’inscription ou l’envoi du message n’est pas possible. Aucune décision automatisée ni aucun profilage n’est réalisé. Vos données ne sont jamais vendues ni utilisées à des fins publicitaires.</p>
+    </section>
+
+    <section>
+        <h2>3. Destinataires des données</h2>
+        <ul>
+            <li>Les membres du bureau et les administrateurs du site, dans la limite de leurs fonctions ;</li>
+            <li>l’hébergeur du site ({{ l.value(legal.host_name) }}), qui stocke les données pour le compte de l’association ;</li>
+            <li>Google (Gmail), qui achemine les messages du formulaire de contact vers la boîte de l’association, et Google Forms pour l’autorisation de droit à l’image.</li>
+        </ul>
+        <p>Google LLC étant établie aux États-Unis, certaines données peuvent y être transférées. Ces transferts sont encadrés par la décision d’adéquation de la Commission européenne du 10 juillet 2023 relative au cadre de protection des données UE–États-Unis (Data Privacy Framework), auquel Google LLC a adhéré.</p>
+    </section>
+
+    <section>
+        <h2>4. Sécurité</h2>
+        <p>Le site est accessible uniquement en HTTPS. Les mots de passe sont stockés sous forme hachée et ne sont connus de personne, pas même des administrateurs. Les formulaires sont protégés contre les requêtes frauduleuses, l’accès à l’administration est réservé aux membres habilités et les photos ne sont pas publiques.</p>
+    </section>
+
+    <section>
+        <h2>5. Vos droits</h2>
+        <p>Vous disposez à tout moment des droits suivants sur vos données : accès, rectification, effacement, limitation du traitement, opposition, portabilité, et retrait de votre consentement lorsque le traitement repose sur celui-ci (sans remettre en cause les traitements déjà réalisés). Vous pouvez également définir des directives sur le sort de vos données après votre décès.</p>
+        <p>Si vous avez un compte, la page <a href="{{ path('account') }}">Mon compte</a> vous permet de consulter et modifier vos informations, de télécharger toutes vos données et de supprimer votre compte en autonomie. Pour toute autre demande, écrivez à <a href="mailto:{{ legal.email }}">{{ legal.email }}</a> ; une réponse vous sera apportée dans un délai d’un mois. Un justificatif d’identité pourra vous être demandé en cas de doute raisonnable sur votre identité.</p>
+        <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL : <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noreferrer">www.cnil.fr/fr/plaintes</a>, ou par courrier à CNIL, 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07.</p>
+    </section>
+
+    <section>
+        <h2>6. Mineurs</h2>
+        <p>Les personnes de moins de 15 ans doivent obtenir l’accord d’un parent ou représentant légal avant de créer un compte ou de remplir l’autorisation de droit à l’image ; ce dernier peut exercer les droits décrits ci-dessus en leur nom.</p>
+    </section>
+
+    <section id="cookies">
+        <h2>7. Cookies et traceurs</h2>
+        <p>Ce site n’utilise <strong>aucun cookie publicitaire, de mesure d’audience ou de réseau social</strong>. Il dépose uniquement un cookie de session, strictement nécessaire au fonctionnement du site (connexion à votre compte, protection des formulaires). Conformément à l’article 82 de la loi Informatique et Libertés, ce cookie est exempté de consentement ; il est supprimé à la fermeture du navigateur ou à la déconnexion.</p>
+        <p>Les polices de caractères sont hébergées sur le site : aucune connexion à Google Fonts n’a lieu.</p>
+        <p><strong>Carte Google Maps</strong> : la carte du lieu d’entraînement n’est chargée que si vous cliquez sur « Afficher la carte ». Ce clic vaut consentement : Google reçoit alors votre adresse IP et peut déposer ses propres cookies, selon sa <a href="https://policies.google.com/privacy?hl=fr" target="_blank" rel="noreferrer">politique de confidentialité</a>. Sans ce clic, aucune donnée n’est transmise à Google. Le consentement vaut pour la page affichée et n’est pas mémorisé : il suffit de recharger la page pour revenir en arrière.</p>
+        <p>Les liens vers Instagram, TikTok, Google Forms et les sites des partenaires ne transmettent aucune donnée tant que vous ne cliquez pas dessus.</p>
+    </section>
+
+    <section>
+        <h2>8. Modification de cette politique</h2>
+        <p>Cette politique peut évoluer, notamment en cas de nouvelle fonctionnalité. La date de dernière mise à jour figure en haut de la page.</p>
+    </section>
+</main>
+{% endblock %}
