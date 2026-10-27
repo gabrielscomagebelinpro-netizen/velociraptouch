@@ -39,7 +39,11 @@
         {% endif %}
         {% if app.user %}
           <a href="{{ path('account') }}">Mon compte</a>
-          <a href="{{ path('admin_logout') }}">Déconnexion</a>
+          {# Déconnexion par formulaire avec jeton : un simple lien piégé ne peut pas déconnecter un membre. #}
+          <form class="nav-logout-form" method="post" action="{{ path('admin_logout') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+            <button class="nav-logout" type="submit">Déconnexion</button>
+          </form>
         {% else %}
           <a href="{{ path('app_login') }}">Connexion</a>
           <a href="{{ path('app_register') }}">Inscription</a>

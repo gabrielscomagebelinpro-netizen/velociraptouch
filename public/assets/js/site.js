@@ -299,3 +299,9 @@ document.querySelectorAll(".map-consent").forEach((placeholder) => {
         placeholder.replaceWith(iframe);
     });
 });
+
+// Confirmation avant les actions sensibles (remplace les attributs onsubmit, interdits par la CSP).
+document.addEventListener("submit", (event) => {
+    const message = event.target.dataset?.confirm;
+    if (message && !window.confirm(message)) event.preventDefault();
+}, true);

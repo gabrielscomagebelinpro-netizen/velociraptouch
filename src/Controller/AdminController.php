@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Entity\EventPhoto;
+use App\Service\AdminActionLog;
 use App\Entity\User;
 use App\Form\EventType;
 use App\Repository\EventPhotoRepository;
@@ -25,8 +26,10 @@ use Dompdf\Options;
 #[Route('/admin')]
 final class AdminController extends AbstractController
 {
-    public function __construct(private readonly string $eventPhotoDirectory)
-    {
+    public function __construct(
+        private readonly string $eventPhotoDirectory,
+        private readonly AdminActionLog $actionLog,
+    ) {
     }
 
     #[Route('', name: 'admin_dashboard', methods: ['GET', 'POST'])]
@@ -40,6 +43,7 @@ final class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($event);
             $entityManager->flush();
+            $this->actionLog->record('événement créé', ['id' => $event->getId(), 'titre' => $event->getTitle()]);
             $this->addFlash('success', 'Événement ajouté à l’agenda.');
             return $this->redirectToRoute('admin_dashboard');
         }
@@ -58,6 +62,7 @@ final class AdminController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+            $this->actionLog->record('événement modifié', ['id' => $event->getId(), 'titre' => $event->getTitle()]);
             $this->addFlash('success', 'Événement modifié.');
             return $this->redirectToRoute('admin_dashboard');
         }
@@ -134,6 +139,9 @@ final class AdminController extends AbstractController
         }
 
         $entityManager->flush();
+        if ($uploaded > 0) {
+            $this->actionLog->record('photos ajoutées', ['evenement' => $event->getId(), 'nombre' => $uploaded]);
+        }
 
         return $this->photoUploadResponse($request, $event, $uploaded, $errors);
     }
@@ -279,21 +287,32 @@ final class AdminController extends AbstractController
         if (is_file($path) && !unlink($path)) {
             throw new \RuntimeException('La photo ne peut pas être supprimée du stockage.');
         }
+        $photoName = $photo->getOriginalName();
         $entityManager->remove($photo);
         $entityManager->flush();
+        $this->actionLog->record('photo supprimée', ['evenement' => $event->getId(), 'photo' => $photoName]);
 
         $this->addFlash('success', 'Photo supprimée.');
         return $this->redirectToRoute('admin_event_edit', ['id' => $event->getId()]);
     }
 
     #[Route('/events/{id}/delete', name: 'admin_event_delete', methods: ['POST'])]
-    public function delete(Event $event, Request $request, EntityManagerInterface $entityManager): Response
+    public function delete(Event $event, Request $request, EntityManagerInterface $entityManager, EventPhotoRepository $photos): Response
     {
         if (!$this->isCsrfTokenValid('delete-event-'.$event->getId(), (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
+        // La base supprime les photos en cascade ; il faut aussi effacer les fichiers, sinon ils restent sur le serveur.
+        foreach ($photos->findForEvent($event) as $photo) {
+            $path = $this->eventPhotoDirectory.'/'.$photo->getFilename();
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+        $details = ['id' => $event->getId(), 'titre' => $event->getTitle()];
         $entityManager->remove($event);
         $entityManager->flush();
+        $this->actionLog->record('événement supprimé (avec ses photos)', $details);
         $this->addFlash('success', 'Événement supprimé.');
         return $this->redirectToRoute('admin_dashboard');
     }
@@ -335,6 +354,7 @@ final class AdminController extends AbstractController
 
         $user->setRoles($makeAdmin ? [...$roles, 'ROLE_ADMIN'] : $roles);
         $entityManager->flush();
+        $this->actionLog->record($makeAdmin ? 'rôle admin donné' : 'rôle admin retiré', ['compte' => $user->getEmail()]);
         $this->addFlash('success', $makeAdmin ? sprintf('%s est maintenant administrateur.', $name) : sprintf('%s est maintenant utilisateur simple.', $name));
 
         // Un admin qui se retire ses propres droits n'a plus accès au panel.
@@ -384,7 +404,7 @@ final class AdminController extends AbstractController
         ]);
     }
 
-    #[Route('/logout', name: 'admin_logout', methods: ['GET'])]
+    #[Route('/logout', name: 'admin_logout', methods: ['POST'])]
     public function logout(): never
     {
         throw new \LogicException('Cette route est interceptée par le firewall Symfony.');

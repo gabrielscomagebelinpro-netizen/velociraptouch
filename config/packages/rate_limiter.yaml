@@ -1,0 +1,12 @@
+framework:
+    rate_limiter:
+        # Anti-robots : nombre maximal de créations de compte par adresse IP.
+        registration:
+            policy: sliding_window
+            limit: 5
+            interval: '1 hour'
+        # Anti-spam : nombre maximal de messages de contact par adresse IP.
+        contact_form:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'

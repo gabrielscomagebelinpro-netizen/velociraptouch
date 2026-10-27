@@ -5,6 +5,9 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\AccountType;
 use App\Repository\AttendanceRepository;
+use App\Security\PasswordPolicy;
+use App\Service\AdminActionLog;
+use Symfony\Component\Form\FormError;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -23,17 +26,21 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AccountController extends AbstractController
 {
     #[Route('', name: 'account', methods: ['GET', 'POST'])]
-    public function show(Request $request, EntityManagerInterface $entityManager, AttendanceRepository $attendances): Response
+    public function show(Request $request, EntityManagerInterface $entityManager, AttendanceRepository $attendances, UserPasswordHasherInterface $hasher): Response
     {
         $user = $this->currentUser();
         $form = $this->createForm(AccountType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-            $this->addFlash('success', 'Tes informations ont été mises à jour.');
+            // Le prénom, le nom et l'email servent à se connecter : toute modification exige le mot de passe actuel.
+            if ($hasher->isPasswordValid($user, (string) $form->get('currentPassword')->getData())) {
+                $entityManager->flush();
+                $this->addFlash('success', 'Tes informations ont été mises à jour.');
 
-            return $this->redirectToRoute('account');
+                return $this->redirectToRoute('account');
+            }
+            $form->get('currentPassword')->addError(new FormError('Mot de passe incorrect : tes informations n’ont pas été modifiées.'));
         }
         if ($form->isSubmitted()) {
             // Ne garde pas en mémoire des valeurs invalides pour la suite de la requête.
@@ -44,6 +51,30 @@ final class AccountController extends AbstractController
             'form' => $form,
             'attendances' => $attendances->findBy(['user' => $user]),
         ]);
+    }
+
+    #[Route('/mot-de-passe', name: 'account_password', methods: ['POST'])]
+    public function changePassword(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response
+    {
+        $user = $this->currentUser();
+        if (!$this->isCsrfTokenValid('change-password', (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        $newPassword = (string) $request->request->get('new_password');
+        if (!$hasher->isPasswordValid($user, (string) $request->request->get('current_password'))) {
+            $this->addFlash('error', 'Mot de passe actuel incorrect : ton mot de passe n’a pas été changé.');
+        } elseif (!PasswordPolicy::isStrong($newPassword)) {
+            $this->addFlash('error', PasswordPolicy::RULE);
+        } elseif ($newPassword !== (string) $request->request->get('new_password_confirm')) {
+            $this->addFlash('error', 'Les deux nouveaux mots de passe ne sont pas identiques.');
+        } else {
+            $user->setPassword($hasher->hashPassword($user, $newPassword));
+            $entityManager->flush();
+            $this->addFlash('success', 'Ton mot de passe a été changé.');
+        }
+
+        return $this->redirectToRoute('account', ['_fragment' => 'mot-de-passe']);
     }
 
     #[Route('/export', name: 'account_export', methods: ['GET'])]
@@ -71,7 +102,7 @@ final class AccountController extends AbstractController
     }
 
     #[Route('/supprimer', name: 'account_delete', methods: ['POST'])]
-    public function delete(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher, Security $security): Response
+    public function delete(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher, Security $security, AdminActionLog $actionLog): Response
     {
         $user = $this->currentUser();
         if (!$this->isCsrfTokenValid('delete-account', (string) $request->request->get('_token'))) {
@@ -95,6 +126,7 @@ final class AccountController extends AbstractController
         }
 
         // Les présences sont supprimées avec le compte (suppression en cascade).
+        $actionLog->record('compte supprimé par son titulaire', ['compte' => $user->getEmail()]);
         $security->logout(false);
         $entityManager->remove($user);
         $entityManager->flush();

@@ -15,6 +15,8 @@
             {{ form_widget(form[field], {attr: {class: 'form-control', autocomplete: autocomplete}}) }}
             {% for error in form[field].vars.errors %}<p class="form-note">{{ error.message }}</p>{% endfor %}
         {% endfor %}
+        {# Champ piège : invisible pour les humains, rempli automatiquement par les robots. #}
+        <div class="hp-field" aria-hidden="true"><label for="website">Site web</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></div>
         <p class="privacy-notice mt-0">Au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un caractère spécial.</p>
         {% for error in form.vars.errors %}<p class="form-note">{{ error.message }}</p>{% endfor %}
         <button class="button button-primary btn mt-4" type="submit">S’inscrire <span>↗</span></button>

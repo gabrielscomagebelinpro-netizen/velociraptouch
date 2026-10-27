@@ -14,13 +14,28 @@
         <h2>Mes informations</h2>
         <p>Tu peux corriger ces informations à tout moment.</p>
         {{ form_start(form, {attr: {class: 'contact-form', style: 'max-width: 480px'}}) }}
-            {% for field, autocomplete in {firstName: 'given-name', lastName: 'family-name', email: 'email'} %}
+            {% for field, autocomplete in {firstName: 'given-name', lastName: 'family-name', email: 'email', currentPassword: 'current-password'} %}
                 {{ form_label(form[field]) }}
                 {{ form_widget(form[field], {attr: {class: 'form-control', autocomplete: autocomplete}}) }}
                 {% for error in form[field].vars.errors %}<p class="form-note">{{ error.message }}</p>{% endfor %}
             {% endfor %}
             <button class="button button-primary btn" type="submit">Enregistrer <span>↗</span></button>
         {{ form_end(form) }}
+    </section>
+
+    <section id="mot-de-passe">
+        <h2>Changer mon mot de passe</h2>
+        <form class="contact-form" style="max-width: 480px" method="post" action="{{ path('account_password') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('change-password') }}">
+            <label for="current-password">Mot de passe actuel</label>
+            <input class="form-control" type="password" id="current-password" name="current_password" autocomplete="current-password" required>
+            <label for="new-password">Nouveau mot de passe</label>
+            <input class="form-control" type="password" id="new-password" name="new_password" autocomplete="new-password" required aria-describedby="new-password-help">
+            <p class="privacy-notice mt-0" id="new-password-help">Au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un caractère spécial.</p>
+            <label for="new-password-confirm">Confirme le nouveau mot de passe</label>
+            <input class="form-control" type="password" id="new-password-confirm" name="new_password_confirm" autocomplete="new-password" required>
+            <button class="button button-primary btn" type="submit">Changer le mot de passe <span>↗</span></button>
+        </form>
     </section>
 
     <section>
@@ -45,7 +60,7 @@
     <section id="supprimer">
         <h2>Supprimer mon compte</h2>
         <p>La suppression est définitive : ton compte et tes inscriptions aux événements sont effacés immédiatement. Pour les photos ou l’autorisation de droit à l’image, écris à <a href="mailto:{{ legal.email }}">{{ legal.email }}</a>.</p>
-        <form class="contact-form" style="max-width: 480px" method="post" action="{{ path('account_delete') }}" onsubmit="return confirm('Supprimer définitivement ton compte ?')">
+        <form class="contact-form" style="max-width: 480px" method="post" action="{{ path('account_delete') }}" data-confirm="Supprimer définitivement ton compte ?">
             <input type="hidden" name="_token" value="{{ csrf_token('delete-account') }}">
             <label for="delete-password">Confirme avec ton mot de passe</label>
             <input class="form-control" type="password" id="delete-password" name="password" autocomplete="current-password" required>

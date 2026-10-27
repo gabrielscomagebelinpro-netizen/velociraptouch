@@ -73,8 +73,8 @@ Document interne exigé par l’article 30 du RGPD. Il doit être tenu à jour e
 |---|---|
 | Finalité | Maintenir la session, protéger les formulaires, assurer la sécurité |
 | Base légale | Intérêt légitime (art. 6.1.f) ; obligations légales de l’hébergeur (LCEN) |
-| Données | Cookie de session, adresse IP, journaux techniques |
-| Durée de conservation | Cookie : durée de la session ; journaux : 1 an maximum (hébergeur) |
+| Données | Cookie de session, adresse IP (compteurs anti-force brute et anti-robots), journaux techniques, journal des actions des administrateurs (auteur, action, date) dans `var/log/admin-actions.log` |
+| Durée de conservation | Cookie : durée de la session ; compteurs : 1 heure maximum ; journal admin : 1 an (purge automatique) ; journaux de l’hébergeur : 1 an maximum |
 
 ---
 

@@ -7,7 +7,16 @@
     <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
     <p class="eyebrow">Espace membre</p>
     <h1>Connexion <span>à votre compte.</span></h1>
-    {% if error %}<p class="form-note">{{ error.messageKey|trans(error.messageData, 'security') }}</p>{% endif %}
+    {% if error %}
+        {# Messages en français ; le message ne dit jamais si c'est le nom ou le mot de passe qui est faux. #}
+        {% if error.messageKey starts with 'Too many failed login attempts' %}
+            <p class="form-note form-note-error" role="alert">Trop de tentatives de connexion. Réessaie dans {{ error.messageData['%minutes%'] ?? 15 }} minutes.</p>
+        {% elseif error.messageKey == 'Invalid CSRF token.' %}
+            <p class="form-note form-note-error" role="alert">Le formulaire a expiré. Recharge la page puis réessaie.</p>
+        {% else %}
+            <p class="form-note form-note-error" role="alert">Prénom, nom ou mot de passe incorrect.</p>
+        {% endif %}
+    {% endif %}
     <form method="post" action="{{ path('admin_login') }}" class="contact-form mt-5" style="max-width: 480px">
         <label for="first_name">Prénom</label>
         <input class="form-control" type="text" id="first_name" name="_first_name" autocomplete="given-name" required>

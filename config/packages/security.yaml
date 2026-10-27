@@ -16,8 +16,14 @@ security:
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\LoginAuthenticator
+            # Contre la force brute : 5 essais par compte et par adresse IP, puis blocage 15 minutes.
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
             logout:
                 path: admin_logout
+                # La déconnexion exige un jeton : un autre site ne peut pas déconnecter un membre.
+                enable_csrf: true
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

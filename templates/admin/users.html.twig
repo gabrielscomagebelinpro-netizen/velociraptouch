@@ -30,7 +30,7 @@
                     <span>{{ user.email }} · {{ isAdmin ? 'Administrateur' : 'Utilisateur' }}</span>
                 </div>
                 <div class="admin-row-actions">
-                    <form method="post" action="{{ path('admin_user_role', {id: user.id}) }}"{% if isMe and isAdmin %} onsubmit="return confirm('Tu vas perdre l’accès à l’administration. Continuer ?')"{% endif %}>
+                    <form method="post" action="{{ path('admin_user_role', {id: user.id}) }}"{% if isMe and isAdmin %} data-confirm="Tu vas perdre l’accès à l’administration. Continuer ?"{% endif %}>
                         <input type="hidden" name="_token" value="{{ csrf_token('user-role-' ~ user.id) }}">
                         <input type="hidden" name="role" value="{{ isAdmin ? 'user' : 'admin' }}">
                         {% if isAdmin %}

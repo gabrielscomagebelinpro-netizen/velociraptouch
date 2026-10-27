@@ -341,14 +341,16 @@ APP_SECRET=une-valeur-aleatoire-de-32-caracteres-ou-plus
 DATABASE_URL="mysql://UTILISATEUR:MOT_DE_PASSE@localhost:3306/NOM_DE_LA_BASE?serverVersion=8.0&charset=utf8mb4"
 MAILER_DSN="smtp://velociraptouch@gmail.com:MOT_DE_PASSE_APPLICATION@smtp.gmail.com:587?encryption=tls&auth_mode=login"
 CONTACT_RECIPIENT=velociraptouch@gmail.com
-TRUSTED_PROXIES=127.0.0.1,REMOTE_ADDR
+TRUSTED_PROXIES=127.0.0.1
+SYMFONY_TRUSTED_HOSTS=^(www\.)?velociraptouch\.fr$
 DEFAULT_URI=https://velociraptouch.fr
 SHOP_ENABLED=0
 ```
 
-- `APP_SECRET` : générer une valeur avec `php -r "echo bin2hex(random_bytes(16));"`.
+- `APP_SECRET` : **obligatoire et unique**, générer une valeur avec `php -r "echo bin2hex(random_bytes(32));"`. Ne jamais réutiliser la valeur de `.env` ou `.env.dev`, qui sont publiques sur GitHub.
 - `serverVersion` : mettre la version MySQL indiquée par l'hébergeur (ex. `8.0` ou `10.11.2-MariaDB` pour MariaDB).
-- `TRUSTED_PROXIES` : indispensable si l'hébergeur place un proxy HTTPS devant le site ; sans lui, la connexion et les formulaires échouent avec « Invalid CSRF token ».
+- `TRUSTED_PROXIES` : laisser `127.0.0.1` si le site est servi directement par Apache (cas d’o2switch). Si l’hébergeur place un proxy HTTPS devant le site, indiquer **uniquement l’adresse IP de ce proxy** (donnée par l’hébergeur). Ne jamais mettre `REMOTE_ADDR` : n’importe qui pourrait falsifier son adresse IP et le nom du site.
+- `SYMFONY_TRUSTED_HOSTS` : noms de domaine autorisés (expression régulière) ; adapter au vrai domaine. Les requêtes avec un autre nom d’hôte sont refusées.
 - `APP_ENV=prod` est obligatoire : en `dev`, les erreurs détaillées et la barre de debug exposeraient les mots de passe.
 
 ### 12.4. Installer et initialiser

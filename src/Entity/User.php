@@ -2,15 +2,23 @@
 
 namespace App\Entity;
 
+use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[UniqueEntity(fields: ['email'], message: 'Un compte existe déjà avec cet email.')]
+// La connexion se fait par prénom + nom : ce couple doit être unique (sans tenir compte des majuscules).
+#[UniqueEntity(
+    fields: ['firstName', 'lastName'],
+    repositoryMethod: 'findByNameCaseInsensitive',
+    errorPath: 'lastName',
+    message: 'Un compte existe déjà avec ce prénom et ce nom. Ajoute par exemple l’initiale d’un second prénom ou d’un second nom pour te distinguer.',
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]

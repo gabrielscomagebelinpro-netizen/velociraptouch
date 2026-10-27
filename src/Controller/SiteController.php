@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -35,6 +36,7 @@ final class SiteController
         private readonly Security $security,
         #[Autowire('%app.shop_enabled%')]
         private readonly bool $shopEnabled,
+        private readonly RateLimiterFactory $contactFormLimiter,
     ) {
     }
 
@@ -83,7 +85,27 @@ final class SiteController
         $this->entityManager->flush();
 
         $request->getSession()->getFlashBag()->add('attendance', $message);
-        return new RedirectResponse($request->headers->get('referer') ?: '/#agenda');
+        return new RedirectResponse($this->safeReferer($request, '/#agenda'));
+    }
+
+    /**
+     * Page d'origine (en-tête Referer) seulement si elle appartient à ce site ; sinon la page par défaut.
+     * Empêche un autre site de se servir du nôtre pour rediriger vers une adresse piégée.
+     */
+    private function safeReferer(Request $request, string $fallback): string
+    {
+        $referer = (string) $request->headers->get('referer');
+        $parts = parse_url($referer);
+        if (!is_array($parts) || ($parts['host'] ?? null) !== $request->getHost()) {
+            return $fallback;
+        }
+
+        $path = $parts['path'] ?? '/';
+        if (!str_starts_with($path, '/') || str_starts_with($path, '//')) {
+            return $fallback;
+        }
+
+        return $path.(isset($parts['query']) ? '?'.$parts['query'] : '');
     }
 
     #[Route('/boutique', name: 'site_shop', methods: ['GET'])]
@@ -108,8 +130,18 @@ final class SiteController
         $name = trim((string) $request->request->get('name'));
         $email = trim((string) $request->request->get('email'));
         $message = trim((string) $request->request->get('message'));
-        $redirect = $request->headers->get('referer') ?: '/';
+        $redirect = $this->safeReferer($request, '/').'#contact';
         $account = $this->security->getUser();
+
+        // Champ piège invisible : seuls les robots le remplissent. On fait comme si l'envoi avait réussi.
+        if (trim((string) $request->request->get('website')) !== '') {
+            $request->getSession()->getFlashBag()->add('contact_success', 'Merci ! Votre message a bien été envoyé.');
+            return new RedirectResponse($redirect);
+        }
+        if (!$this->contactFormLimiter->create($request->getClientIp() ?? 'inconnu')->consume()->isAccepted()) {
+            $request->getSession()->getFlashBag()->add('contact_error', 'Trop de messages envoyés. Réessaie dans quelques minutes.');
+            return new RedirectResponse($redirect);
+        }
         if ($account instanceof User) {
             $name = trim($account->getFirstName().' '.$account->getLastName());
             $email = $account->getEmail();

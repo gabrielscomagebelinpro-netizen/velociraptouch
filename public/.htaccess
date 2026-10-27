@@ -1,6 +1,14 @@
 # Envoie toutes les requêtes vers index.php (front controller Symfony) sur un hébergement Apache.
 DirectoryIndex index.php
 
+# Pas de liste des fichiers d'un dossier.
+Options -Indexes
+
+# Fichiers cachés (.user.ini, .htaccess…) jamais servis ; le dossier .well-known reste accessible (certificat HTTPS).
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
 # En-têtes de sécurité (protection des données des visiteurs).
 <IfModule mod_headers.c>
     Header always set Strict-Transport-Security "max-age=31536000"

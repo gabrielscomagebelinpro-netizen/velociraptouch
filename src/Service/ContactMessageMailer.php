@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
 final class ContactMessageMailer
@@ -15,8 +16,11 @@ final class ContactMessageMailer
 
     public function send(string $name, string $email, string $message): void
     {
+        // L'expéditeur est toujours l'adresse de l'association (pas d'usurpation possible) ;
+        // l'adresse du visiteur sert seulement de « Répondre à ».
+        $name = trim((string) preg_replace('/[\x00-\x1F\x7F]+/u', ' ', $name));
         $mail = (new Email())
-            ->from($email)
+            ->from(new Address($this->recipient, 'Site Vélociraptouch'))
             ->to($this->recipient)
             ->replyTo($email)
             ->subject(sprintf('Nouveau message de contact — %s', $name))

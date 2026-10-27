@@ -3439,3 +3439,49 @@ main:focus {
 .button-primary span {
     color: inherit !important
 }
+
+/* Bouton « Déconnexion » du menu : même apparence que les autres liens. */
+.nav-logout-form {
+    display: contents
+}
+
+.main-nav .nav-logout {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--ink);
+    cursor: pointer;
+    font-family: "Barlow Condensed", "DM Sans", sans-serif;
+    font-size: inherit;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    line-height: inherit
+}
+
+.main-nav .nav-logout:hover {
+    text-decoration: underline;
+    text-underline-offset: 7px;
+    text-decoration-color: var(--orange)
+}
+
+@media (max-width: 760px) {
+    .main-nav .nav-logout::before {
+        content: "›";
+        display: inline-block;
+        margin-right: .55em;
+        color: var(--orange);
+        font-size: 1.35em;
+        line-height: 0;
+        vertical-align: -.08em
+    }
+}
+
+/* Champ piège anti-robots : retiré de l’écran sans display:none (que certains robots détectent). */
+.hp-field {
+    position: absolute !important;
+    left: -10000px !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden
+}

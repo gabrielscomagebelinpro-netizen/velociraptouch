@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\EventPhoto;
 use App\Entity\User;
 use App\Repository\AttendanceRepository;
+use App\Service\AdminActionLog;
 use App\Service\ContactMessageStore;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -25,11 +26,13 @@ final class PurgePersonalDataCommand extends Command
     private const INACTIVE_ACCOUNT = '-3 years';
     private const CONTACT_MESSAGE = '-1 year';
     private const EVENT_PHOTO = '-3 years';
+    private const ADMIN_LOG = '-1 year';
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly AttendanceRepository $attendances,
         private readonly ContactMessageStore $messages,
+        private readonly AdminActionLog $actionLog,
         #[Autowire('%kernel.project_dir%/var/uploads/events')]
         private readonly string $eventPhotoDirectory,
     ) {
@@ -98,13 +101,17 @@ final class PurgePersonalDataCommand extends Command
         // 4. Messages de contact de plus d'un an.
         $deletedMessages = $this->messages->purgeOlderThan($now->modify(self::CONTACT_MESSAGE), $dryRun);
 
+        // 5. Journal des actions admin de plus d'un an.
+        $deletedLogs = $this->actionLog->purgeOlderThan($now->modify(self::ADMIN_LOG), $dryRun);
+
         $output->writeln(sprintf(
-            '<info>%s%d présence(s), %d compte(s) inactif(s), %d photo(s), %d message(s) de contact.</info>',
+            '<info>%s%d présence(s), %d compte(s) inactif(s), %d photo(s), %d message(s) de contact, %d ligne(s) du journal admin.</info>',
             $dryRun ? '[Simulation] À supprimer : ' : 'Supprimé : ',
             $attendances,
             $deletedAccounts,
             count($photos),
             $deletedMessages,
+            $deletedLogs,
         ));
 
         return Command::SUCCESS;
