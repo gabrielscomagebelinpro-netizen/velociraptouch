@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="{% block meta_description %}Les Vélociraptouch — association de rugby touch, de sport et de convivialité.{% endblock %}" />
     <title>{% block title %}Les Vélociraptouch{% endblock %}</title>
-    <link rel="icon" type="image/png" href="/assets/images/brand/logo-velo-svg.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/app/favicon-32.png" />
+    {# Ajout à l'écran d'accueil : nom et icône de l'application. #}
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/assets/images/app/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Vélociraptouch" />
+    <meta name="application-name" content="Vélociraptouch" />
+    <meta name="theme-color" content="#163545" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=Pinyon+Script&family=Racing+Sans+One&display=swap" rel="stylesheet" />

@@ -1,0 +1,17 @@
+{
+    "name": "Vélociraptouch",
+    "short_name": "Vélociraptouch",
+    "description": "Les Vélociraptouch — association de rugby touch, de sport et de convivialité à Montpellier.",
+    "lang": "fr",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#fffbfb",
+    "theme_color": "#163545",
+    "icons": [
+        { "src": "/assets/images/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "/assets/images/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "/assets/images/app/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+        { "src": "/assets/images/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}
