@@ -8,15 +8,16 @@
     <p class="eyebrow">Nouveau membre</p>
     <h1>Créer un <span>compte.</span></h1>
     {% for message in app.flashes('error') %}<p class="form-note">{{ message }}</p>{% endfor %}
-    <div class="contact-form mt-5" style="max-width: 480px">
-        {{ form_start(form) }}
-        {{ form_row(form.firstName, {attr: {class: 'form-control', autocomplete: 'given-name'}}) }}
-        {{ form_row(form.lastName, {attr: {class: 'form-control', autocomplete: 'family-name'}}) }}
-        {{ form_row(form.email, {attr: {class: 'form-control'}}) }}
-        {{ form_row(form.plainPassword, {attr: {class: 'form-control'}}) }}
+    {# Même structure que le formulaire de connexion : labels et champs directement empilés dans le formulaire. #}
+    {{ form_start(form, {attr: {class: 'contact-form mt-5', style: 'max-width: 480px'}}) }}
+        {% for field, autocomplete in {firstName: 'given-name', lastName: 'family-name', email: 'email', plainPassword: 'new-password'} %}
+            {{ form_label(form[field]) }}
+            {{ form_widget(form[field], {attr: {class: 'form-control', autocomplete: autocomplete}}) }}
+            {% for error in form[field].vars.errors %}<p class="form-note">{{ error.message }}</p>{% endfor %}
+        {% endfor %}
+        {% for error in form.vars.errors %}<p class="form-note">{{ error.message }}</p>{% endfor %}
         <button class="button button-primary btn mt-4" type="submit">S’inscrire <span>↗</span></button>
-        {{ form_end(form) }}
-    </div>
+    {{ form_end(form) }}
     <p class="field-help mt-4">Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a></p>
 </main>
 {% endblock %}
