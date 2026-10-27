@@ -3,3 +3,4 @@ twig:
     strict_variables: '%kernel.debug%'
     globals:
         shop_enabled: '%app.shop_enabled%'
+        image_rights_url: 'https://docs.google.com/forms/d/e/1FAIpQLScnQRGjvyv02XVdlD9zs4aPA9aiKCxUdf6hLBGr5fUWBlOnKQ/viewform'
