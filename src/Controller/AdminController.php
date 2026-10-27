@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Entity\EventPhoto;
+use App\Entity\User;
 use App\Form\EventType;
 use App\Repository\EventPhotoRepository;
 use App\Repository\EventRepository;
@@ -295,6 +296,53 @@ final class AdminController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', 'Événement supprimé.');
         return $this->redirectToRoute('admin_dashboard');
+    }
+
+    #[Route('/users', name: 'admin_users', methods: ['GET'])]
+    public function users(EntityManagerInterface $entityManager): Response
+    {
+        $users = $entityManager->getRepository(User::class)->findBy([], ['lastName' => 'ASC', 'firstName' => 'ASC']);
+
+        return $this->render('admin/users.html.twig', [
+            'users' => $users,
+            'adminCount' => count(array_filter($users, static fn (User $user): bool => in_array('ROLE_ADMIN', $user->getRoles(), true))),
+        ]);
+    }
+
+    #[Route('/users/{id}/role', name: 'admin_user_role', methods: ['POST'])]
+    public function changeUserRole(User $user, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if (!$this->isCsrfTokenValid('user-role-'.$user->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        $name = trim($user->getFirstName().' '.$user->getLastName()) ?: $user->getEmail();
+        $makeAdmin = $request->request->get('role') === 'admin';
+        $roles = array_values(array_diff($user->getRoles(), ['ROLE_ADMIN', 'ROLE_USER']));
+
+        if (!$makeAdmin) {
+            // Sans administrateur, plus personne ne pourrait accéder au panel.
+            $admins = array_filter(
+                $entityManager->getRepository(User::class)->findAll(),
+                static fn (User $other): bool => in_array('ROLE_ADMIN', $other->getRoles(), true),
+            );
+            if (count($admins) <= 1) {
+                $this->addFlash('error', 'Impossible : il doit toujours rester au moins un administrateur.');
+
+                return $this->redirectToRoute('admin_users');
+            }
+        }
+
+        $user->setRoles($makeAdmin ? [...$roles, 'ROLE_ADMIN'] : $roles);
+        $entityManager->flush();
+        $this->addFlash('success', $makeAdmin ? sprintf('%s est maintenant administrateur.', $name) : sprintf('%s est maintenant utilisateur simple.', $name));
+
+        // Un admin qui se retire ses propres droits n'a plus accès au panel.
+        if (!$makeAdmin && $this->getUser()?->getUserIdentifier() === $user->getUserIdentifier()) {
+            return $this->redirectToRoute('site_home');
+        }
+
+        return $this->redirectToRoute('admin_users');
     }
 
     #[Route('/events/{id}/attendance.pdf', name: 'admin_event_attendance_pdf', methods: ['GET'])]

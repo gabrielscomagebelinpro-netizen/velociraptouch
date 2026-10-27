@@ -1,0 +1,8 @@
+<nav class="admin-tabs" aria-label="Sections de l’administration">
+    {% for tab in [
+        {route: 'admin_dashboard', label: 'Agenda'},
+        {route: 'admin_users', label: 'Gestion des utilisateurs'},
+    ] %}
+        <a class="button {{ active == tab.route ? 'button-primary' : 'button-outline' }}" href="{{ path(tab.route) }}"{% if active == tab.route %} aria-current="page"{% endif %}>{{ tab.label }}</a>
+    {% endfor %}
+</nav>

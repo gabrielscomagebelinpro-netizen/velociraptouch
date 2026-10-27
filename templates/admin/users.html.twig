@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration — Utilisateurs{% endblock %}
+
+{% block body %}
+<main class="admin-page-main">
+    <div class="admin-page-header">
+        <div>
+            <p class="eyebrow">Espace administration</p>
+            <h1>Gérer <span>les utilisateurs.</span></h1>
+            <p class="admin-page-intro">Donne ou retire le rôle d’administrateur aux membres inscrits.</p>
+        </div>
+        <div class="admin-header-actions">
+            <a class="button button-outline" href="{{ path('site_home') }}">← Accueil</a>
+        </div>
+    </div>
+    {% include 'admin/_tabs.html.twig' with {active: 'admin_users'} %}
+    {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
+    <section class="admin-card">
+        <h2>Utilisateurs <span class="admin-count">({{ users|length }})</span></h2>
+        <p class="field-help">{{ adminCount }} administrateur{{ adminCount > 1 ? 's' }}. Il doit toujours en rester au moins un.</p>
+        <div class="admin-content-list">
+        {% for user in users %}
+            {% set isAdmin = 'ROLE_ADMIN' in user.roles %}
+            {% set isMe = app.user and app.user.userIdentifier == user.userIdentifier %}
+            <article class="admin-event-row">
+                <div>
+                    <strong>{{ user.firstName }} {{ user.lastName }}{% if isMe %} (vous){% endif %}</strong>
+                    <span>{{ user.email }} · {{ isAdmin ? 'Administrateur' : 'Utilisateur' }}</span>
+                </div>
+                <div class="admin-row-actions">
+                    <form method="post" action="{{ path('admin_user_role', {id: user.id}) }}"{% if isMe and isAdmin %} onsubmit="return confirm('Tu vas perdre l’accès à l’administration. Continuer ?')"{% endif %}>
+                        <input type="hidden" name="_token" value="{{ csrf_token('user-role-' ~ user.id) }}">
+                        <input type="hidden" name="role" value="{{ isAdmin ? 'user' : 'admin' }}">
+                        {% if isAdmin %}
+                            <button class="button button-outline btn" type="submit"{% if adminCount <= 1 %} disabled title="Dernier administrateur"{% endif %}>Passer utilisateur</button>
+                        {% else %}
+                            <button class="button button-primary btn" type="submit">Passer admin <span>↗</span></button>
+                        {% endif %}
+                    </form>
+                </div>
+            </article>
+        {% else %}
+            <p class="field-help">Aucun utilisateur inscrit.</p>
+        {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

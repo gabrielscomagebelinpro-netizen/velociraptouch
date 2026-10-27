@@ -38,6 +38,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private string $password = '';
 
+    public function getId(): ?int { return $this->id; }
     public function getUserIdentifier(): string { return $this->email; }
     public function getRoles(): array { return array_values(array_unique(array_merge($this->roles, ['ROLE_USER']))); }
     public function setRoles(array $roles): self { $this->roles = $roles; return $this; }

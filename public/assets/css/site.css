@@ -1903,6 +1903,27 @@ dialog {
     white-space: nowrap
 }
 
+.admin-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: -24px 0 36px
+}
+
+.admin-tabs .button {
+    white-space: nowrap
+}
+
+.admin-count {
+    color: var(--muted);
+    font-size: .6em
+}
+
+.admin-row-actions .button:disabled {
+    opacity: .4;
+    cursor: not-allowed
+}
+
 .text-button {
     border: 0;
     background: none;
