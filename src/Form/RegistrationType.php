@@ -17,9 +17,10 @@ final class RegistrationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('firstName', TextType::class, ['label' => 'Prénom'])
-            ->add('lastName', TextType::class, ['label' => 'Nom'])
-            ->add('email', EmailType::class, ['label' => 'Email'])
+            // empty_data : un champ vide devient '' (et non null) pour que la validation affiche l'erreur.
+            ->add('firstName', TextType::class, ['label' => 'Prénom', 'empty_data' => ''])
+            ->add('lastName', TextType::class, ['label' => 'Nom', 'empty_data' => ''])
+            ->add('email', EmailType::class, ['label' => 'Email', 'empty_data' => ''])
             ->add('plainPassword', PasswordType::class, [
                 'mapped' => false,
                 'label' => 'Mot de passe',

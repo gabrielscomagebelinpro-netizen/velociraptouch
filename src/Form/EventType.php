@@ -16,8 +16,9 @@ final class EventType extends AbstractType
     {
         $builder
             ->add('date', DateType::class, ['widget' => 'single_text', 'label' => 'Date'])
-            ->add('title', TextType::class, ['label' => 'Titre'])
-            ->add('description', TextareaType::class, ['label' => 'Description', 'attr' => ['rows' => 4]]);
+            // empty_data : un champ vide devient '' (et non null) pour que la validation affiche l'erreur.
+            ->add('title', TextType::class, ['label' => 'Titre', 'empty_data' => ''])
+            ->add('description', TextareaType::class, ['label' => 'Description', 'empty_data' => '', 'attr' => ['rows' => 4]]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
