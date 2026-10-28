@@ -3485,3 +3485,39 @@ main:focus {
     height: 1px;
     overflow: hidden
 }
+
+/* Téléchargement des photos : sur téléphone, le ZIP passe en lien secondaire sous le bouton d'enregistrement. */
+.photo-download-actions {
+    flex-wrap: wrap
+}
+
+.photo-zip-secondary {
+    border: 0 !important;
+    padding: 6px 0 !important;
+    font-size: 12px !important;
+    text-decoration: underline;
+    text-underline-offset: 4px
+}
+
+.photo-zip-secondary span {
+    display: none
+}
+
+.photo-share-status {
+    margin-top: 10px
+}
+
+/* Variantes de boutons selon l’écran. */
+.mobile-only {
+    display: none !important
+}
+
+@media (max-width: 760px) {
+    .mobile-only {
+        display: inline-flex !important
+    }
+
+    .desktop-only {
+        display: none !important
+    }
+}

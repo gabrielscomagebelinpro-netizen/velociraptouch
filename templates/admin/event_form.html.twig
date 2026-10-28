@@ -37,9 +37,15 @@
             <button class="button button-primary btn" type="submit">Ajouter les photos <span>↗</span></button>
         </form>
         {% if photos is not empty %}
-            <div class="admin-form-actions">
-                <a class="button button-outline" href="{{ path('admin_event_photos_zip', {id: event.id}) }}">Télécharger toutes les photos ({{ photos|length }}) <span>↓</span></a>
+            {# Sur téléphone, le bouton « Enregistrer dans mes photos » (partage natif) remplace le ZIP, difficile à ouvrir. #}
+            <div class="admin-form-actions photo-download-actions">
+                <button class="button button-primary btn photo-share-button" type="button" hidden
+                        data-photos="{{ photos|map(p => {url: path('admin_event_photo_view', {id: event.id, filename: p.filename}), name: p.originalName, type: p.mimeType})|json_encode }}">
+                    Enregistrer dans mes photos <span>↓</span>
+                </button>
+                <a class="button button-outline photo-zip-link" href="{{ path('admin_event_photos_zip', {id: event.id}) }}">Télécharger toutes les photos (.zip, {{ photos|length }}) <span>↓</span></a>
             </div>
+            <p class="field-help photo-share-status" aria-live="polite" hidden></p>
             <div class="event-photo-grid">
                 {% for photo in photos %}
                     <figure>
