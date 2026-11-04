@@ -36,7 +36,7 @@
                     <div class="admin-row-actions">
                         <a class="button button-primary btn" href="{{ path('admin_event_edit', {id: event.id}) }}#event-photos">Ajouter des photos <span>↗</span></a>
                         <a class="text-link" href="{{ path('admin_event_edit', {id: event.id}) }}">Modifier <span>→</span></a>
-                        <a class="text-link" href="{{ path('admin_event_attendance_pdf', {id: event.id}) }}">PDF <span>↓</span></a>
+                        <a class="text-link" href="{{ path('admin_event_attendance_pdf', {id: event.id}) }}">Télécharger les présences <span>↓</span></a>
                         <form method="post" action="{{ path('admin_event_delete', {id: event.id}) }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete-event-' ~ event.id) }}">
                             <button class="text-button" type="submit">Supprimer</button>
