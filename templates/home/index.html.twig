@@ -70,9 +70,20 @@
           <div><p class="eyebrow">03 — le calendrier</p><h2>À vos agendas<span>.</span></h2></div>
         </div>
         {% for message in app.flashes('attendance') %}<p class="form-note">{{ message }}</p>{% endfor %}
+        {# Planning du mois : construit par site.js à partir de ces données (pas de script en ligne, la CSP l'interdit). #}
+        <div class="month-calendar" id="month-calendar" hidden>
+          <div class="month-calendar-head">
+            <button class="month-calendar-nav" type="button" data-calendar-step="-1" aria-label="Mois précédent">‹</button>
+            <h3 class="month-calendar-title" aria-live="polite"></h3>
+            <button class="month-calendar-nav" type="button" data-calendar-step="1" aria-label="Mois suivant">›</button>
+          </div>
+          <div class="month-calendar-weekdays" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
+          <ol class="month-calendar-grid" role="list"></ol>
+          <script type="application/json" id="month-calendar-data">{{ events|map(e => {id: e.id, date: e.date|date('Y-m-d'), title: e.title})|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP') b-or constant('JSON_UNESCAPED_UNICODE'))|raw }}</script>
+        </div>
         <div class="events-list container-fluid px-0" id="events-list">
           {% for event in events %}
-            <article class="event">
+            <article class="event" id="event-{{ event.id }}">
               <div class="event-date"><strong>{{ event.date|date('d') }}</strong>{{ event.date|format_datetime(pattern='EEEE MMM', locale='fr')|upper }}</div>
               <div class="event-main"><h3>{{ event.title }}</h3><p>{{ event.date|format_datetime(pattern='EEEE d MMMM y', locale='fr')|capitalize }} · {{ event.description }}</p></div>
               <span class="event-tag">Agenda</span>

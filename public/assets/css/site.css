@@ -3521,3 +3521,187 @@ main:focus {
         display: none !important
     }
 }
+
+/* ===== Planning du mois (section Agenda) ===== */
+.month-calendar {
+    margin-bottom: 55px;
+    border: 1px solid #095b67;
+    padding: 22px
+}
+
+.month-calendar[hidden] {
+    display: none
+}
+
+.month-calendar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px
+}
+
+.month-calendar-title {
+    margin: 0;
+    font-size: 24px;
+    text-align: center
+}
+
+.month-calendar-nav {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #7dbfc1;
+    background: transparent;
+    color: var(--paper);
+    font: 700 22px/1 "DM Sans";
+    cursor: pointer
+}
+
+.month-calendar-nav:hover:not(:disabled) {
+    background: var(--turquoise);
+    border-color: var(--turquoise);
+    color: var(--ink)
+}
+
+.month-calendar-nav:disabled {
+    opacity: .3;
+    cursor: default
+}
+
+.month-calendar-weekdays,
+.month-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px
+}
+
+.month-calendar-weekdays {
+    margin-bottom: 4px;
+    font: 11px "DM Sans";
+    text-transform: uppercase;
+    color: #7dbfc1;
+    text-align: center
+}
+
+.month-calendar-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+
+.month-calendar-day {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 84px;
+    min-width: 0;
+    padding: 6px;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid transparent
+}
+
+.month-calendar-day.is-outside {
+    background: transparent
+}
+
+.month-calendar-day.is-past {
+    opacity: .4
+}
+
+.month-calendar-day.is-today {
+    border-color: var(--turquoise)
+}
+
+.month-calendar-number {
+    font: 600 13px "DM Sans";
+    color: #7dbfc1
+}
+
+.month-calendar-day.is-today .month-calendar-number,
+.month-calendar-day.has-events .month-calendar-number {
+    color: var(--paper)
+}
+
+.month-calendar-event {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: var(--turquoise);
+    color: var(--ink);
+    font: 600 11px "DM Sans";
+    text-decoration: none;
+    transition: transform .15s ease, background .15s ease
+}
+
+.month-calendar-event:hover {
+    background: var(--paper);
+    transform: translateY(-1px)
+}
+
+/* La fiche visée par une bulle reste visible sous l'en-tête fixe et s'illumine un instant. */
+.event {
+    scroll-margin-top: 100px
+}
+
+.event.is-highlighted {
+    animation: event-highlight 2.2s ease
+}
+
+@keyframes event-highlight {
+    0%, 40% { background: rgba(1, 175, 181, .22) }
+    100% { background: transparent }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .event.is-highlighted {
+        animation: none;
+        outline: 2px solid var(--turquoise)
+    }
+}
+
+/* Sur téléphone, les bulles deviennent des pastilles : le titre reste lu par les lecteurs d'écran. */
+@media (max-width: 760px) {
+    .month-calendar {
+        padding: 14px 10px;
+        margin-bottom: 40px
+    }
+
+    .month-calendar-title {
+        font-size: 19px
+    }
+
+    .month-calendar-weekdays,
+    .month-calendar-grid {
+        gap: 2px
+    }
+
+    .month-calendar-day {
+        min-height: 52px;
+        padding: 4px 2px;
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-content: flex-start
+    }
+
+    .month-calendar-number {
+        flex-basis: 100%;
+        text-align: center;
+        font-size: 12px
+    }
+
+    /* Pastille de 14px visibles, zone tactile de 24px (WCAG 2.5.8). */
+    .month-calendar-event {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: 5px solid transparent;
+        background-clip: padding-box;
+        font-size: 0;
+        color: transparent
+    }
+}

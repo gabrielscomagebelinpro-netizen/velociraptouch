@@ -369,3 +369,117 @@ if (photoShareButton && navigator.canShare) {
         });
     }
 }
+
+// Planning du mois (section Agenda) : une bulle par événement, cliquable pour aller à sa fiche dans la liste.
+const monthCalendar = document.getElementById("month-calendar");
+if (monthCalendar) {
+    let calendarEvents = [];
+    try {
+        calendarEvents = JSON.parse(document.getElementById("month-calendar-data")?.textContent || "[]");
+    } catch {
+        calendarEvents = [];
+    }
+
+    if (calendarEvents.length) {
+        const pad = (value) => String(value).padStart(2, "0");
+        const isoDay = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+        const monthIndex = (date) => date.getFullYear() * 12 + date.getMonth();
+        const monthFormat = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
+        const dayFormat = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+
+        const eventsByDay = new Map();
+        calendarEvents.forEach((event) => {
+            if (!eventsByDay.has(event.date)) eventsByDay.set(event.date, []);
+            eventsByDay.get(event.date).push(event);
+        });
+
+        const today = new Date();
+        const todayIso = isoDay(today);
+        const lastEventDate = new Date(`${calendarEvents[calendarEvents.length - 1].date}T00:00:00`);
+        const firstMonth = monthIndex(today);
+        const lastMonth = Math.max(firstMonth, monthIndex(lastEventDate));
+        let shownMonth = firstMonth;
+
+        const title = monthCalendar.querySelector(".month-calendar-title");
+        const grid = monthCalendar.querySelector(".month-calendar-grid");
+        const prevButton = monthCalendar.querySelector('[data-calendar-step="-1"]');
+        const nextButton = monthCalendar.querySelector('[data-calendar-step="1"]');
+
+        const render = () => {
+            const year = Math.floor(shownMonth / 12);
+            const month = shownMonth % 12;
+            const firstDay = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const leading = (firstDay.getDay() + 6) % 7; // semaine commençant le lundi
+            const totalCells = Math.ceil((leading + daysInMonth) / 7) * 7;
+
+            const label = monthFormat.format(firstDay);
+            title.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+            prevButton.disabled = shownMonth <= firstMonth;
+            nextButton.disabled = shownMonth >= lastMonth;
+            grid.replaceChildren();
+
+            for (let cell = 0; cell < totalCells; cell++) {
+                const item = document.createElement("li");
+                item.className = "month-calendar-day";
+                const dayNumber = cell - leading + 1;
+
+                if (dayNumber < 1 || dayNumber > daysInMonth) {
+                    item.classList.add("is-outside");
+                    item.setAttribute("aria-hidden", "true");
+                    grid.append(item);
+                    continue;
+                }
+
+                const date = new Date(year, month, dayNumber);
+                const iso = isoDay(date);
+                if (iso < todayIso) item.classList.add("is-past");
+                if (iso === todayIso) item.classList.add("is-today");
+
+                const number = document.createElement("span");
+                number.className = "month-calendar-number";
+                number.textContent = dayNumber;
+                number.setAttribute("aria-hidden", "true");
+                item.append(number);
+
+                const dayEvents = eventsByDay.get(iso) || [];
+                if (!dayEvents.length) {
+                    item.setAttribute("aria-hidden", "true");
+                } else {
+                    item.classList.add("has-events");
+                    dayEvents.forEach((event) => {
+                        const bubble = document.createElement("a");
+                        bubble.className = "month-calendar-event";
+                        bubble.href = `#event-${event.id}`;
+                        bubble.title = event.title;
+                        bubble.setAttribute("aria-label", `${event.title}, ${dayFormat.format(date)}`);
+                        bubble.textContent = event.title;
+                        item.append(bubble);
+                    });
+                }
+                grid.append(item);
+            }
+        };
+
+        monthCalendar.querySelectorAll("[data-calendar-step]").forEach((button) => {
+            button.addEventListener("click", () => {
+                shownMonth = Math.min(lastMonth, Math.max(firstMonth, shownMonth + Number(button.dataset.calendarStep)));
+                render();
+            });
+        });
+
+        // Un clic sur une bulle fait défiler jusqu'à l'événement et le met brièvement en évidence.
+        grid.addEventListener("click", (clickEvent) => {
+            const bubble = clickEvent.target.closest(".month-calendar-event");
+            const target = bubble && document.querySelector(bubble.getAttribute("href"));
+            if (!target) return;
+            target.classList.remove("is-highlighted");
+            void target.offsetWidth;
+            target.classList.add("is-highlighted");
+            setTimeout(() => target.classList.remove("is-highlighted"), 2200);
+        });
+
+        render();
+        monthCalendar.hidden = false;
+    }
+}
