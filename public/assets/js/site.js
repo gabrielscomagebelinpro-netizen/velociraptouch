@@ -301,9 +301,46 @@ document.querySelectorAll(".map-consent").forEach((placeholder) => {
 });
 
 // Confirmation avant les actions sensibles (remplace les attributs onsubmit, interdits par la CSP).
+// Fenêtre intégrée au site plutôt que window.confirm() : certains navigateurs intégrés et webviews bloquent
+// les boîtes natives (confirm() y renvoie false sans rien afficher), ce qui empêchait toute suppression.
+let confirmDialog = null;
+const getConfirmDialog = () => {
+    if (confirmDialog) return confirmDialog;
+    confirmDialog = document.createElement("dialog");
+    confirmDialog.className = "confirm-dialog";
+    confirmDialog.innerHTML = `
+        <form method="dialog">
+            <p class="confirm-dialog-message"></p>
+            <div class="confirm-dialog-actions">
+                <button class="button button-outline" value="cancel">Annuler</button>
+                <button class="button button-danger" value="confirm">Confirmer</button>
+            </div>
+        </form>`;
+    document.body.append(confirmDialog);
+    return confirmDialog;
+};
+
 document.addEventListener("submit", (event) => {
-    const message = event.target.dataset?.confirm;
-    if (message && !window.confirm(message)) event.preventDefault();
+    const form = event.target;
+    const message = form.dataset?.confirm;
+    if (!message) return;
+    if (form.dataset.confirmed === "1") {
+        delete form.dataset.confirmed;
+        return;
+    }
+    event.preventDefault();
+    const submitter = event.submitter;
+    const dialog = getConfirmDialog();
+    dialog.querySelector(".confirm-dialog-message").textContent = message;
+    dialog.returnValue = "";
+    dialog.addEventListener("close", () => {
+        if (dialog.returnValue !== "confirm") return;
+        form.dataset.confirmed = "1";
+        if (submitter && form.contains(submitter)) form.requestSubmit(submitter);
+        else form.requestSubmit();
+    }, {once: true});
+    dialog.showModal();
+    dialog.querySelector('[value="cancel"]').focus();
 }, true);
 
 // Photos d'un événement sur téléphone : le partage natif permet de les enregistrer directement dans la galerie

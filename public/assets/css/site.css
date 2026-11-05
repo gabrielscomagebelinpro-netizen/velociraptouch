@@ -2314,11 +2314,11 @@ dialog {
     font-size: 11px
 }
 
-.admin-event-row strong, .admin-event-row span {
+.admin-event-row > div:first-child strong, .admin-event-row > div:first-child span {
     display: block
 }
 
-.admin-event-row span {
+.admin-event-row > div:first-child span {
     font: 11px "DM Sans";
     color: var(--muted);
     margin-top: 5px
@@ -3744,4 +3744,296 @@ a.month-calendar-event.is-past:hover {
         font-size: 0;
         color: transparent
     }
+}
+
+/* ===== Barre du haut des pages secondaires : surtitre à gauche, bouton retour à droite. ===== */
+.page-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 26px
+}
+
+.page-topbar .eyebrow {
+    margin: 0;
+    min-width: 0
+}
+
+.page-topbar-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px
+}
+
+.page-topbar .button {
+    flex-shrink: 0;
+    white-space: nowrap;
+    gap: 10px
+}
+
+/* ===== Tableau de bord admin : formulaire à gauche, listes à droite. ===== */
+.admin-page-grid {
+    grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+    align-items: start
+}
+
+.admin-create-card {
+    position: sticky;
+    top: 96px
+}
+
+.admin-stack {
+    display: grid;
+    gap: 20px;
+    min-width: 0
+}
+
+.admin-card h2 .admin-count {
+    font-size: .55em;
+    letter-spacing: 0
+}
+
+.admin-event-row {
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 20px;
+    padding: 20px 0
+}
+
+.admin-event-date {
+    display: block;
+    margin-bottom: 4px;
+    font: 600 11px "DM Sans";
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--orange)
+}
+
+.admin-event-row.is-past .admin-event-date {
+    color: var(--muted)
+}
+
+/* Actions d'une ligne : grille de boutons de même taille. */
+.admin-event-row .admin-row-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px
+}
+
+.admin-row-actions form {
+    margin: 0
+}
+
+.admin-row-actions .button,
+.photo-actions .button {
+    width: 100%;
+    min-height: 40px;
+    margin: 0;
+    padding: 0 10px;
+    justify-content: center;
+    gap: 8px;
+    font-size: 12px;
+    white-space: nowrap
+}
+
+.admin-row-actions .button span {
+    font-size: 15px
+}
+
+.button-danger {
+    border: 1px solid #a12d2d;
+    background: transparent;
+    color: #a12d2d;
+    font-size: 12px
+}
+
+.button-danger:hover {
+    background: #a12d2d;
+    color: #fffbfb
+}
+
+/* Page utilisateurs : une seule action, alignée à droite. */
+.admin-row-actions:has(> form:only-child) {
+    grid-template-columns: 1fr
+}
+
+/* Grille des photos d'un événement. */
+.event-photo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr))
+}
+
+.event-photo-grid figcaption {
+    display: block;
+    padding-top: 8px
+}
+
+.event-photo-grid figcaption > span {
+    display: block;
+    color: var(--muted);
+    margin-bottom: 8px
+}
+
+.photo-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px
+}
+
+.photo-actions form {
+    margin: 0
+}
+
+.photo-actions .button {
+    min-height: 34px;
+    padding: 0 6px;
+    font-size: 11px;
+    gap: 5px
+}
+
+.photo-actions .button span {
+    font-size: inherit;
+    line-height: inherit
+}
+
+@media (max-width: 1050px) {
+    .admin-page-grid {
+        grid-template-columns: 1fr
+    }
+
+    .admin-create-card {
+        position: static
+    }
+}
+
+@media (max-width: 760px) {
+    .page-topbar {
+        margin-bottom: 20px
+    }
+
+    .page-topbar .button {
+        padding: 10px 12px
+    }
+
+    .admin-page-header {
+        margin-bottom: 28px
+    }
+
+    .admin-tabs {
+        margin: 0 0 24px
+    }
+
+    .admin-tabs .button {
+        flex: 1 1 0;
+        justify-content: center;
+        white-space: normal;
+        text-align: center
+    }
+
+    .admin-card h2 {
+        font-size: 26px;
+        margin-bottom: 14px
+    }
+
+    .admin-event-row {
+        grid-template-columns: 1fr;
+        gap: 14px
+    }
+
+    .admin-row-actions .button {
+        min-height: 44px
+    }
+
+    .event-photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px
+    }
+
+    /* Sur téléphone, actions photo en icônes (libellé gardé pour les lecteurs d'écran via aria-label). */
+    .photo-action-label {
+        display: none
+    }
+
+    .photo-actions .button {
+        min-height: 40px;
+        font-size: 16px
+    }
+
+    .photo-download-actions .button,
+    .event-photo-upload .button {
+        width: 100%;
+        justify-content: center
+    }
+}
+
+/* Photos déjà en ligne : séparées du formulaire d'envoi. */
+.admin-photos-card .photo-download-actions {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line)
+}
+
+.photo-download-actions .button {
+    margin-top: 0
+}
+
+.admin-edit-card {
+    margin-top: 28px
+}
+
+/* Pictogrammes des boutons (à la place des flèches). */
+.button .icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0
+}
+
+.admin-row-actions .button .icon,
+.photo-actions .button .icon {
+    width: 16px;
+    height: 16px
+}
+
+.photo-zip-secondary .icon {
+    display: none
+}
+
+/* Vignettes photo : actions en icône seule (libellé via aria-label et infobulle). */
+.photo-action-label {
+    display: none
+}
+
+.photo-actions .button .icon {
+    width: 18px;
+    height: 18px
+}
+
+/* Fenêtre de confirmation des actions sensibles (suppression, etc.). */
+.confirm-dialog {
+    width: min(420px, calc(100vw - 32px));
+    padding: 28px;
+    border: 1px solid var(--line);
+    background: #fffbfb;
+    color: var(--ink);
+    box-shadow: 0 20px 50px rgba(22, 53, 69, .2)
+}
+
+.confirm-dialog::backdrop {
+    background: rgba(22, 53, 69, .45)
+}
+
+.confirm-dialog-message {
+    margin: 0 0 22px;
+    font: 16px/1.5 "DM Sans", sans-serif
+}
+
+.confirm-dialog-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px
+}
+
+.confirm-dialog-actions .button {
+    justify-content: center;
+    min-height: 44px;
+    margin: 0
 }

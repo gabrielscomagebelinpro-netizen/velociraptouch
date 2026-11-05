@@ -4,8 +4,10 @@
 
 {% block body %}
 <main id="contenu" tabindex="-1" class="admin-page-main">
-    <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
-    <p class="eyebrow">Espace membre</p>
+    <div class="page-topbar">
+        <p class="eyebrow">Espace membre</p>
+        <a class="button button-outline page-back" href="{{ path('site_home') }}">← Accueil</a>
+    </div>
     <h1>Connexion <span>à votre compte.</span></h1>
     {% if error %}
         {# Messages en français ; le message ne dit jamais si c'est le nom ou le mot de passe qui est faux. #}

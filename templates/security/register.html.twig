@@ -4,8 +4,10 @@
 
 {% block body %}
 <main id="contenu" tabindex="-1" class="admin-page-main">
-    <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
-    <p class="eyebrow">Nouveau membre</p>
+    <div class="page-topbar">
+        <p class="eyebrow">Nouveau membre</p>
+        <a class="button button-outline page-back" href="{{ path('site_home') }}">← Accueil</a>
+    </div>
     <h1>Créer un <span>compte.</span></h1>
     {% for message in app.flashes('error') %}<p class="form-note">{{ message }}</p>{% endfor %}
     {# Même structure que le formulaire de connexion : labels et champs directement empilés dans le formulaire. #}

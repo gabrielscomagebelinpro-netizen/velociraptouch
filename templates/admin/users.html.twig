@@ -1,17 +1,18 @@
 {% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
 
 {% block title %}Administration — Utilisateurs{% endblock %}
 
 {% block body %}
 <main id="contenu" tabindex="-1" class="admin-page-main">
+    <div class="page-topbar">
+        <p class="eyebrow">Espace administration</p>
+        <a class="button button-outline page-back" href="{{ path('site_home') }}">← Accueil</a>
+    </div>
     <div class="admin-page-header">
         <div>
-            <p class="eyebrow">Espace administration</p>
             <h1>Gérer <span>les utilisateurs.</span></h1>
             <p class="admin-page-intro">Donne ou retire le rôle d’administrateur aux membres inscrits.</p>
-        </div>
-        <div class="admin-header-actions">
-            <a class="button button-outline" href="{{ path('site_home') }}">← Accueil</a>
         </div>
     </div>
     {% include 'admin/_tabs.html.twig' with {active: 'admin_users'} %}
@@ -34,9 +35,9 @@
                         <input type="hidden" name="_token" value="{{ csrf_token('user-role-' ~ user.id) }}">
                         <input type="hidden" name="role" value="{{ isAdmin ? 'user' : 'admin' }}">
                         {% if isAdmin %}
-                            <button class="button button-outline btn" type="submit"{% if adminCount <= 1 %} disabled title="Dernier administrateur"{% endif %}>Passer utilisateur</button>
+                            <button class="button button-outline btn" type="submit"{% if adminCount <= 1 %} disabled title="Dernier administrateur"{% endif %}>Passer utilisateur {{ ui.icon('user') }}</button>
                         {% else %}
-                            <button class="button button-primary btn" type="submit">Passer admin <span>↗</span></button>
+                            <button class="button button-primary btn" type="submit">Passer admin {{ ui.icon('shield') }}</button>
                         {% endif %}
                     </form>
                 </div>

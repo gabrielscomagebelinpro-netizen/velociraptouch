@@ -5,8 +5,10 @@
 
 {% block body %}
 <main id="contenu" tabindex="-1" class="admin-page-main legal-page">
-    <a class="button button-outline mb-5" href="{{ path('site_home') }}">← Retour à l’accueil</a>
-    <p class="eyebrow">Informations légales</p>
+    <div class="page-topbar">
+        <p class="eyebrow">Informations légales</p>
+        <a class="button button-outline page-back" href="{{ path('site_home') }}">← Accueil</a>
+    </div>
     <h1>Accessi<span>bilité.</span></h1>
     <p class="legal-updated">Dernière mise à jour : {{ legal.updated_at }}</p>
 
