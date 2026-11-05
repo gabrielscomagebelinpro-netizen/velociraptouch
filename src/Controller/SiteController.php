@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\AgendaCalendar;
 use App\Service\ContactMessageStore;
 use App\Service\ContactMessageMailer;
 use App\Repository\EventRepository;
@@ -37,14 +38,18 @@ final class SiteController
         #[Autowire('%app.shop_enabled%')]
         private readonly bool $shopEnabled,
         private readonly RateLimiterFactory $contactFormLimiter,
+        private readonly AgendaCalendar $agendaCalendar,
     ) {
     }
 
     #[Route('/', name: 'site_home', methods: ['GET'])]
     public function home(Request $request): Response
     {
-        $this->attendanceRepository->removeForPastEvents(new \DateTimeImmutable('today'));
-        $events = $this->eventRepository->findUpcoming();
+        $today = new \DateTimeImmutable('today');
+        $this->attendanceRepository->removeForPastEvents($today);
+        // Le planning remonte quelques mois en arrière ; la liste en dessous ne garde que l'à-venir.
+        $calendarEvents = $this->eventRepository->findSince(AgendaCalendar::windowStart($today));
+        $events = AgendaCalendar::upcoming($calendarEvents, $today);
         $attendanceEventIds = [];
         $user = $this->security->getUser();
         if ($user instanceof User) {
@@ -55,7 +60,7 @@ final class SiteController
 
         return new Response($this->twig->render('home/index.html.twig', [
             'events' => $events,
-            'attendance_event_ids' => $attendanceEventIds,
+            'calendar_entries' => $this->agendaCalendar->entries($calendarEvents, $today, $this->security->isGranted('ROLE_ADMIN')),            'attendance_event_ids' => $attendanceEventIds,
             'csrf_token' => $this->csrfTokens->getToken('contact')->getValue(),
             'message_error' => $request->getSession()->getFlashBag()->get('contact_error')[0] ?? null,
             'message_success' => $request->getSession()->getFlashBag()->get('contact_success')[0] ?? null,

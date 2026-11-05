@@ -47,6 +47,24 @@
                 <p class="field-help">Aucun événement enregistré.</p>
             {% endfor %}
             </div>
+            {# Archive repliée : les événements passés ne sont plus sur le site public mais restent accessibles pour leurs photos. #}
+            {% if pastEvents is not empty %}
+                <details class="admin-past-events">
+                    <summary>Événements passés ({{ pastEvents|length }})</summary>
+                    <div class="admin-content-list">
+                    {% for event in pastEvents %}
+                        {% set photoCount = photoCounts[event.id] ?? 0 %}
+                        <article class="admin-event-row is-past">
+                            <div><strong>{{ event.date|format_datetime(pattern='dd/MM/y', locale='fr') }} — {{ event.title }}</strong><span>{{ photoCount ? photoCount ~ ' photo' ~ (photoCount > 1 ? 's') : 'Aucune photo' }}</span></div>
+                            <div class="admin-row-actions">
+                                <a class="button button-primary btn" href="{{ path('admin_event_edit', {id: event.id}) }}#event-photos">{{ photoCount ? 'Voir les photos' : 'Ajouter des photos' }} <span>↗</span></a>
+                                <a class="text-link" href="{{ path('admin_event_edit', {id: event.id}) }}">Modifier <span>→</span></a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                    </div>
+                </details>
+            {% endif %}
         </section>
         <section class="admin-card admin-albums-card">
             <h2>Photos des événements</h2>

@@ -51,6 +51,8 @@ final class AdminController extends AbstractController
         return $this->render('admin/dashboard.html.twig', [
             'form' => $form,
             'events' => $events->findUpcoming(),
+            'pastEvents' => $events->findPast(),
+            'photoCounts' => $photos->countByEvent(),
             'photoAlbums' => $photos->findEventsWithPhotos(),
         ]);
     }

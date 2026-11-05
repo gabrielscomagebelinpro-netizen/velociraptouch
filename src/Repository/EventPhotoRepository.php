@@ -20,6 +20,27 @@ final class EventPhotoRepository extends ServiceEntityRepository
     }
 
     /**
+     * Nombre de photos par identifiant d'événement (les événements sans photo sont absents).
+     *
+     * @return array<int, int>
+     */
+    public function countByEvent(): array
+    {
+        $rows = $this->createQueryBuilder('photo')
+            ->select('IDENTITY(photo.event) AS eventId', 'COUNT(photo.id) AS photoCount')
+            ->groupBy('photo.event')
+            ->getQuery()
+            ->getArrayResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(int) $row['eventId']] = (int) $row['photoCount'];
+        }
+
+        return $counts;
+    }
+
+    /**
      * Événements ayant au moins une photo, du plus récent au plus ancien, avec leur nombre de photos.
      *
      * @return list<array{event: Event, photoCount: int}>

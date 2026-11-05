@@ -79,7 +79,7 @@
           </div>
           <div class="month-calendar-weekdays" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
           <ol class="month-calendar-grid" role="list"></ol>
-          <script type="application/json" id="month-calendar-data">{{ events|map(e => {id: e.id, date: e.date|date('Y-m-d'), title: e.title})|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP') b-or constant('JSON_UNESCAPED_UNICODE'))|raw }}</script>
+          <script type="application/json" id="month-calendar-data">{{ calendar_entries|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP') b-or constant('JSON_UNESCAPED_UNICODE'))|raw }}</script>
         </div>
         <div class="events-list container-fluid px-0" id="events-list">
           {% for event in events %}

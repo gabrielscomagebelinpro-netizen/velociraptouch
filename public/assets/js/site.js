@@ -395,10 +395,12 @@ if (monthCalendar) {
 
         const today = new Date();
         const todayIso = isoDay(today);
+        const firstEventDate = new Date(`${calendarEvents[0].date}T00:00:00`);
         const lastEventDate = new Date(`${calendarEvents[calendarEvents.length - 1].date}T00:00:00`);
-        const firstMonth = monthIndex(today);
-        const lastMonth = Math.max(firstMonth, monthIndex(lastEventDate));
-        let shownMonth = firstMonth;
+        // On peut remonter jusqu'au mois du plus ancien événement fourni (événements passés grisés).
+        const firstMonth = Math.min(monthIndex(today), monthIndex(firstEventDate));
+        const lastMonth = Math.max(monthIndex(today), monthIndex(lastEventDate));
+        let shownMonth = monthIndex(today);
 
         const title = monthCalendar.querySelector(".month-calendar-title");
         const grid = monthCalendar.querySelector(".month-calendar-grid");
@@ -448,11 +450,14 @@ if (monthCalendar) {
                 } else {
                     item.classList.add("has-events");
                     dayEvents.forEach((event) => {
-                        const bubble = document.createElement("a");
+                        // Événement à venir : ancre vers sa fiche. Passé : lien vers ses photos (admins) ou simple étiquette.
+                        const bubble = document.createElement(event.url ? "a" : "span");
                         bubble.className = "month-calendar-event";
-                        bubble.href = `#event-${event.id}`;
-                        bubble.title = event.title;
-                        bubble.setAttribute("aria-label", `${event.title}, ${dayFormat.format(date)}`);
+                        if (event.url) bubble.href = event.url;
+                        const status = event.past ? (event.url ? " (terminé, voir les photos)" : " (terminé)") : "";
+                        if (event.past) bubble.classList.add("is-past");
+                        bubble.title = event.title + status;
+                        bubble.setAttribute("aria-label", `${event.title}, ${dayFormat.format(date)}${status}`);
                         bubble.textContent = event.title;
                         item.append(bubble);
                     });
@@ -471,7 +476,8 @@ if (monthCalendar) {
         // Un clic sur une bulle fait défiler jusqu'à l'événement et le met brièvement en évidence.
         grid.addEventListener("click", (clickEvent) => {
             const bubble = clickEvent.target.closest(".month-calendar-event");
-            const target = bubble && document.querySelector(bubble.getAttribute("href"));
+            const href = bubble?.getAttribute("href") || "";
+            const target = href.startsWith("#event-") && document.querySelector(href);
             if (!target) return;
             target.classList.remove("is-highlighted");
             void target.offsetWidth;
