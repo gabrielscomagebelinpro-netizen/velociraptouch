@@ -1,4 +1,5 @@
 {% extends 'base.html.twig' %}
+{% import 'home/_sponsor_card.html.twig' as cards %}
 
 {% block title %}Le site des Vélociraptouch{% endblock %}
 {% block meta_description %}Les Vélociraptouch — association de rugby touch, de sport et de convivialité.{% endblock %}
@@ -9,6 +10,7 @@
   <a href="#agenda">Agenda</a>
   {% if shop_enabled %}<a href="{{ path('site_shop') }}">Boutique <span>↗</span></a>{% endif %}
   <a href="#sponsors">Sponsors</a>
+  <a href="#rejoindre">Nous rejoindre</a>
   <a href="#contact">Contact</a>
 {% endblock %}
 
@@ -113,40 +115,83 @@
         </article>
         <article class="image-rights" id="droit-image">
           <div class="image-rights-qr">
-            <img class="lightbox-trigger" src="/assets/images/editorial/code-qr-velo.jpg" alt="QR code du formulaire de droit à l’image des Vélociraptouch" width="180" height="180" loading="lazy" tabindex="0" />
+            <img class="lightbox-trigger" src="{{ image_rights_qr }}" alt="QR code du formulaire de droit à l’image des Vélociraptouch" width="180" height="180" loading="lazy" tabindex="0" />
           </div>
           <div>
             <p class="eyebrow">Droit à l’image</p>
             <h3>Autorise-nous à te prendre en photo.</h3>
             <p>Pendant les entraînements et les événements, on prend des photos pour le site et nos réseaux. Scanne le QR code avec ton téléphone pour remplir l’autorisation, ou ouvre directement le formulaire.</p>
-            <div class="map-actions">
-              <a class="button button-outline" href="{{ image_rights_url }}" target="_blank" rel="noreferrer">Remplir le formulaire <span>↗</span></a>
-            </div>
+            {% if image_rights_url %}
+              <div class="map-actions">
+                <a class="button button-outline" href="{{ image_rights_url }}" target="_blank" rel="noreferrer">Remplir le formulaire <span>↗</span></a>
+              </div>
+            {% endif %}
           </div>
         </article>
       </section>
 
       <section class="section sponsors" id="sponsors">
         <div class="section-heading heading-row"><div><p class="eyebrow">04 — nos partenaires</p><h2>Ils font vivre<br /><span>le collectif.</span></h2></div><p class="sponsor-intro">Merci aux partenaires qui soutiennent le rugby touch et les moments partagés à Montpellier.</p></div>
-        <div class="sponsor-featured-grid">
-          <article class="sponsor-card sponsor-card-featured">
-            <div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-featured" src="/assets/images/sponsors/ethik-sport-club.jpeg" alt="Photo du profil Ethik Sport Club Montpellier" tabindex="0" /></div>
-            <div class="sponsor-details"><p class="eyebrow">Partenaire principal</p><h3>Ethik Sport Club</h3><p>Le sport, la santé et le collectif à Montpellier.</p><a class="sponsor-link" href="https://www.instagram.com/ethiksportclub_montpellier/" target="_blank" rel="noreferrer">@ethiksportclub_montpellier <span>↗</span></a></div>
-          </article>
-          <article class="sponsor-card sponsor-card-featured">
-            <div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-featured" src="/assets/images/sponsors/little-matt-panuozzo.jpeg" alt="Photo du profil Little Matt Panuozzo" tabindex="0" /></div>
-            <div class="sponsor-details"><p class="eyebrow">Partenaire principal</p><h3>Little Matt Panuozzo</h3><p>Panuozzi italiens et gourmandise au cœur de Montpellier.</p><a class="sponsor-link" href="https://www.instagram.com/littlemattpanuozzo/" target="_blank" rel="noreferrer">@littlemattpanuozzo <span>↗</span></a></div>
-          </article>
+        {# Partenaires gérés dans l'administration (onglet « Liens et partenaires »). #}
+        {% if sponsors.featured is not empty %}
+          <div class="sponsor-featured-grid">
+            {% for sponsor in sponsors.featured %}{{ cards.sponsor_card(sponsor, 'sponsor-card-featured') }}{% endfor %}
+          </div>
+        {% endif %}
+        {% for sponsor in sponsors.club %}{{ cards.sponsor_card(sponsor, 'sponsor-card-small sponsor-card-club') }}{% endfor %}
+        {% if sponsors.secondary is not empty %}
+          <div class="sponsor-grid sponsor-grid-secondary">
+            {% for sponsor in sponsors.secondary %}{{ cards.sponsor_card(sponsor, 'sponsor-card-small') }}{% endfor %}
+          </div>
+        {% endif %}
+        {% if sponsors.tertiary is not empty %}
+          <div class="sponsor-grid sponsor-grid-tertiary">
+            {% for sponsor in sponsors.tertiary %}{{ cards.sponsor_card(sponsor, 'sponsor-card-small') }}{% endfor %}
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="section join" id="rejoindre">
+        <div class="section-heading heading-row">
+          <div><p class="eyebrow">05 — nous rejoindre</p><h2>Prends ta<br /><span>licence.</span></h2></div>
+          <p class="join-lead">Trois étapes et tu fais officiellement partie de la Vélocirap’team.</p>
         </div>
-        <div class="sponsor-grid sponsor-grid-secondary">
-          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger" src="/assets/images/sponsors/logo-beers-montpellier.png" alt="Logo BEERS! Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire convivialité</p><h3>BEERS! Montpellier</h3><p>Same place, more fun.</p><a class="sponsor-link" href="https://www.instagram.com/beers_montpellier/" target="_blank" rel="noreferrer">@beers_montpellier <span>↗</span></a></div></article>
-          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-lowres" src="/assets/images/sponsors/logo-la-fumerie-montpellier.jpg" alt="Logo La Fumerie Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire convivialité</p><h3>La Fumerie Montpellier</h3><p>Vodka bar · 8 rue de l’Aiguillerie · Montpellier</p><a class="sponsor-link" href="https://www.instagram.com/lafumerie_mtp/?hl=fr" target="_blank" rel="noreferrer">@lafumerie_mtp <span>↗</span></a></div></article>
-        </div>
-        <div class="sponsor-grid sponsor-grid-tertiary">
-          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-lowres" src="/assets/images/sponsors/le-tord-boyaux.jpg" alt="Photo du profil Le Tord Boyaux Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire</p><h3>Le Tord Boyaux</h3><p>Bar et convivialité à Montpellier.</p><a class="sponsor-link" href="https://www.instagram.com/letordboyauxmontpellier/" target="_blank" rel="noreferrer">@letordboyauxmontpellier <span>↗</span></a></div></article>
-          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger sponsor-image-lowres" src="/assets/images/sponsors/tuk-tuk-team.jpg" alt="Photo du profil Tuk Tuk Team Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire</p><h3>Tuk Tuk Team</h3><p>L'équipe Tuk Tuk à Montpellier.</p><a class="sponsor-link" href="https://www.instagram.com/tuktukteamontpellier/" target="_blank" rel="noreferrer">@tuktukteamontpellier <span>↗</span></a></div></article>
-          <article class="sponsor-card sponsor-card-small"><div class="sponsor-logo"><img class="lightbox-trigger" src="/assets/images/sponsors/logo-sarda-avocat-montpellier.png" alt="Logo Sarda Avocat Montpellier" tabindex="0" /></div><div class="sponsor-details"><p class="eyebrow">Partenaire juridique</p><h3>Sarda Avocat</h3><p>Avocat pénaliste · 6 passage Lonjon · 34000 Montpellier</p><a class="sponsor-link" href="https://avocat-sarda.fr/" target="_blank" rel="noreferrer">avocat-sarda.fr <span>↗</span></a><a class="sponsor-link" href="https://www.instagram.com/sarda_avocat/" target="_blank" rel="noreferrer">@sarda_avocat <span>↗</span></a></div></article>
-        </div>
+        <ol class="join-steps" role="list">
+          <li class="join-step">
+            <span class="story-number">01</span>
+            <p class="eyebrow">Tes informations</p>
+            <h3>Remplis le tableau.</h3>
+            <p>Renseigne tes informations dans notre Google Sheets : c’est ce qui nous permet d’établir ta licence.</p>
+            {% if licence_sheet_url %}
+              <a class="button button-outline" href="{{ licence_sheet_url }}" target="_blank" rel="noreferrer">Ouvrir le Google Sheets <span>↗</span></a>
+            {% else %}
+              <a class="button button-outline" href="#contact">Demander le lien <span>→</span></a>
+            {% endif %}
+          </li>
+          <li class="join-step">
+            <span class="story-number">02</span>
+            <p class="eyebrow">Ta cotisation</p>
+            <h3>Règle ta licence.</h3>
+            <dl class="join-prices">
+              <div><dt>50 €</dt><dd>si tu n’as pas de licence dans un autre club</dd></div>
+              <div><dt>20 €</dt><dd>si tu es déjà licencié·e dans un autre club</dd></div>
+            </dl>
+          </li>
+          <li class="join-step">
+            <span class="story-number">03</span>
+            <p class="eyebrow">Le terrain</p>
+            <h3>Viens jouer.</h3>
+            <p>Rendez-vous le mardi à 19h30 au Stade Eric Béchu. Pour réviser avant, les règles du jeu sont juste en dessous.</p>
+          </li>
+        </ol>
+        <article class="join-card join-rules">
+          <div>
+            <p class="eyebrow">Les règles du jeu</p>
+            <h3>Rugby à 5 mixte à toucher.</h3>
+            <p>Terrain, nombre de joueur·ses, toucher, passes, mixité : toutes les règles officielles de la Fédération française de rugby réunies dans un seul document.</p>
+          </div>
+          {% if rugby5_rules_url %}<a class="button button-outline" href="{{ rugby5_rules_url }}" target="_blank" rel="noreferrer">Lire les règles <span>↗</span></a>{% endif %}
+        </article>
       </section>
 
       <section class="section contact" id="contact">

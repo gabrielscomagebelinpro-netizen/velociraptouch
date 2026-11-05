@@ -6,7 +6,8 @@ twig:
         timezone: 'Europe/Paris'
     globals:
         shop_enabled: '%app.shop_enabled%'
-        image_rights_url: 'https://docs.google.com/forms/d/e/1FAIpQLScnQRGjvyv02XVdlD9zs4aPA9aiKCxUdf6hLBGr5fUWBlOnKQ/viewform'
+        # Les liens Google Sheets / Google Forms, le QR code et les règles du jeu se modifient dans
+        # l'administration (onglet « Liens et partenaires ») : voir App\Service\SiteLinks.
         # Informations légales affichées dans les mentions légales et la politique de confidentialité.
         # Remplacer chaque « [À COMPLÉTER …] » par la vraie valeur (voir les statuts et le récépissé de la préfecture).
         # Sources : Journal officiel des associations (annonce de création du 9 avril 2024) et répertoire SIRENE.

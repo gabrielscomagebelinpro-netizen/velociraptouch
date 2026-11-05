@@ -1399,12 +1399,13 @@ dialog {
 .sponsor-featured-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px
+    gap: 20px;
+    padding-top: 55px
 }
 
 .sponsor-card-featured {
     display: block;
-    margin-top: 55px;
+    margin-top: 0;
     min-height: 0
 }
 
@@ -3380,6 +3381,7 @@ footer a,
 /* … et turquoise clair sur les sections bleu foncé (4,79:1). */
 .story,
 .agenda,
+.join,
 .ticker,
 .sponsor-card,
 footer,
@@ -4036,4 +4038,275 @@ a.month-calendar-event.is-past:hover {
     justify-content: center;
     min-height: 44px;
     margin: 0
+}
+
+/* Section « Nous rejoindre » : licence, règles du jeu et club partenaire. */
+.join {
+    background: var(--ink);
+    color: var(--paper)
+}
+
+.join .eyebrow,
+.join-lead {
+    color: #7dbfc1
+}
+
+.join-lead {
+    max-width: 330px;
+    line-height: 1.6;
+    margin: 0
+}
+
+.join-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+
+.join-step {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border-top: 1px solid rgba(255, 251, 251, .35);
+    padding-top: 22px
+}
+
+.join-step .story-number {
+    margin-bottom: 30px
+}
+
+.join-step h3,
+.join-card h3 {
+    color: var(--paper);
+    font-size: 27px;
+    margin: 0 0 16px
+}
+
+.join-step p:not(.eyebrow),
+.join-card p:not(.eyebrow) {
+    color: #b8e1e2;
+    line-height: 1.65;
+    margin: 0 0 22px
+}
+
+.join .button-outline {
+    color: var(--paper);
+    border-color: #7dbfc1;
+    margin-top: auto
+}
+
+.join-prices {
+    display: grid;
+    gap: 14px;
+    margin: 0
+}
+
+.join-prices div {
+    display: grid;
+    grid-template-columns: 82px 1fr;
+    align-items: baseline;
+    gap: 12px
+}
+
+.join-prices dt {
+    color: var(--orange);
+    font: 700 28px "DM Sans"
+}
+
+.join-prices dd {
+    color: #b8e1e2;
+    line-height: 1.5;
+    margin: 0
+}
+
+.join-card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 32px;
+    margin-top: 60px;
+    border: 1px solid #0e7e8e;
+    padding: 28px
+}
+
+.join-card p:last-child {
+    margin-bottom: 0
+}
+
+/* Club partenaire (Novas) : carte pleine largeur entre les partenaires principaux et les autres. */
+.sponsor-card-club {
+    margin-top: 20px;
+    min-height: 0
+}
+
+.sponsor-card-club .sponsor-details > p:not(.eyebrow) {
+    max-width: 720px;
+    line-height: 1.6;
+    margin-bottom: 12px
+}
+
+@media (max-width: 760px) {
+    .join-steps {
+        grid-template-columns: 1fr
+    }
+
+    .join-step .story-number {
+        margin-bottom: 18px
+    }
+
+    .join-card {
+        grid-template-columns: 1fr;
+        gap: 22px;
+        padding: 22px
+    }
+
+    .join .heading-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px
+    }
+}
+
+/* Onglet admin « Liens et partenaires ». */
+#liens {
+    margin-bottom: 22px
+}
+
+.admin-link-field {
+    padding: 4px 0 18px;
+    border-bottom: 1px solid var(--line)
+}
+
+.admin-link-field .field-help {
+    margin: 10px 0 0
+}
+
+.admin-link-field ul {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--red);
+    font-size: 13px
+}
+
+.admin-link-test {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--deep-teal)
+}
+
+.admin-qr-field {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+    padding-top: 18px
+}
+
+.admin-qr-field > div:only-child {
+    grid-column: 1 / -1
+}
+
+.admin-qr-preview,
+.admin-sponsor-preview {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid var(--line);
+    padding: 6px
+}
+
+.admin-sponsor-preview {
+    background: var(--ink)
+}
+
+.admin-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px
+}
+
+.admin-card-head h2 {
+    margin: 0
+}
+
+.admin-card .admin-card-head .button {
+    margin-top: 0
+}
+
+.admin-tier-title {
+    font-size: 20px;
+    letter-spacing: -.04em;
+    margin: 34px 0 6px
+}
+
+.admin-tier-title .admin-count {
+    font-size: .7em;
+    letter-spacing: 0
+}
+
+.admin-event-row.admin-sponsor-row {
+    grid-template-columns: 64px minmax(0, 1fr) 340px
+}
+
+.admin-sponsor-thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    background: var(--ink);
+    padding: 4px
+}
+
+.admin-row-actions .admin-icon-button {
+    justify-content: center
+}
+
+.admin-row-actions .button:disabled {
+    opacity: .35;
+    cursor: default
+}
+
+@media (max-width: 760px) {
+    .admin-event-row.admin-sponsor-row {
+        grid-template-columns: 56px minmax(0, 1fr)
+    }
+
+    .admin-sponsor-row .admin-row-actions {
+        grid-column: 1 / -1
+    }
+
+    .admin-sponsor-thumb {
+        width: 56px;
+        height: 56px
+    }
+
+    .admin-qr-field {
+        grid-template-columns: 1fr;
+        gap: 12px
+    }
+}
+
+/* Ligne d'un partenaire : nom et détails l'un sous l'autre, flèches compactes à côté des boutons. */
+.admin-sponsor-row .admin-event-info strong,
+.admin-sponsor-row .admin-event-info span {
+    display: block
+}
+
+.admin-sponsor-row .admin-event-info span {
+    font: 11px "DM Sans";
+    color: var(--muted);
+    margin-top: 5px;
+    overflow-wrap: anywhere
+}
+
+
+.admin-sponsor-row .admin-row-actions {
+    grid-template-columns: 44px 44px minmax(0, 1fr) minmax(0, 1fr)
 }

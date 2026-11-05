@@ -32,6 +32,7 @@
           <a href="{{ path('site_home') }}#agenda">Agenda</a>
           {% if shop_enabled %}<a href="{{ path('site_shop') }}">Boutique <span>↗</span></a>{% endif %}
           <a href="{{ path('site_home') }}#sponsors">Sponsors</a>
+          <a href="{{ path('site_home') }}#rejoindre">Nous rejoindre</a>
           <a href="{{ path('site_home') }}#contact">Contact</a>
         {% endblock %}
         {% if is_granted('ROLE_ADMIN') %}
@@ -61,7 +62,6 @@
       </a>
       <p>Rugby touch, collectif & bonne humeur à Montpellier.</p>
       <div>
-        <a href="{{ path('site_home') }}#sponsors">Partenaires</a>
         <a href="{{ path('site_home') }}#contact">Nous contacter</a>
       </div>
     </footer>

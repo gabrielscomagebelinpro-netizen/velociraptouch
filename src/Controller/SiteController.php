@@ -7,6 +7,7 @@ use App\Service\ContactMessageStore;
 use App\Service\ContactMessageMailer;
 use App\Repository\EventRepository;
 use App\Repository\AttendanceRepository;
+use App\Repository\SponsorRepository;
 use App\Entity\Attendance;
 use App\Entity\Event;
 use App\Entity\User;
@@ -39,6 +40,7 @@ final class SiteController
         private readonly bool $shopEnabled,
         private readonly RateLimiterFactory $contactFormLimiter,
         private readonly AgendaCalendar $agendaCalendar,
+        private readonly SponsorRepository $sponsorRepository,
     ) {
     }
 
@@ -60,7 +62,9 @@ final class SiteController
 
         return new Response($this->twig->render('home/index.html.twig', [
             'events' => $events,
-            'calendar_entries' => $this->agendaCalendar->entries($calendarEvents, $today, $this->security->isGranted('ROLE_ADMIN')),            'attendance_event_ids' => $attendanceEventIds,
+            'calendar_entries' => $this->agendaCalendar->entries($calendarEvents, $today, $this->security->isGranted('ROLE_ADMIN')),
+            'attendance_event_ids' => $attendanceEventIds,
+            'sponsors' => $this->sponsorRepository->findGroupedByTier(),
             'csrf_token' => $this->csrfTokens->getToken('contact')->getValue(),
             'message_error' => $request->getSession()->getFlashBag()->get('contact_error')[0] ?? null,
             'message_success' => $request->getSession()->getFlashBag()->get('contact_success')[0] ?? null,

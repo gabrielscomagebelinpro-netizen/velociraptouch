@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
+
+{% block title %}Administration — Liens et partenaires{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main">
+    <div class="page-topbar">
+        <p class="eyebrow">Espace administration</p>
+        <a class="button button-outline page-back" href="{{ path('site_home') }}">← Accueil</a>
+    </div>
+    <div class="admin-page-header">
+        <div>
+            <h1>Liens <span>et partenaires.</span></h1>
+            <p class="admin-page-intro">Change les liens Google Sheets et Google Forms, le QR code et les partenaires affichés sur l’accueil, sans toucher au code.</p>
+        </div>
+    </div>
+    {% include 'admin/_tabs.html.twig' with {active: 'admin_content'} %}
+    {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
+
+    <section class="admin-card" id="liens">
+        <h2>Liens du site</h2>
+        {{ form_start(linksForm, {attr: {class: 'contact-form admin-links-form'}}) }}
+        {% for key, definition in linkDefinitions %}
+            <div class="admin-link-field">
+                {{ form_label(linksForm[key]) }}
+                {{ form_widget(linksForm[key], {attr: {class: 'form-control'}}) }}
+                {{ form_errors(linksForm[key]) }}
+                <p class="field-help">{{ definition[1] }}</p>
+                {# Valeur enregistrée (et non celle saisie, qui peut avoir été refusée). #}
+                {% set current = currentLinks[key] %}
+                {% if current %}<a class="admin-link-test" href="{{ current }}" target="_blank" rel="noreferrer">Ouvrir le lien actuel ↗</a>{% endif %}
+            </div>
+        {% endfor %}
+        <div class="admin-link-field admin-qr-field">
+            <img class="admin-qr-preview" src="{{ qrCodePath }}" alt="QR code actuel du droit à l’image" width="120" height="120">
+            <div>
+                {{ form_label(linksForm.qrCode) }}
+                {{ form_widget(linksForm.qrCode, {attr: {class: 'form-control'}}) }}
+                {{ form_errors(linksForm.qrCode) }}
+                <p class="field-help">{{ linksForm.qrCode.vars.help }}</p>
+            </div>
+        </div>
+        <div class="admin-form-actions">
+            <button class="button button-primary btn" type="submit">Enregistrer les liens {{ ui.icon('save') }}</button>
+        </div>
+        {{ form_end(linksForm) }}
+    </section>
+
+    <section class="admin-card" id="partenaires">
+        <div class="admin-card-head">
+            <h2>Partenaires</h2>
+            <a class="button button-primary" href="{{ path('admin_sponsor_new') }}">Ajouter un partenaire {{ ui.icon('plus') }}</a>
+        </div>
+        <p class="field-help">Dans chaque emplacement, les partenaires s’affichent dans l’ordre de cette liste. Les flèches changent l’ordre.</p>
+        {% for tier, tierLabel in tiers %}
+            {% set tierSponsors = sponsorsByTier[tier] %}
+            <h3 class="admin-tier-title">{{ tierLabel }} <span class="admin-count">({{ tierSponsors|length }})</span></h3>
+            <div class="admin-content-list">
+            {% for sponsor in tierSponsors %}
+                <article class="admin-event-row admin-sponsor-row" id="partenaire-{{ sponsor.id }}">
+                    <img class="admin-sponsor-thumb" src="{{ sponsor.imagePath }}" alt="" width="64" height="64" loading="lazy">
+                    <div class="admin-event-info">
+                        <strong>{{ sponsor.name }}</strong>
+                        <span>{{ sponsor.label }}{% if sponsor.instagramHandle %} · {{ sponsor.instagramHandle }}{% endif %}{% if sponsor.websiteLabel %} · {{ sponsor.websiteLabel }}{% endif %}</span>
+                    </div>
+                    <div class="admin-row-actions">
+                        {% set isFirst = loop.first %}{% set isLast = loop.last %}
+                        {% for direction in ['up', 'down'] %}
+                            {% set disabled = (direction == 'up' and isFirst) or (direction == 'down' and isLast) %}
+                            <form method="post" action="{{ path('admin_sponsor_move', {id: sponsor.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('move-sponsor-' ~ sponsor.id) }}">
+                                <input type="hidden" name="direction" value="{{ direction }}">
+                                <button class="button button-outline admin-icon-button" type="submit"{% if disabled %} disabled{% endif %} aria-label="{{ direction == 'up' ? 'Monter' : 'Descendre' }} {{ sponsor.name }}" title="{{ direction == 'up' ? 'Monter' : 'Descendre' }}">{{ ui.icon(direction == 'up' ? 'arrow_up' : 'arrow_down') }}</button>
+                            </form>
+                        {% endfor %}
+                        <a class="button button-outline" href="{{ path('admin_sponsor_edit', {id: sponsor.id}) }}">Modifier {{ ui.icon('edit') }}</a>
+                        <form method="post" action="{{ path('admin_sponsor_delete', {id: sponsor.id}) }}" data-confirm="Retirer « {{ sponsor.name }} » des partenaires ?">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete-sponsor-' ~ sponsor.id) }}">
+                            <button class="button button-danger" type="submit">Supprimer {{ ui.icon('trash') }}</button>
+                        </form>
+                    </div>
+                </article>
+            {% else %}
+                <p class="field-help">Aucun partenaire à cet emplacement. <a href="{{ path('admin_sponsor_new', {emplacement: tier}) }}">En ajouter un</a></p>
+            {% endfor %}
+            </div>
+        {% endfor %}
+    </section>
+</main>
+{% endblock %}

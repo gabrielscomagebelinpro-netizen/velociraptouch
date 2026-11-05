@@ -48,3 +48,6 @@ out/
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+# Images envoyées depuis l’administration (logos des partenaires, QR code).
+/public/uploads/

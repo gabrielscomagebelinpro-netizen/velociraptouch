@@ -1,0 +1,13 @@
+{# Carte d'un partenaire (section « Nos partenaires » de l'accueil). #}
+{% macro sponsor_card(sponsor, classes) %}
+  <article class="sponsor-card {{ classes }}">
+    <div class="sponsor-logo"><img class="lightbox-trigger{{ sponsor.tier == 'featured' ? ' sponsor-image-featured' : (sponsor.imageLowres ? ' sponsor-image-lowres') }}" src="{{ sponsor.imagePath }}" alt="{{ sponsor.altText }}" tabindex="0" /></div>
+    <div class="sponsor-details">
+      <p class="eyebrow">{{ sponsor.label }}</p>
+      <h3>{{ sponsor.name }}</h3>
+      {% for paragraph in sponsor.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+      {% if sponsor.websiteUrl %}<a class="sponsor-link" href="{{ sponsor.websiteUrl }}" target="_blank" rel="noreferrer">{{ sponsor.websiteLabel }} <span>↗</span></a>{% endif %}
+      {% if sponsor.instagramUrl %}<a class="sponsor-link" href="{{ sponsor.instagramUrl }}" target="_blank" rel="noreferrer">{{ sponsor.instagramHandle }} <span>↗</span></a>{% endif %}
+    </div>
+  </article>
+{% endmacro %}

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
+
+{% block title %}{{ sponsor.id ? 'Modifier un partenaire' : 'Ajouter un partenaire' }}{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main">
+    <div class="page-topbar">
+        <p class="eyebrow">Espace administration</p>
+        <a class="button button-outline page-back" href="{{ path('admin_content') }}#partenaires">← Liens et partenaires</a>
+    </div>
+    <h1>{% if sponsor.id %}Modifier <span>le partenaire.</span>{% else %}Ajouter <span>un partenaire.</span>{% endif %}</h1>
+    <section class="admin-card admin-edit-card">
+        {{ form_start(form, {attr: {class: 'contact-form admin-sponsor-form'}}) }}
+        {{ form_row(form.name, {attr: {class: 'form-control'}}) }}
+        {{ form_row(form.tier, {attr: {class: 'form-control'}}) }}
+        {{ form_row(form.label, {attr: {class: 'form-control'}}) }}
+        {{ form_row(form.description, {attr: {class: 'form-control'}}) }}
+        {{ form_row(form.instagramUrl, {attr: {class: 'form-control'}}) }}
+        {{ form_row(form.websiteUrl, {attr: {class: 'form-control'}}) }}
+        <div class="admin-qr-field">
+            {% if sponsor.imagePath %}<img class="admin-sponsor-preview" src="{{ sponsor.imagePath }}" alt="Image actuelle de {{ sponsor.name }}" width="120" height="120">{% endif %}
+            <div>{{ form_row(form.image, {attr: {class: 'form-control'}}) }}</div>
+        </div>
+        {{ form_row(form.imageAlt, {attr: {class: 'form-control'}}) }}
+        <div class="admin-form-actions">
+            <button class="button button-primary btn" type="submit">{{ sponsor.id ? 'Enregistrer' : 'Ajouter le partenaire' }} {{ ui.icon('save') }}</button>
+            <a class="button button-outline" href="{{ path('admin_content') }}#partenaires">Annuler</a>
+        </div>
+        {{ form_end(form) }}
+    </section>
+</main>
+{% endblock %}
