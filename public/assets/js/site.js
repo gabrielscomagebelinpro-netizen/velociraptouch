@@ -121,6 +121,28 @@ const photoPreview = document.querySelector(".photo-upload-preview");
 const photoStatus = document.querySelector(".photo-upload-status");
 const photoForm = document.querySelector(".event-photo-upload");
 
+// Les albums peuvent contenir beaucoup de fichiers : aucune photo pleine résolution
+// n'est demandée avant d'approcher sa vignette dans la fenêtre.
+const lazyPhotos = document.querySelectorAll("img.photo-lazy[data-src]");
+if (lazyPhotos.length) {
+    const loadPhoto = (image) => {
+        image.src = image.dataset.src;
+        image.removeAttribute("data-src");
+    };
+    if ("IntersectionObserver" in window) {
+        const photoObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                loadPhoto(entry.target);
+                observer.unobserve(entry.target);
+            });
+        }, {rootMargin: "300px 0px"});
+        lazyPhotos.forEach((image) => photoObserver.observe(image));
+    } else {
+        lazyPhotos.forEach(loadPhoto);
+    }
+}
+
 if (photoInput && photoDropzone && photoPreview && photoStatus && photoForm) {
     const isImage = (file) => file.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name);
     const plural = (count, word) => `${count} ${word}${count > 1 ? "s" : ""}`;
@@ -343,14 +365,24 @@ document.addEventListener("submit", (event) => {
     dialog.querySelector('[value="cancel"]').focus();
 }, true);
 
-// Photos d'un événement sur téléphone : le partage natif permet de les enregistrer directement dans la galerie
-// (« Enregistrer les images » sur iPhone, « Enregistrer » / Google Photos sur Android), là où un ZIP est inutilisable.
-// Les photos sont préparées par lots de 10 à l'avance, car le partage doit être lancé immédiatement après le toucher.
+// Le partage natif est réservé aux téléphones iPhone/Android qui savent réellement
+// partager des fichiers. Sur PC ou navigateur incompatible, le ZIP est privilégié.
 const photoShareButton = document.querySelector(".photo-share-button");
-if (photoShareButton && navigator.canShare) {
+const photoZipLink = document.querySelector(".photo-zip-link");
+const isMobileDevice = navigator.userAgentData?.mobile === true
+    || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const canSharePhotoFiles = typeof navigator.canShare === "function"
+    && typeof navigator.share === "function";
+
+if (photoShareButton && photoZipLink && (!isMobileDevice || !canSharePhotoFiles)) {
+    photoShareButton.hidden = true;
+    photoZipLink.classList.remove("photo-zip-secondary");
+}
+
+if (photoShareButton && photoZipLink && isMobileDevice && canSharePhotoFiles) {
     const photos = JSON.parse(photoShareButton.dataset.photos || "[]");
     const status = document.querySelector(".photo-share-status");
-    const zipLink = document.querySelector(".photo-zip-link");
     const BATCH = 10;
     const probe = new File([new Blob(["x"], {type: "image/jpeg"})], "test.jpg", {type: "image/jpeg"});
 
@@ -373,20 +405,21 @@ if (photoShareButton && navigator.canShare) {
                     return new File([await response.blob()], photo.name, {type: photo.type});
                 }));
                 label(batchCount > 1
-                    ? `Enregistrer les photos ${batchIndex * BATCH + 1} à ${batchIndex * BATCH + batch.length} sur ${photos.length}`
-                    : `Enregistrer les ${photos.length} photo${photos.length > 1 ? "s" : ""} dans mes photos`);
+                    ? `Partager les photos ${batchIndex * BATCH + 1} à ${batchIndex * BATCH + batch.length} sur ${photos.length}`
+                    : `Partager les ${photos.length} photo${photos.length > 1 ? "s" : ""}`);
                 photoShareButton.disabled = false;
             } catch {
-                label("Enregistrer dans mes photos");
-                setStatus("Les photos n'ont pas pu être préparées. Recharge la page ou utilise le téléchargement .zip.");
+                label("Partager / enregistrer");
+                setStatus("Les photos n'ont pas pu être préparées. Utilise le ZIP ou le téléchargement individuel.");
             }
         };
 
         photoShareButton.hidden = false;
-        if (zipLink && window.matchMedia("(max-width: 760px)").matches) zipLink.classList.add("photo-zip-secondary");
-        prepareBatch();
-
+        if (window.matchMedia("(max-width: 760px)").matches) photoZipLink.classList.add("photo-zip-secondary");
         photoShareButton.addEventListener("click", async () => {
+            if (!preparedFiles) {
+                await prepareBatch();
+            }
             if (!preparedFiles) return;
             try {
                 await navigator.share({files: preparedFiles, title: "Photos Vélociraptouch"});
@@ -401,7 +434,7 @@ if (photoShareButton && navigator.canShare) {
                 }
             } catch (error) {
                 // Partage annulé par l'utilisateur : rien à signaler.
-                if (error?.name !== "AbortError") setStatus("Le partage a échoué. Utilise le téléchargement .zip ou le bouton « Télécharger » de chaque photo.");
+                if (error?.name !== "AbortError") setStatus("Le partage a échoué. Utilise le ZIP ou le téléchargement individuel.");
             }
         });
     }

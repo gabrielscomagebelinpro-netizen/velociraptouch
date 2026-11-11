@@ -6,6 +6,7 @@ use App\Service\AgendaCalendar;
 use App\Service\ContactMessageStore;
 use App\Service\ContactMessageMailer;
 use App\Repository\EventRepository;
+use App\Repository\EventPhotoRepository;
 use App\Repository\AttendanceRepository;
 use App\Repository\SponsorRepository;
 use App\Entity\Attendance;
@@ -16,6 +17,8 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
@@ -33,6 +36,7 @@ final class SiteController
         private readonly ContactMessageMailer $contactMailer,
         private readonly CsrfTokenManagerInterface $csrfTokens,
         private readonly EventRepository $eventRepository,
+        private readonly EventPhotoRepository $eventPhotoRepository,
         private readonly AttendanceRepository $attendanceRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly Security $security,
@@ -41,6 +45,8 @@ final class SiteController
         private readonly RateLimiterFactory $contactFormLimiter,
         private readonly AgendaCalendar $agendaCalendar,
         private readonly SponsorRepository $sponsorRepository,
+        #[Autowire('%kernel.project_dir%/var/uploads/events')]
+        private readonly string $eventPhotoDirectory,
     ) {
     }
 
@@ -62,6 +68,8 @@ final class SiteController
 
         return new Response($this->twig->render('home/index.html.twig', [
             'events' => $events,
+            'photo_counts' => $this->eventPhotoRepository->countByEvent(),
+            'past_events' => $this->eventRepository->findPast(),
             'calendar_entries' => $this->agendaCalendar->entries($calendarEvents, $today, $this->security->isGranted('ROLE_ADMIN')),
             'attendance_event_ids' => $attendanceEventIds,
             'sponsors' => $this->sponsorRepository->findGroupedByTier(),
@@ -69,6 +77,97 @@ final class SiteController
             'message_error' => $request->getSession()->getFlashBag()->get('contact_error')[0] ?? null,
             'message_success' => $request->getSession()->getFlashBag()->get('contact_success')[0] ?? null,
         ]));
+    }
+
+    #[Route('/evenements/{id}/photos', name: 'event_photos', methods: ['GET'])]
+    public function photos(Event $event): Response
+    {
+        return new Response($this->twig->render('home/event_photos.html.twig', [
+            'event' => $event,
+            'photos' => $this->eventPhotoRepository->findForEvent($event),
+        ]));
+    }
+
+    #[Route('/evenements/{id}/photos/{filename}', name: 'event_photo_view', methods: ['GET'])]
+    public function photo(Event $event, string $filename): BinaryFileResponse
+    {
+        if (!preg_match('/\A[a-f0-9]{32}\.(jpg|png|webp|heic|heif)\z/', $filename)) {
+            throw new NotFoundHttpException('Photo introuvable.');
+        }
+
+        $photo = $this->eventPhotoRepository->findOneBy(['event' => $event, 'filename' => $filename]);
+        $path = $this->eventPhotoDirectory.'/'.$filename;
+        if ($photo === null || !is_file($path)) {
+            throw new NotFoundHttpException('Photo introuvable.');
+        }
+
+        return new BinaryFileResponse($path, 200, ['Content-Type' => $photo->getMimeType()]);
+    }
+
+    #[Route('/evenements/{id}/photos/{filename}/telecharger', name: 'event_photo_download', methods: ['GET'])]
+    public function downloadPhoto(Event $event, string $filename): BinaryFileResponse
+    {
+        if (!preg_match('/\A[a-f0-9]{32}\.(jpg|jpeg|png|webp|heic|heif)\z/', $filename)) {
+            throw new NotFoundHttpException('Photo introuvable.');
+        }
+
+        $photo = $this->eventPhotoRepository->findOneBy(['event' => $event, 'filename' => $filename]);
+        $path = $this->eventPhotoDirectory.'/'.$filename;
+        if ($photo === null || !is_file($path)) {
+            throw new NotFoundHttpException('Photo introuvable.');
+        }
+
+        $response = new BinaryFileResponse($path, 200, ['Content-Type' => $photo->getMimeType()]);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $photo->getOriginalName());
+
+        return $response;
+    }
+
+    #[Route('/evenements/{id}/photos.zip', name: 'event_photos_zip', methods: ['GET'])]
+    public function downloadPhotosZip(Event $event): BinaryFileResponse
+    {
+        $eventPhotos = $this->eventPhotoRepository->findForEvent($event);
+        if ($eventPhotos === []) {
+            throw new NotFoundHttpException('Aucune photo pour cet événement.');
+        }
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'photos-');
+        $zip = new \ZipArchive();
+        if ($zipPath === false || $zip->open($zipPath, \ZipArchive::OVERWRITE) !== true) {
+            throw new \RuntimeException('L’archive des photos ne peut pas être créée.');
+        }
+
+        $usedNames = [];
+        foreach ($eventPhotos as $photo) {
+            $path = $this->eventPhotoDirectory.'/'.$photo->getFilename();
+            if (!is_file($path)) {
+                continue;
+            }
+
+            $name = trim(str_replace(['/', '\\', "\0"], '-', $photo->getOriginalName())) ?: 'photo';
+            $base = pathinfo($name, PATHINFO_FILENAME);
+            $extension = pathinfo($name, PATHINFO_EXTENSION) ?: pathinfo($photo->getFilename(), PATHINFO_EXTENSION);
+            if ($extension !== '' && pathinfo($name, PATHINFO_EXTENSION) === '') {
+                $name .= '.'.$extension;
+            }
+            for ($i = 2; isset($usedNames[mb_strtolower($name)]); $i++) {
+                $name = sprintf('%s (%d).%s', $base, $i, $extension);
+            }
+            $usedNames[mb_strtolower($name)] = true;
+            $zip->addFile($path, $name);
+            $zip->setCompressionName($name, \ZipArchive::CM_STORE);
+        }
+        $zip->close();
+
+        $slug = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $event->getTitle()) ?: 'evenement';
+        $slug = trim(strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', $slug)), '-') ?: 'evenement';
+        $filename = sprintf('photos-%s-%s.zip', $event->getDate()?->format('Y-m-d') ?? 'sans-date', $slug);
+
+        $response = new BinaryFileResponse($zipPath, 200, ['Content-Type' => 'application/zip']);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename);
+        $response->deleteFileAfterSend();
+
+        return $response;
     }
 
     #[Route('/events/{id}/attendance', name: 'event_attendance_toggle', methods: ['POST'])]

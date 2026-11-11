@@ -705,6 +705,65 @@ body {
     border-color: #7dbfc1
 }
 
+.event-album-page .section-heading {
+    margin-bottom: 35px;
+}
+
+.event-album-page h1 {
+    margin: 0;
+}
+
+.event-album-page .event-photo-grid figure {
+    border: 1px solid var(--line);
+    padding: 8px;
+}
+
+.event-album-page .event-photo-grid figcaption {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.event-album-page .event-photo-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.past-events {
+    margin-top: 28px;
+    border-top: 1px solid #095b67;
+    border-bottom: 1px solid #095b67;
+}
+
+.past-events summary {
+    cursor: pointer;
+    padding: 18px 0;
+    color: var(--lime);
+    font: 500 12px "DM Sans";
+    list-style-position: inside;
+}
+
+.past-events-list {
+    border-top: 1px solid #095b67;
+}
+
+.past-events-list .event {
+    opacity: .8;
+}
+
+.event-album-page .public-photo-download-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.event-album-page .event-photo-grid figcaption .button {
+    margin-top: 8px;
+    padding: 8px 10px;
+    gap: 8px;
+    font-size: 11px;
+}
+
 .events-list {
     border-top: 1px solid #095b67
 }
@@ -716,6 +775,15 @@ body {
     gap: 35px;
     border-bottom: 1px solid #095b67;
     padding: 25px 0
+}
+
+.event:has(.event-photos-link) {
+    grid-template-columns: 90px minmax(0, 1fr) auto auto auto;
+}
+
+.event-photos-link {
+    grid-column: 4;
+    grid-row: 1;
 }
 
 .event-date {
@@ -1643,7 +1711,7 @@ dialog {
 
     .value-grid {
         grid-template-columns:1fr;
-        gap: 25px
+        gap: 10px;
     }
 
     .value-grid h3 {
@@ -3157,6 +3225,10 @@ body {
         grid-column: auto
     }
 
+    .event-album-page .event-photo-grid {
+        grid-template-columns: 1fr;
+    }
+
     .event-date {
         display: flex;
         align-items: baseline;
@@ -3948,6 +4020,29 @@ a.month-calendar-event.is-past:hover {
     .event-photo-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px
+    }
+
+    .event-album-page .event-photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .event-photos-link {
+        grid-column: 1 / -1;
+        grid-row: auto;
+        justify-self: start;
+    }
+
+    .past-events-list .event {
+        grid-template-columns: 58px minmax(0, 1fr);
+    }
+
+    .past-events-list .event-photos-link {
+        grid-column: 2;
+    }
+
+    .event-album-page .public-photo-download-actions .button {
+        width: 100%;
+        justify-content: center;
     }
 
     /* Sur téléphone, actions photo en icônes (libellé gardé pour les lecteurs d'écran via aria-label). */

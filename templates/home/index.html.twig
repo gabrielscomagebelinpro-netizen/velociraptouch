@@ -1,4 +1,5 @@
 {% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
 {% import 'home/_sponsor_card.html.twig' as cards %}
 
 {% block title %}Le site des Vélociraptouch{% endblock %}
@@ -104,6 +105,26 @@
             <p class="empty-state">Aucun événement à venir pour le moment.</p>
           {% endfor %}
         </div>
+        {% if past_events is not empty %}
+          <details class="past-events">
+            <summary>Voir les événements passés ({{ past_events|length }})</summary>
+            <div class="events-list past-events-list">
+              {% for event in past_events %}
+                <article class="event" id="past-event-{{ event.id }}">
+                  <div class="event-date"><strong>{{ event.date|date('d') }}</strong>{{ event.date|format_datetime(pattern='MMM y', locale='fr')|upper }}</div>
+                  <div class="event-main"><h3>{{ event.title }}</h3><p>{{ event.description }}</p></div>
+                  {% if is_granted('ROLE_ADMIN') %}
+                    <a class="button button-outline event-photos-link" href="{{ path('admin_event_edit', {id: event.id}) }}#event-photos">Ajouter des photos {{ ui.icon('photos') }}</a>
+                  {% elseif app.user and (photo_counts[event.id] ?? 0) > 0 %}
+                    <a class="button button-outline event-photos-link" href="{{ path('event_photos', {id: event.id}) }}">Photos {{ ui.icon('photos') }}</a>
+                  {% else %}
+                    <span class="event-tag">Archivé</span>
+                  {% endif %}
+                </article>
+              {% endfor %}
+            </div>
+          </details>
+        {% endif %}
         <article class="training-location">
           <div><p class="eyebrow">Lieu habituel</p><h3>Stade Eric Béchu</h3><p>Rue Gustave Flaubert, 34071 Montpellier · entraînements le mardi à 19h30</p></div>
           <div class="map-actions"><a class="button button-outline" href="https://www.google.com/maps/search/?api=1&query=Stade+Eric-B%C3%A9chu%2C+Rue+Gustave+Flaubert%2C+34071+Montpellier" target="_blank" rel="noreferrer">Ouvrir dans Google Maps <span>↗</span></a></div>

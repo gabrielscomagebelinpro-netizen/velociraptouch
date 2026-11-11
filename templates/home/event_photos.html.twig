@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
+
+{% block title %}Photos — {{ event.title }}{% endblock %}
+
+{% block body %}
+<main class="section event-album-page">
+  <div class="container-fluid">
+    <div class="section-heading heading-row">
+      <div>
+        <p class="eyebrow">Photos de l’événement</p>
+        <h1>{{ event.title }}</h1>
+        {% if event.date %}<p>{{ event.date|format_datetime(pattern='EEEE d MMMM y', locale='fr')|capitalize }}</p>{% endif %}
+      </div>
+      <a class="button button-outline" href="{{ path('site_home') }}#agenda">Retour à l’agenda</a>
+    </div>
+
+    {% if photos is not empty %}
+      <div class="photo-download-actions public-photo-download-actions">
+        <button class="button button-primary photo-share-button" type="button" hidden
+                data-photos="{{ photos|map(p => {url: path('event_photo_view', {id: event.id, filename: p.filename}), name: p.originalName, type: p.mimeType})|json_encode }}">
+          Partager / enregistrer {{ ui.icon('phone') }}
+        </button>
+        <a class="button button-outline photo-zip-link" href="{{ path('event_photos_zip', {id: event.id}) }}">Télécharger toutes les photos (.zip) {{ ui.icon('archive') }}</a>
+      </div>
+      <p class="field-help photo-share-status" aria-live="polite" hidden></p>
+      <div class="event-photo-grid">
+        {% for photo in photos %}
+          <figure>
+            <a href="{{ path('event_photo_view', {id: event.id, filename: photo.filename}) }}" target="_blank">
+              <img class="photo-lazy" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="{{ path('event_photo_view', {id: event.id, filename: photo.filename}) }}" alt="{{ photo.originalName|e }}" loading="lazy" decoding="async">
+            </a>
+            <figcaption>
+              <span>{{ photo.originalName }}</span>
+              <a class="button button-outline" href="{{ path('event_photo_download', {id: event.id, filename: photo.filename}) }}" download="{{ photo.originalName }}">{{ ui.icon('download') }} Télécharger cette photo</a>
+            </figcaption>
+          </figure>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-state">Aucune photo n’est disponible pour cet événement.</p>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}
