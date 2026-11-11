@@ -17,13 +17,8 @@
 
     {% if photos is not empty %}
       <div class="photo-download-actions public-photo-download-actions">
-        <button class="button button-primary photo-share-button" type="button" hidden
-                data-photos="{{ photos|map(p => {url: path('event_photo_view', {id: event.id, filename: p.filename}), name: p.originalName, type: p.mimeType})|json_encode }}">
-          Enregistrer toutes les photos {{ ui.icon('phone') }}
-        </button>
-        <a class="button button-outline photo-zip-link" href="{{ path('event_photos_zip', {id: event.id}) }}">Télécharger toutes les photos (.zip) {{ ui.icon('archive') }}</a>
+        <a class="button button-primary photo-zip-link" href="{{ path('event_photos_zip', {id: event.id}) }}">Enregistrer toutes les photos (.zip) {{ ui.icon('archive') }}</a>
       </div>
-      <p class="field-help photo-share-status" aria-live="polite" hidden></p>
       <div class="event-photo-grid">
         {% for photo in photos %}
           <figure>
