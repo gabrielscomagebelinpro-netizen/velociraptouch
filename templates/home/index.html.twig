@@ -113,9 +113,7 @@
                 <article class="event" id="past-event-{{ event.id }}">
                   <div class="event-date"><strong>{{ event.date|date('d') }}</strong>{{ event.date|format_datetime(pattern='MMM y', locale='fr')|upper }}</div>
                   <div class="event-main"><h3>{{ event.title }}</h3><p>{{ event.description }}</p></div>
-                  {% if is_granted('ROLE_ADMIN') %}
-                    <a class="button button-outline event-photos-link" href="{{ path('admin_event_edit', {id: event.id}) }}#event-photos">Ajouter des photos {{ ui.icon('photos') }}</a>
-                  {% elseif app.user and (photo_counts[event.id] ?? 0) > 0 %}
+                  {% if app.user and (photo_counts[event.id] ?? 0) > 0 %}
                     <a class="button button-outline event-photos-link" href="{{ path('event_photos', {id: event.id}) }}">Photos {{ ui.icon('photos') }}</a>
                   {% else %}
                     <span class="event-tag">Archivé</span>
