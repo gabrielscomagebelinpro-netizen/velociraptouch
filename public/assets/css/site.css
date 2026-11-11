@@ -4045,6 +4045,19 @@ a.month-calendar-event.is-past:hover {
         justify-content: center;
     }
 
+    .event-album-page .event-photo-grid figcaption {
+        overflow: visible;
+        white-space: normal;
+    }
+
+    .event-album-page .event-photo-grid figcaption .button {
+        max-width: 100%;
+        min-width: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        text-align: center;
+    }
+
     /* Sur téléphone, actions photo en icônes (libellé gardé pour les lecteurs d'écran via aria-label). */
     .photo-action-label {
         display: none
