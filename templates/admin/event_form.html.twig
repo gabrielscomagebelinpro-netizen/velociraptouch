@@ -38,11 +38,11 @@
             <button class="button button-primary btn" type="submit">Ajouter les photos {{ ui.icon('upload') }}</button>
         </form>
         {% if photos is not empty %}
-            {# Sur téléphone, le bouton « Enregistrer dans mes photos » (partage natif) remplace le ZIP, difficile à ouvrir. #}
+            {# Sur téléphone, l’enregistrement natif remplace le ZIP, difficile à ouvrir. #}
             <div class="admin-form-actions photo-download-actions">
                 <button class="button button-primary btn photo-share-button" type="button" hidden
                         data-photos="{{ photos|map(p => {url: path('admin_event_photo_view', {id: event.id, filename: p.filename}), name: p.originalName, type: p.mimeType})|json_encode }}">
-                    Partager / enregistrer {{ ui.icon('phone') }}
+                    Enregistrer toutes les photos {{ ui.icon('phone') }}
                 </button>
                 <a class="button button-outline photo-zip-link" href="{{ path('admin_event_photos_zip', {id: event.id}) }}">Télécharger toutes les photos (.zip, {{ photos|length }}) {{ ui.icon('archive') }}</a>
             </div>

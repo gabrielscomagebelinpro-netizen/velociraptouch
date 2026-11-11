@@ -19,7 +19,7 @@
       <div class="photo-download-actions public-photo-download-actions">
         <button class="button button-primary photo-share-button" type="button" hidden
                 data-photos="{{ photos|map(p => {url: path('event_photo_view', {id: event.id, filename: p.filename}), name: p.originalName, type: p.mimeType})|json_encode }}">
-          Partager / enregistrer {{ ui.icon('phone') }}
+          Enregistrer toutes les photos {{ ui.icon('phone') }}
         </button>
         <a class="button button-outline photo-zip-link" href="{{ path('event_photos_zip', {id: event.id}) }}">Télécharger toutes les photos (.zip) {{ ui.icon('archive') }}</a>
       </div>

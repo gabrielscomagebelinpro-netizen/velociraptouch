@@ -405,11 +405,11 @@ if (photoShareButton && photoZipLink && isMobileDevice && canSharePhotoFiles) {
                     return new File([await response.blob()], photo.name, {type: photo.type});
                 }));
                 label(batchCount > 1
-                    ? `Partager les photos ${batchIndex * BATCH + 1} à ${batchIndex * BATCH + batch.length} sur ${photos.length}`
-                    : `Partager les ${photos.length} photo${photos.length > 1 ? "s" : ""}`);
+                    ? `Enregistrer les photos ${batchIndex * BATCH + 1} à ${batchIndex * BATCH + batch.length} sur ${photos.length}`
+                    : `Enregistrer les ${photos.length} photo${photos.length > 1 ? "s" : ""}`);
                 photoShareButton.disabled = false;
             } catch {
-                label("Partager / enregistrer");
+                label("Enregistrer toutes les photos");
                 setStatus("Les photos n'ont pas pu être préparées. Utilise le ZIP ou le téléchargement individuel.");
             }
         };
@@ -434,7 +434,7 @@ if (photoShareButton && photoZipLink && isMobileDevice && canSharePhotoFiles) {
                 }
             } catch (error) {
                 // Partage annulé par l'utilisateur : rien à signaler.
-                if (error?.name !== "AbortError") setStatus("Le partage a échoué. Utilise le ZIP ou le téléchargement individuel.");
+                if (error?.name !== "AbortError") setStatus("L'enregistrement a échoué. Utilise le ZIP ou le téléchargement individuel.");
             }
         });
     }
