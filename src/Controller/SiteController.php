@@ -101,7 +101,12 @@ final class SiteController
             throw new NotFoundHttpException('Photo introuvable.');
         }
 
-        return new BinaryFileResponse($path, 200, ['Content-Type' => $photo->getMimeType()]);
+        $response = new BinaryFileResponse($path, 200, ['Content-Type' => $photo->getMimeType()]);
+        $response->setPrivate();
+        $response->setMaxAge(31536000);
+        $response->setImmutable(true);
+
+        return $response;
     }
 
     #[Route('/evenements/{id}/photos/{filename}/telecharger', name: 'event_photo_download', methods: ['GET'])]

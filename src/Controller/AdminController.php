@@ -185,7 +185,12 @@ final class AdminController extends AbstractController
             throw $this->createNotFoundException('Photo introuvable.');
         }
 
-        return new BinaryFileResponse($path, 200, ['Content-Type' => $photo->getMimeType()]);
+        $response = new BinaryFileResponse($path, 200, ['Content-Type' => $photo->getMimeType()]);
+        $response->setPrivate();
+        $response->setMaxAge(31536000);
+        $response->setImmutable(true);
+
+        return $response;
     }
 
     #[Route('/events/{id}/photos/{photoId}/download', name: 'admin_event_photo_download', methods: ['GET'], requirements: ['photoId' => '\d+'])]
