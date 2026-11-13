@@ -2,7 +2,7 @@
 {% block title %}{{ product.id ? 'Modifier un produit' : 'Ajouter un produit' }} — Administration{% endblock %}
 {% block body %}
 <main id="contenu" tabindex="-1" class="admin-page-main">
-  <div class="page-topbar"><p class="eyebrow">Espace administration</p><a class="button button-outline" href="{{ path('admin_shop') }}">← Boutique</a></div>
+  <div class="page-topbar"><p class="eyebrow">Espace administration</p><a class="button button-outline" href="{{ path('admin_dashboard') }}">← Panel admin</a></div>
   <h1>{{ product.id ? 'Modifier le' : 'Ajouter un' }} <span>produit.</span></h1>
   {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
   <section class="admin-card admin-product-card">
@@ -26,9 +26,9 @@
           <div class="admin-form-section">
             <p class="eyebrow">Options de précommande</p>
             <div class="admin-checkbox-list">
-              <label><input type="checkbox" name="requires_jersey_size" value="1"{% if product.requiresJerseySize %} checked{% endif %}> Demander une taille de maillot</label>
-              <label><input type="checkbox" name="requires_short_size" value="1"{% if product.requiresShortSize %} checked{% endif %}> Demander une taille de short</label>
-              <label><input type="checkbox" name="active" value="1"{% if product.id is null or product.active %} checked{% endif %}> Produit visible et précommandable</label>
+              <label><input type="checkbox" name="requires_jersey_size" value="1"{% if product.requiresJerseySize %} checked{% endif %}><span>Demander une taille de maillot</span></label>
+              <label><input type="checkbox" name="requires_short_size" value="1"{% if product.requiresShortSize %} checked{% endif %}><span>Demander une taille de short</span></label>
+              <label><input type="checkbox" name="active" value="1"{% if product.id is null or product.active %} checked{% endif %}><span>Produit visible et précommandable</span></label>
             </div>
           </div>
         </div>
@@ -48,7 +48,7 @@
           <strong class="admin-product-preview-price" data-product-preview-price-output>{{ product.id ? (product.priceCents / 100)|number_format(2, '.', '') : '0.00' }} €</strong>
         </aside>
       </div>
-      <div class="admin-form-actions"><button class="button button-primary" type="submit">Enregistrer le produit <span>→</span></button><a class="button button-outline" href="{{ path('admin_shop') }}">Annuler</a></div>
+      <div class="admin-form-actions"><button class="button button-primary" type="submit">Enregistrer le produit <span>→</span></button><a class="button button-outline" href="{{ path('admin_dashboard') }}">Annuler</a></div>
     </form>
   </section>
 </main>
