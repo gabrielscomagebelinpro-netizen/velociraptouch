@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ product.id ? 'Modifier un produit' : 'Ajouter un produit' }} — Administration{% endblock %}
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main">
+  <div class="page-topbar"><p class="eyebrow">Espace administration</p><a class="button button-outline" href="{{ path('admin_shop') }}">← Boutique</a></div>
+  <h1>{{ product.id ? 'Modifier le' : 'Ajouter un' }} <span>produit.</span></h1>
+  {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
+  <section class="admin-card admin-product-card">
+    <form class="contact-form admin-product-form" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="_token" value="{{ csrf_token('shop-product') }}">
+      <div class="admin-product-layout">
+        <div class="admin-product-fields">
+          <div class="admin-form-section">
+            <p class="eyebrow">Informations principales</p>
+            <label>Nom du produit<input class="form-control" name="name" data-product-preview-name required maxlength="120" value="{{ product.name }}"></label>
+            <label>Description<textarea class="form-control" name="description" data-product-preview-description rows="5" required maxlength="2000">{{ product.description }}</textarea></label>
+            <label>Prix (€)<input class="form-control" name="price" data-product-preview-price type="number" min="0" step="0.01" required value="{{ product.id ? (product.priceCents / 100)|number_format(2, '.', '') : '' }}"></label>
+          </div>
+
+          <div class="admin-form-section">
+            <p class="eyebrow">Photo du produit</p>
+            <label>Importer une photo <span class="field-help">JPEG, PNG ou WebP · 5 Mo maximum</span><input class="form-control" name="image" data-product-preview-image type="file" accept="image/jpeg,image/png,image/webp"></label>
+            <label>Description de la photo <span class="field-help">Utile pour l’accessibilité</span><input class="form-control" name="image_alt" data-product-preview-alt maxlength="255" value="{{ product.imageAlt }}"></label>
+          </div>
+
+          <div class="admin-form-section">
+            <p class="eyebrow">Options de précommande</p>
+            <div class="admin-checkbox-list">
+              <label><input type="checkbox" name="requires_jersey_size" value="1"{% if product.requiresJerseySize %} checked{% endif %}> Demander une taille de maillot</label>
+              <label><input type="checkbox" name="requires_short_size" value="1"{% if product.requiresShortSize %} checked{% endif %}> Demander une taille de short</label>
+              <label><input type="checkbox" name="active" value="1"{% if product.id is null or product.active %} checked{% endif %}> Produit visible et précommandable</label>
+            </div>
+          </div>
+        </div>
+
+        <aside class="admin-product-preview">
+          <p class="eyebrow">Aperçu</p>
+          <div class="admin-product-preview-image" data-product-preview-image-container>
+            {% if product.imagePath %}
+              <img data-product-preview-image-output src="{{ product.imagePath }}" alt="{{ product.imageAlt }}">
+            {% else %}
+              <div data-product-preview-placeholder class="product-art product-art-orange"><b>VR</b><strong>TOUCH</strong></div>
+            {% endif %}
+          </div>
+          <p class="product-type">Précommande</p>
+          <h2 data-product-preview-name-output>{{ product.name ?: 'Nom du produit' }}</h2>
+          <p data-product-preview-description-output>{{ product.description ?: 'La description du produit apparaîtra ici.' }}</p>
+          <strong class="admin-product-preview-price" data-product-preview-price-output>{{ product.id ? (product.priceCents / 100)|number_format(2, '.', '') : '0.00' }} €</strong>
+        </aside>
+      </div>
+      <div class="admin-form-actions"><button class="button button-primary" type="submit">Enregistrer le produit <span>→</span></button><a class="button button-outline" href="{{ path('admin_shop') }}">Annuler</a></div>
+    </form>
+  </section>
+</main>
+{% endblock %}

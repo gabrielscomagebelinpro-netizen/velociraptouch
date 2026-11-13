@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
+{% block title %}Administration — Boutique{% endblock %}
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main">
+  <div class="page-topbar"><p class="eyebrow">Espace administration</p><a class="button button-outline" href="{{ path('site_shop') }}">Voir la boutique ↗</a></div>
+  <div class="admin-page-header"><div><h1>La <span>boutique.</span></h1><p class="admin-page-intro">Ajoute les produits, leurs photos et leurs prix. Suis ensuite les précommandes reçues.</p></div></div>
+  {% include 'admin/_tabs.html.twig' with {active: 'admin_shop'} %}
+  <div class="admin-shop-create-action"><a class="button button-primary" href="{{ path('admin_shop_product_new') }}">Ajouter un produit {{ ui.icon('plus') }}</a></div>
+  {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
+  {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
+  <section class="admin-card" id="produits"><h2>Produits <span class="admin-count">({{ products|length }})</span></h2>
+    <div class="admin-content-list">
+    {% for product in products %}
+      <article class="admin-event-row admin-product-row">
+        {% if product.imagePath %}<img class="admin-sponsor-thumb" src="{{ product.imagePath }}" alt="" width="64" height="64">{% else %}<span class="admin-product-thumb-placeholder" aria-hidden="true">VR</span>{% endif %}
+        <div class="admin-event-info">
+          <strong>{{ product.name }}</strong>
+          <span class="admin-product-meta">
+            <b>{{ product.priceEuros }} €</b>
+            <i class="{{ product.active ? 'is-visible' : 'is-hidden' }}">{{ product.active ? 'Produit visible' : 'Produit masqué' }}</i>
+          </span>
+        </div>
+        <div class="admin-row-actions"><a class="button button-outline" href="{{ path('admin_shop_product_edit', {id: product.id}) }}">Modifier</a><form method="post" action="{{ path('admin_shop_product_delete', {id: product.id}) }}" data-confirm="Supprimer ce produit et ses précommandes ?"><input type="hidden" name="_token" value="{{ csrf_token('delete-shop-product-' ~ product.id) }}"><button class="button button-danger" type="submit">Supprimer</button></form></div>
+      </article>
+    {% else %}<p class="field-help">Aucun produit.</p>{% endfor %}
+    </div>
+  </section>
+  <section class="admin-card" id="precommandes"><div class="admin-card-head"><h2>Précommandes <span class="admin-count">({{ preorders|length }})</span></h2><a class="button button-outline" href="{{ path('admin_shop_preorders_pdf') }}">Télécharger la liste PDF ↓</a></div>
+  </section>
+</main>
+{% endblock %}

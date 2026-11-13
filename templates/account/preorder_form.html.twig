@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+{% block title %}Modifier ma précommande — Vélociraptouch{% endblock %}
+{% block navigation %}<a href="{{ path('account') }}">← Mon compte</a><a href="{{ path('site_shop') }}">Boutique</a>{% endblock %}
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main">
+  <div class="page-topbar"><p class="eyebrow">Espace membre</p><a class="button button-outline" href="{{ path('site_shop') }}">← Boutique</a></div>
+  <section class="shop-order-panel">
+    <p class="eyebrow">Ma précommande</p>
+    <h1>{{ product.name }} <span>{{ product.priceEuros }} €.</span></h1>
+    <form id="edit-preorder-form" class="contact-form shop-order-form" method="post">
+      <input type="hidden" name="_token" value="{{ csrf_token('edit-preorder-' ~ preorder.id) }}">
+      <div class="shop-order-grid">
+        <label>Quantité<input class="form-control" name="quantity" type="number" min="1" max="20" value="{{ preorder.quantity }}" required></label>
+        {% if product.requiresJerseySize %}<label>Taille maillot<select class="form-control" name="jersey_size" required><option value="">Choisir</option>{% for size in ['XS','S','M','L','XL','XXL'] %}<option{% if preorder.jerseySize == size %} selected{% endif %}>{{ size }}</option>{% endfor %}</select></label><label>Numéro sur le maillot<input class="form-control" name="jersey_number" type="number" min="0" max="99" value="{{ preorder.jerseyNumber }}" required></label>{% endif %}
+        {% if product.requiresShortSize %}<label>Taille short<select class="form-control" name="short_size" required><option value="">Choisir</option>{% for size in ['XS','S','M','L','XL','XXL'] %}<option{% if preorder.shortSize == size %} selected{% endif %}>{{ size }}</option>{% endfor %}</select></label>{% endif %}
+      </div>
+      <label>Précision (facultatif)<textarea class="form-control" name="notes" maxlength="1000" rows="3">{{ preorder.notes }}</textarea></label>
+    </form>
+    <div class="preorder-actions">
+      <button class="button button-primary" type="submit" form="edit-preorder-form">Enregistrer les modifications <span>→</span></button>
+      <form method="post" action="{{ path('account_preorder_delete', {id: preorder.id}) }}" data-confirm="Supprimer cette précommande ?">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete-preorder-' ~ preorder.id) }}">
+        <button class="button button-danger" type="submit">Supprimer ma précommande</button>
+      </form>
+    </div>
+  </section>
+</main>
+{% endblock %}

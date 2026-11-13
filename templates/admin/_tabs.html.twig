@@ -3,6 +3,7 @@
         {route: 'admin_dashboard', label: 'Agenda'},
         {route: 'admin_content', label: 'Liens et partenaires'},
         {route: 'admin_users', label: 'Gestion des utilisateurs'},
+        {route: 'admin_shop', label: 'Boutique'},
     ] %}
         <a class="button {{ active == tab.route ? 'button-primary' : 'button-outline' }}" href="{{ path(tab.route) }}"{% if active == tab.route %} aria-current="page"{% endif %}>{{ tab.label }}</a>
     {% endfor %}

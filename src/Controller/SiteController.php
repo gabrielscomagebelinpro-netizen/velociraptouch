@@ -12,6 +12,10 @@ use App\Repository\SponsorRepository;
 use App\Entity\Attendance;
 use App\Entity\Event;
 use App\Entity\User;
+use App\Entity\Preorder;
+use App\Entity\Product;
+use App\Repository\ProductRepository;
+use App\Repository\PreorderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,6 +49,8 @@ final class SiteController
         private readonly RateLimiterFactory $contactFormLimiter,
         private readonly AgendaCalendar $agendaCalendar,
         private readonly SponsorRepository $sponsorRepository,
+        private readonly ProductRepository $productRepository,
+        private readonly PreorderRepository $preorderRepository,
         #[Autowire('%kernel.project_dir%/var/uploads/events')]
         private readonly string $eventPhotoDirectory,
     ) {
@@ -224,16 +230,88 @@ final class SiteController
     #[Route('/boutique', name: 'site_shop', methods: ['GET'])]
     public function shop(Request $request): Response
     {
-        // Boutique conservée telle quelle mais masquée tant que SHOP_ENABLED vaut 0.
         if (!$this->shopEnabled) {
             throw new NotFoundHttpException();
+        }
+
+        $user = $this->security->getUser();
+        $preordersByProduct = [];
+        if ($user instanceof User) {
+            foreach ($this->preorderRepository->findForUser($user) as $preorder) {
+                $preordersByProduct[$preorder->getProduct()->getId()] = $preorder;
+            }
         }
 
         return new Response($this->twig->render('shop/index.html.twig', [
             'csrf_token' => $this->csrfTokens->getToken('contact')->getValue(),
             'message_error' => $request->getSession()->getFlashBag()->get('contact_error')[0] ?? null,
             'message_success' => $request->getSession()->getFlashBag()->get('contact_success')[0] ?? null,
+            'products' => $this->productRepository->findActive(),
+            'preordersByProduct' => $preordersByProduct,
+            'shopSuccess' => $request->getSession()->getFlashBag()->get('shop_success')[0] ?? null,
         ]));
+    }
+
+    #[Route('/boutique/{id}/precommander', name: 'site_shop_preorder', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function preorder(Product $product, Request $request): Response
+    {
+        if (!$this->shopEnabled || !$product->isActive()) {
+            throw new NotFoundHttpException();
+        }
+        $user = $this->security->getUser();
+        if (!$user instanceof User) {
+            $request->getSession()->getFlashBag()->add('shop_error', 'Connecte-toi pour préparer une précommande.');
+            return new RedirectResponse('/connexion');
+        }
+        $existingPreorder = $this->preorderRepository->findForUserAndProduct($user, $product);
+
+        if ($request->isMethod('GET')) {
+            if ($existingPreorder instanceof Preorder) {
+                return new RedirectResponse('/mon-compte/precommandes/'.$existingPreorder->getId().'/modifier');
+            }
+            return new Response($this->twig->render('shop/preorder.html.twig', [
+                'product' => $product,
+                'preorderUser' => $user,
+                'shopError' => $request->getSession()->getFlashBag()->get('shop_error')[0] ?? null,
+            ]));
+        }
+
+        $redirect = new RedirectResponse('/boutique');
+        if ($existingPreorder instanceof Preorder) {
+            $request->getSession()->getFlashBag()->add('error', 'Tu as déjà une précommande pour ce produit. Tu peux la modifier depuis ton compte.');
+            return new RedirectResponse('/mon-compte#precommandes');
+        }
+        if (!$this->csrfTokens->isTokenValid(new CsrfToken('preorder-'.$product->getId(), (string) $request->request->get('_token')))) {
+            $request->getSession()->getFlashBag()->add('shop_error', 'Le formulaire a expiré. Merci de réessayer.');
+            return $redirect;
+        }
+        $name = $user->getFirstName().' '.$user->getLastName();
+        $email = $user->getEmail();
+        $quantity = filter_var($request->request->get('quantity'), FILTER_VALIDATE_INT);
+        $jerseySize = trim((string) $request->request->get('jersey_size'));
+        $jerseyNumber = filter_var($request->request->get('jersey_number'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 99]]);
+        $shortSize = trim((string) $request->request->get('short_size'));
+        $notes = trim((string) $request->request->get('notes'));
+        if ($name === '' || mb_strlen($name) > 120 || !filter_var($email, FILTER_VALIDATE_EMAIL)
+            || $quantity === false || $quantity < 1 || $quantity > 20
+            || ($product->isRequiresJerseySize() && !in_array($jerseySize, ['XS', 'S', 'M', 'L', 'XL', 'XXL'], true))
+            || ($product->isRequiresJerseySize() && $jerseyNumber === false)
+            || ($product->isRequiresShortSize() && !in_array($shortSize, ['XS', 'S', 'M', 'L', 'XL', 'XXL'], true))
+            || mb_strlen($notes) > 1000) {
+            $request->getSession()->getFlashBag()->add('shop_error', 'Vérifie les informations et les tailles choisies.');
+            return $redirect;
+        }
+        $order = (new Preorder($product))
+            ->setName($name)->setEmail($email)->setQuantity($quantity)
+            ->setJerseySize($product->isRequiresJerseySize() ? $jerseySize : null)
+            ->setJerseyNumber($product->isRequiresJerseySize() ? $jerseyNumber : null)
+            ->setShortSize($product->isRequiresShortSize() ? $shortSize : null)
+            ->setNotes($notes);
+        $order->setUser($user)->setName($name)->setEmail($email);
+        $this->entityManager->persist($order);
+        $this->entityManager->flush();
+        $request->getSession()->getFlashBag()->add('shop_success', 'Ta précommande est enregistrée. Nous reviendrons vers toi pour la suite.');
+        return $redirect;
     }
 
     #[Route('/contact', name: 'site_contact', methods: ['POST'])]

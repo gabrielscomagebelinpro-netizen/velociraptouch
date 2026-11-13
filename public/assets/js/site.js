@@ -15,8 +15,27 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
+// Quand le navigateur fait remonter un champ, garde aussi son libellé sous l'en-tête sticky.
+document.addEventListener("focusin", (event) => {
+    const field = event.target;
+    if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement)) return;
+
+    const header = document.querySelector(".site-header");
+    const label = field.closest("label")
+        || (field.id ? document.querySelector(`label[for="${CSS.escape(field.id)}"]`) : null)
+        || (field.previousElementSibling instanceof HTMLLabelElement ? field.previousElementSibling : null);
+    if (!header || !label) return;
+
+    const headerBottom = header.getBoundingClientRect().bottom;
+    const labelTop = label.getBoundingClientRect().top;
+    const safeTop = headerBottom + 16;
+    if (labelTop < safeTop) {
+        window.scrollBy({ top: labelTop - safeTop, behavior: "auto" });
+    }
+});
+
 const animatedElements = document.querySelectorAll(
-    ".section-heading, .collective-content, .story-step, .event, .sponsor-card, .training-location, .contact-copy, .contact-form"
+    ".section-heading, .collective-content, .story-step, .event, .sponsor-card, .training-location, .contact-copy, .contact-form, .product-card, .equipment-grid article, .shop-order-panel"
 );
 
 if (animatedElements.length && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -118,6 +137,60 @@ if (lightboxTriggers.length) {
 const photoInput = document.querySelector("#event-photos-input");
 const photoDropzone = document.querySelector(".photo-dropzone");
 const photoPreview = document.querySelector(".photo-upload-preview");
+
+const productPreviewName = document.querySelector("[data-product-preview-name]");
+const productPreviewDescription = document.querySelector("[data-product-preview-description]");
+const productPreviewPrice = document.querySelector("[data-product-preview-price]");
+const productPreviewImage = document.querySelector("[data-product-preview-image]");
+
+if (productPreviewName && productPreviewDescription && productPreviewPrice) {
+    const previewNameOutput = document.querySelector("[data-product-preview-name-output]");
+    const previewDescriptionOutput = document.querySelector("[data-product-preview-description-output]");
+    const previewPriceOutput = document.querySelector("[data-product-preview-price-output]");
+    const previewImageOutput = document.querySelector("[data-product-preview-image-output]");
+    const previewPlaceholder = document.querySelector("[data-product-preview-placeholder]");
+    const previewImageContainer = document.querySelector("[data-product-preview-image-container]");
+    const previewAlt = document.querySelector("[data-product-preview-alt]");
+
+    const updateProductPreview = () => {
+        previewNameOutput.textContent = productPreviewName.value.trim() || "Nom du produit";
+        previewDescriptionOutput.textContent = productPreviewDescription.value.trim() || "La description du produit apparaîtra ici.";
+        const price = Number.parseFloat(productPreviewPrice.value);
+        previewPriceOutput.textContent = Number.isFinite(price) && price >= 0
+            ? `${price.toFixed(2)} €`
+            : "0.00 €";
+        if (previewImageOutput && previewAlt) {
+            previewImageOutput.alt = previewAlt.value.trim();
+        }
+    };
+
+    [productPreviewName, productPreviewDescription, productPreviewPrice].forEach((field) => {
+        field.addEventListener("input", updateProductPreview);
+    });
+
+    productPreviewImage?.addEventListener("change", () => {
+        const file = productPreviewImage.files?.[0];
+        if (!file || !file.type.startsWith("image/")) return;
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+            if (previewPlaceholder) previewPlaceholder.hidden = true;
+            if (previewImageOutput) {
+                previewImageOutput.src = String(reader.result);
+                previewImageOutput.hidden = false;
+            } else {
+                const image = document.createElement("img");
+                image.dataset.productPreviewImageOutput = "";
+                image.alt = previewAlt?.value.trim() || "";
+                image.src = String(reader.result);
+                previewImageContainer?.append(image);
+            }
+        });
+        reader.readAsDataURL(file);
+    });
+
+    previewAlt?.addEventListener("input", updateProductPreview);
+    updateProductPreview();
+}
 const photoStatus = document.querySelector(".photo-upload-status");
 const photoForm = document.querySelector(".event-photo-upload");
 
@@ -297,7 +370,17 @@ window.addEventListener("pagehide", () => {
 });
 
 const savedScrollPositions = readScrollPositions();
-const savedScrollPosition = savedScrollPositions[window.location.pathname];
+const isShopLandingPage = window.location.pathname === "/boutique" && !window.location.hash;
+if (isShopLandingPage) {
+    delete savedScrollPositions[window.location.pathname];
+    writeScrollPositions(savedScrollPositions);
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    const resetShopScroll = () => window.scrollTo({top: 0, left: 0, behavior: "instant"});
+    resetShopScroll();
+    window.addEventListener("load", resetShopScroll, {once: true});
+}
+
+const savedScrollPosition = isShopLandingPage ? null : savedScrollPositions[window.location.pathname];
 if (savedScrollPosition) {
     delete savedScrollPositions[window.location.pathname];
     writeScrollPositions(savedScrollPositions);

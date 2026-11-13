@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\Preorder;
+use App\Repository\PreorderRepository;
 use App\Form\AccountType;
 use App\Repository\AttendanceRepository;
 use App\Security\PasswordPolicy;
@@ -26,7 +28,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AccountController extends AbstractController
 {
     #[Route('', name: 'account', methods: ['GET', 'POST'])]
-    public function show(Request $request, EntityManagerInterface $entityManager, AttendanceRepository $attendances, UserPasswordHasherInterface $hasher): Response
+    public function show(Request $request, EntityManagerInterface $entityManager, AttendanceRepository $attendances, PreorderRepository $preorders, UserPasswordHasherInterface $hasher): Response
     {
         $user = $this->currentUser();
         $form = $this->createForm(AccountType::class, $user);
@@ -50,6 +52,7 @@ final class AccountController extends AbstractController
         return $this->render('account/show.html.twig', [
             'form' => $form,
             'attendances' => $attendances->findBy(['user' => $user]),
+            'preorders' => $preorders->findForUser($user),
         ]);
     }
 
@@ -75,6 +78,44 @@ final class AccountController extends AbstractController
         }
 
         return $this->redirectToRoute('account', ['_fragment' => 'mot-de-passe']);
+    }
+
+    #[Route('/precommandes/{id}/modifier', name: 'account_preorder_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function editPreorder(Preorder $preorder, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->currentUser();
+        if ($preorder->getUser()?->getId() !== $user->getId()) {
+            throw $this->createNotFoundException();
+        }
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('edit-preorder-'.$preorder->getId(), (string) $request->request->get('_token'))) {
+                throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+            }
+            $this->applyPreorderValues($preorder, $request);
+            if ($this->preorderValuesAreValid($preorder)) {
+                $entityManager->flush();
+                $this->addFlash('success', 'Ta précommande a été modifiée.');
+                return $this->redirectToRoute('site_shop');
+            }
+            $this->addFlash('error', 'Vérifie les tailles, le numéro et la quantité demandés.');
+        }
+        return $this->render('account/preorder_form.html.twig', ['preorder' => $preorder, 'product' => $preorder->getProduct()]);
+    }
+
+    #[Route('/precommandes/{id}/supprimer', name: 'account_preorder_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function deletePreorder(Preorder $preorder, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->currentUser();
+        if ($preorder->getUser()?->getId() !== $user->getId()) {
+            throw $this->createNotFoundException();
+        }
+        if (!$this->isCsrfTokenValid('delete-preorder-'.$preorder->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+        $entityManager->remove($preorder);
+        $entityManager->flush();
+        $this->addFlash('success', 'Ta précommande a été supprimée.');
+        return $this->redirectToRoute('site_shop');
     }
 
     #[Route('/export', name: 'account_export', methods: ['GET'])]
@@ -144,5 +185,25 @@ final class AccountController extends AbstractController
         }
 
         return $user;
+    }
+
+    private function applyPreorderValues(Preorder $preorder, Request $request): void
+    {
+        $number = filter_var($request->request->get('jersey_number'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 99]]);
+        $preorder->setQuantity((int) $request->request->get('quantity'))
+            ->setJerseySize((string) $request->request->get('jersey_size'))
+            ->setJerseyNumber($number === false ? null : $number)
+            ->setShortSize((string) $request->request->get('short_size'))
+            ->setNotes((string) $request->request->get('notes'));
+    }
+
+    private function preorderValuesAreValid(Preorder $preorder): bool
+    {
+        $product = $preorder->getProduct();
+        return $preorder->getQuantity() >= 1 && $preorder->getQuantity() <= 20
+            && (!$product->isRequiresJerseySize() || in_array($preorder->getJerseySize(), ['XS', 'S', 'M', 'L', 'XL', 'XXL'], true))
+            && (!$product->isRequiresJerseySize() || $preorder->getJerseyNumber() !== null)
+            && (!$product->isRequiresShortSize() || in_array($preorder->getShortSize(), ['XS', 'S', 'M', 'L', 'XL', 'XXL'], true))
+            && mb_strlen($preorder->getNotes()) <= 1000;
     }
 }

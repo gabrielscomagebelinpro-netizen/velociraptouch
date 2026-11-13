@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><style>
+body { font-family: DejaVu Sans, sans-serif; color: #17202a; font-size: 10px; }
+h1 { color: #e85d04; margin-bottom: 4px; } .meta { color: #566573; margin-bottom: 20px; }
+table { border-collapse: collapse; width: 100%; } th { background: #17202a; color: #fff; text-align: left; }
+th, td { border: 1px solid #ccd1d1; padding: 6px; } tr:nth-child(even) { background: #f4f6f7; }
+</style></head>
+<body>
+<h1>Précommandes boutique</h1>
+<div class="meta">Export du {{ exportedAt|format_datetime(pattern='dd/MM/y à HH:mm', locale='fr') }} · {{ preorders|length }} précommande{{ preorders|length > 1 ? 's' : '' }}</div>
+{% if preorders %}
+<table><thead><tr><th>#</th><th>Produit</th><th>Nom</th><th>Email</th><th>Qté</th><th>Tailles / numéro</th><th>Date</th></tr></thead><tbody>
+{% for preorder in preorders %}<tr><td>{{ loop.index }}</td><td>{{ preorder.product.name }}</td><td>{{ preorder.name }}</td><td>{{ preorder.email }}</td><td>{{ preorder.quantity }}</td><td>{% if preorder.jerseySize %}Maillot {{ preorder.jerseySize }}{% endif %}{% if preorder.jerseyNumber is not null %} / n°{{ preorder.jerseyNumber }}{% endif %}{% if preorder.shortSize %} / Short {{ preorder.shortSize }}{% endif %}</td><td>{{ preorder.createdAt|date('d/m/Y H:i') }}</td></tr>{% endfor %}
+</tbody></table>
+{% else %}<p>Aucune précommande.</p>{% endif %}
+</body></html>

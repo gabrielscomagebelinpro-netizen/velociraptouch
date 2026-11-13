@@ -53,6 +53,35 @@
         {% endif %}
     </section>
 
+    <section id="precommandes">
+        <div class="admin-card-head">
+            <h2>Mes précommandes</h2>
+            <a class="button button-outline" href="{{ path('site_shop') }}">Voir la boutique</a>
+        </div>
+        {% if preorders is empty %}
+            <p>Tu n’as encore envoyé aucune précommande.</p>
+        {% else %}
+            <div class="admin-content-list">
+                {% for preorder in preorders %}
+                    <article class="admin-event-row">
+                        <div class="admin-event-info">
+                            <strong>{{ preorder.product.name }}</strong>
+                            <span>{{ preorder.quantity }} exemplaire{{ preorder.quantity > 1 ? 's' : '' }}{% if preorder.jerseySize %} · maillot {{ preorder.jerseySize }}{% endif %}{% if preorder.jerseyNumber is not null %} · numéro {{ preorder.jerseyNumber }}{% endif %}{% if preorder.shortSize %} · short {{ preorder.shortSize }}{% endif %}</span>
+                            <small>{{ preorder.createdAt|date('d/m/Y H:i') }}</small>
+                        </div>
+                        <div class="admin-row-actions">
+                            <a class="button button-outline" href="{{ path('account_preorder_edit', {id: preorder.id}) }}">Modifier</a>
+                            <form method="post" action="{{ path('account_preorder_delete', {id: preorder.id}) }}" data-confirm="Supprimer cette précommande ?">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete-preorder-' ~ preorder.id) }}">
+                                <button class="button button-danger" type="submit">Supprimer</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </section>
+
     <section>
         <h2>Télécharger mes données</h2>
         <p>Récupère toutes les données liées à ton compte dans un document PDF (droit d’accès et de portabilité).</p>

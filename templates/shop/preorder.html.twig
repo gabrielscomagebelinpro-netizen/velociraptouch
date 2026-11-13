@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Précommander {{ product.name }} — Vélociraptouch{% endblock %}
+{% block meta_description %}Précommande ton équipement Vélociraptouch.{% endblock %}
+
+{% block navigation %}
+  <a href="{{ path('site_shop') }}">← Retour à la boutique</a>
+  <a href="{{ path('site_home') }}#contact">Contact</a>
+{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main">
+  <div class="page-topbar">
+    <p class="eyebrow">Précommande</p>
+    <a class="button button-outline page-back" href="{{ path('site_shop') }}">← Tous les produits</a>
+  </div>
+
+  <section class="shop-order-panel">
+    <p class="eyebrow">Ta sélection</p>
+    <h1>{{ product.name }} <span>{{ product.priceEuros }} €.</span></h1>
+    <p>{{ product.description|nl2br }}</p>
+    <p class="field-help">Tes coordonnées sont préremplies depuis ton compte. Tu pourras retrouver cette précommande dans ton espace membre. Pas de paiement en ligne : l’association te recontactera pour confirmer les détails.</p>
+    {% if shopError %}<p class="form-note form-note-error">{{ shopError }}</p>{% endif %}
+    <details class="size-guide">
+      <summary>Guide des tailles <span>Mensurations en cm</span></summary>
+      <p class="field-help">Mesure ton tour de poitrine sous les bras et ton tour de taille sans serrer. Pour le short, mesure aussi le tour de hanches à l’endroit le plus large. Entre deux tailles, privilégie la plus grande pour jouer confortablement.</p>
+      <div class="size-guide-tables">
+        {% if product.requiresJerseySize %}
+          <div>
+            <h3>Maillot</h3>
+            <div class="size-guide-table-wrap">
+              <table class="size-guide-table">
+                <thead><tr><th>Taille</th><th>Poitrine</th><th>Taille</th></tr></thead>
+                <tbody>
+                  <tr><th>XS</th><td>84–89</td><td>68–73</td></tr>
+                  <tr><th>S</th><td>90–95</td><td>74–79</td></tr>
+                  <tr><th>M</th><td>96–101</td><td>80–85</td></tr>
+                  <tr><th>L</th><td>102–107</td><td>86–91</td></tr>
+                  <tr><th>XL</th><td>108–114</td><td>92–99</td></tr>
+                  <tr><th>XXL</th><td>115–122</td><td>100–108</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% endif %}
+        {% if product.requiresShortSize %}
+          <div>
+            <h3>Short</h3>
+            <div class="size-guide-table-wrap">
+              <table class="size-guide-table">
+                <thead><tr><th>Taille</th><th>Taille</th><th>Hanches</th></tr></thead>
+                <tbody>
+                  <tr><th>XS</th><td>68–73</td><td>84–89</td></tr>
+                  <tr><th>S</th><td>74–79</td><td>90–95</td></tr>
+                  <tr><th>M</th><td>80–85</td><td>96–101</td></tr>
+                  <tr><th>L</th><td>86–91</td><td>102–107</td></tr>
+                  <tr><th>XL</th><td>92–99</td><td>108–114</td></tr>
+                  <tr><th>XXL</th><td>100–108</td><td>115–122</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </details>
+    <form class="contact-form shop-order-form" method="post" action="{{ path('site_shop_preorder', {id: product.id}) }}">
+      <input type="hidden" name="_token" value="{{ csrf_token('preorder-' ~ product.id) }}">
+      <div class="shop-order-grid">
+        <label>Nom et prénom<input class="form-control" name="name" required maxlength="120" value="{{ preorderUser.firstName }} {{ preorderUser.lastName }}" readonly></label>
+        <label>Email<input class="form-control" name="email" type="email" required maxlength="180" value="{{ preorderUser.email }}" readonly></label>
+        <label>Quantité<input class="form-control" name="quantity" type="number" min="1" max="20" value="1" required></label>
+        {% if product.requiresJerseySize %}<label>Taille maillot<select class="form-control" name="jersey_size" required><option value="">Choisir</option>{% for size in ['XS','S','M','L','XL','XXL'] %}<option>{{ size }}</option>{% endfor %}</select></label>{% endif %}
+        {% if product.requiresJerseySize %}<label>Numéro sur le maillot<input class="form-control" name="jersey_number" type="number" min="0" max="99" required placeholder="0 à 99"></label>{% endif %}
+        {% if product.requiresShortSize %}<label>Taille short<select class="form-control" name="short_size" required><option value="">Choisir</option>{% for size in ['XS','S','M','L','XL','XXL'] %}<option>{{ size }}</option>{% endfor %}</select></label>{% endif %}
+      </div>
+      <label>Précision (facultatif)<textarea class="form-control" name="notes" maxlength="1000" rows="3" placeholder="Une précision pour l’équipe…"></textarea></label>
+      <button class="button button-primary" type="submit">Envoyer la précommande <span>→</span></button>
+    </form>
+  </section>
+</main>
+{% endblock %}
