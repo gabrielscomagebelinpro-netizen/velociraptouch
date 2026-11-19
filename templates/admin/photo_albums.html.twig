@@ -6,9 +6,12 @@
 {% block body %}
 <main id="contenu" tabindex="-1" class="admin-page-main">
     {% include 'admin/_tabs.html.twig' with {active: 'admin_photo_albums'} %}
-    <div class="page-topbar">
-        <div><p class="eyebrow">Albums photos</p><h1>La <span>photothèque.</span></h1></div>
-        <a class="button button-primary page-back" href="{{ path('admin_photo_album_new') }}">Créer un album {{ ui.icon('plus') }}</a>
+    <div class="page-topbar photo-albums-admin-header">
+        <div>
+            <p class="eyebrow">Albums photos</p>
+            <h1>La <span>photothèque.</span></h1>
+            <a class="button button-primary photo-albums-create-button" href="{{ path('admin_photo_album_new') }}">Créer un album {{ ui.icon('plus') }}</a>
+        </div>
     </div>
     {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
     {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
