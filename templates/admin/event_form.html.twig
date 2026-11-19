@@ -24,44 +24,9 @@
         {{ form_end(form) }}
     </section>
     <section class="admin-card admin-photos-card" id="event-photos">
-        <h2>Photos de l’événement</h2>
-        <p class="field-help">Les fichiers originaux sont conservés sans compression. JPEG, PNG, WebP, HEIC ou HEIF, 25 Mo maximum par photo.</p>
-        <form class="event-photo-upload" method="post" action="{{ path('admin_event_photos_upload', {id: event.id}) }}" enctype="multipart/form-data">
-            <input type="hidden" name="_token" value="{{ csrf_token('event-photos-' ~ event.id) }}">
-            <label class="photo-dropzone" for="event-photos-input">
-                <strong>Dépose tes photos ici</strong>
-                <span>ou appuie pour les choisir depuis ton téléphone</span>
-                <input id="event-photos-input" name="photos[]" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
-            </label>
-            <div class="photo-upload-status" aria-live="polite">Aucune photo sélectionnée</div>
-            <div class="photo-upload-preview" aria-live="polite"></div>
-            <button class="button button-primary btn" type="submit">Ajouter les photos {{ ui.icon('upload') }}</button>
-        </form>
-        {% if photos is not empty %}
-            <div class="admin-form-actions photo-download-actions">
-                <a class="button button-primary photo-zip-link" href="{{ path('admin_event_photos_zip', {id: event.id}) }}">Enregistrer toutes les photos (.zip, {{ photos|length }}) {{ ui.icon('archive') }}</a>
-            </div>
-            <p class="field-help photo-share-status" aria-live="polite" hidden></p>
-            <div class="event-photo-grid">
-                {% for photo in photos %}
-                    <figure>
-                        <img class="photo-lazy" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="{{ path('admin_event_photo_view', {id: event.id, filename: photo.filename}) }}" alt="{{ photo.originalName|e }}" loading="lazy" decoding="async">
-                        <figcaption>
-                            <span title="{{ photo.originalName }}">{{ photo.originalName }}</span>
-                            <div class="photo-actions">
-                                <a class="button button-outline" href="{{ path('admin_event_photo_download', {id: event.id, photoId: photo.id}) }}" aria-label="Télécharger {{ photo.originalName }}" title="Télécharger">{{ ui.icon('download') }} <span class="photo-action-label">Télécharger</span></a>
-                                <form method="post" action="{{ path('admin_event_photo_delete', {id: event.id, photoId: photo.id}) }}" data-confirm="Supprimer cette photo ?">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete-event-photo-' ~ photo.id) }}">
-                                    <button class="button button-danger" type="submit" aria-label="Supprimer {{ photo.originalName }}" title="Supprimer">{{ ui.icon('trash') }} <span class="photo-action-label">Supprimer</span></button>
-                                </form>
-                            </div>
-                        </figcaption>
-                    </figure>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="field-help">Aucune photo pour cet événement.</p>
-        {% endif %}
+        <h2>Albums photos</h2>
+        <p class="field-help">Les photos sont gérées dans des albums indépendants des événements.</p>
+        <a class="button button-primary" href="{{ path('admin_photo_albums') }}">Gérer les albums {{ ui.icon('photos') }}</a>
     </section>
 </main>
 {% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
+
+{% block title %}Présences — {{ event.title }}{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main">
+    {% include 'admin/_tabs.html.twig' with {active: 'admin_dashboard'} %}
+
+    <div class="page-topbar">
+        <div>
+            <p class="eyebrow">Feuille de présence</p>
+            <h1>{{ event.title }}</h1>
+            {% if event.date %}<p class="field-help">{{ event.date|format_datetime(pattern='EEEE d MMMM y', locale='fr')|capitalize }}</p>{% endif %}
+        </div>
+        <a class="button button-outline page-back" href="{{ path('admin_dashboard') }}">← Événements</a>
+    </div>
+
+    <section class="admin-card attendance-table-card" aria-labelledby="attendance-count">
+        <div class="attendance-table-header">
+            <h2 id="attendance-count">{{ attendances|length }} participant{{ attendances|length > 1 ? 's' : '' }}</h2>
+            <a class="button button-primary" href="{{ path('admin_event_attendance_pdf', {id: event.id}) }}">Télécharger le PDF {{ ui.icon('download') }}</a>
+        </div>
+
+        {% if attendances is not empty %}
+            <div class="attendance-table-wrap">
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Prénom</th>
+                            <th scope="col">Nom</th>
+                            <th scope="col">Adresse email</th>
+                            <th scope="col">Inscription</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attendance in attendances %}
+                            <tr>
+                                <td data-label="#">{{ loop.index }}</td>
+                                <td data-label="Prénom"><strong>{{ attendance.user.firstName }}</strong></td>
+                                <td data-label="Nom"><strong>{{ attendance.user.lastName }}</strong></td>
+                                <td data-label="Email"><a href="mailto:{{ attendance.user.email }}">{{ attendance.user.email }}</a></td>
+                                <td data-label="Inscription">{{ attendance.createdAt|format_datetime(pattern="dd/MM/y à HH:mm", locale='fr') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="attendance-empty">Aucune présence enregistrée pour cet événement.</p>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

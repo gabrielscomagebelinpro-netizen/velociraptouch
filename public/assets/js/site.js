@@ -134,7 +134,7 @@ if (lightboxTriggers.length) {
     });
 }
 
-const photoInput = document.querySelector("#event-photos-input");
+const photoInput = document.querySelector("#event-photos-input, #album-photos-input");
 const photoDropzone = document.querySelector(".photo-dropzone");
 const photoPreview = document.querySelector(".photo-upload-preview");
 

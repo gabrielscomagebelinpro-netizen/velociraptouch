@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
+
+{% block title %}Administration — Albums photos{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main">
+    {% include 'admin/_tabs.html.twig' with {active: 'admin_photo_albums'} %}
+    <div class="page-topbar">
+        <div><p class="eyebrow">Albums photos</p><h1>La <span>photothèque.</span></h1></div>
+        <a class="button button-primary page-back" href="{{ path('admin_photo_album_new') }}">Créer un album {{ ui.icon('plus') }}</a>
+    </div>
+    {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
+    <section class="admin-card">
+        <div class="admin-content-list">
+        {% for album in albums %}
+            {% set count = photoCounts[album.id] ?? 0 %}
+            <article class="admin-event-row">
+                <div class="admin-event-info">
+                    <strong>{{ album.title }}</strong>
+                    <span>{{ album.description|length > 120 ? album.description|slice(0, 120) ~ '…' : album.description }}</span>
+                    <span>{{ count }} photo{{ count > 1 ? 's' }}</span>
+                </div>
+                <div class="admin-row-actions">
+                    <a class="button button-primary" href="{{ path('admin_photo_album_edit', {id: album.id}) }}">Gérer {{ ui.icon('edit') }}</a>
+                    <form method="post" action="{{ path('admin_photo_album_delete', {id: album.id}) }}" data-confirm="Supprimer l’album « {{ album.title }} » et toutes ses photos ?">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete-photo-album-' ~ album.id) }}">
+                        <button class="button button-danger" type="submit">Supprimer {{ ui.icon('trash') }}</button>
+                    </form>
+                </div>
+            </article>
+        {% else %}
+            <p class="field-help">Aucun album créé.</p>
+        {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

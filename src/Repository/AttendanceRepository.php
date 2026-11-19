@@ -32,7 +32,15 @@ final class AttendanceRepository extends ServiceEntityRepository
 
     public function findForEvent(Event $event): array
     {
-        return $this->findBy(['event' => $event], ['createdAt' => 'ASC']);
+        return $this->createQueryBuilder('attendance')
+            ->join('attendance.user', 'member')
+            ->andWhere('attendance.event = :event')
+            ->setParameter('event', $event)
+            ->addOrderBy('member.lastName', 'ASC')
+            ->addOrderBy('member.firstName', 'ASC')
+            ->addOrderBy('attendance.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     public function removeForPastEvents(\DateTimeImmutable $today): int

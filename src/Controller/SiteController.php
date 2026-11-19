@@ -74,7 +74,6 @@ final class SiteController
 
         return new Response($this->twig->render('home/index.html.twig', [
             'events' => $events,
-            'photo_counts' => $this->eventPhotoRepository->countByEvent(),
             'past_events' => $this->eventRepository->findPast(),
             'calendar_entries' => $this->agendaCalendar->entries($calendarEvents, $today, $this->security->isGranted('ROLE_ADMIN')),
             'attendance_event_ids' => $attendanceEventIds,

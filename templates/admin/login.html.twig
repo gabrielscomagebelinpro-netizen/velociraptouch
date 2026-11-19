@@ -29,6 +29,7 @@
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <button class="button button-primary btn mt-4" type="submit">Se connecter <span>↗</span></button>
     </form>
+    <p class="field-help mt-4"><a href="{{ path('password_forgot') }}">Mot de passe oublié ?</a></p>
     <p class="field-help mt-4">Pas encore de compte ? <a href="{{ path('app_register') }}">Créer un compte</a></p>
 </main>
 {% endblock %}

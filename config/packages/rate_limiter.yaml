@@ -10,3 +10,8 @@ framework:
             policy: sliding_window
             limit: 5
             interval: '15 minutes'
+        # Anti-abus : demandes de réinitialisation par adresse IP.
+        password_reset:
+            policy: sliding_window
+            limit: 5
+            interval: '1 hour'

@@ -20,3 +20,11 @@ services:
     App\Controller\AdminController:
         arguments:
             $eventPhotoDirectory: '%kernel.project_dir%/var/uploads/events'
+
+    App\Controller\PhotoAlbumController:
+        arguments:
+            $photoDirectory: '%kernel.project_dir%/var/uploads/events'
+
+    App\Controller\PasswordResetController:
+        arguments:
+            $sender: '%env(CONTACT_RECIPIENT)%'

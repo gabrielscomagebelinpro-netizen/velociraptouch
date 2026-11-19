@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
+
+{% block title %}{{ album.title }} — Photos{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="section event-album-page">
+    <div class="container-fluid">
+        <div class="section-heading heading-row">
+            <div><p class="eyebrow">Album photo</p><h1>{{ album.title }}</h1><p>{{ album.description }}</p></div>
+            <a class="button button-outline" href="{{ path('photo_albums') }}">Toutes les photos</a>
+        </div>
+        {% if photos is not empty %}
+            <div class="photo-download-actions public-photo-download-actions">
+                <a class="button button-primary photo-zip-link" href="{{ path('photo_album_zip', {id: album.id}) }}">Enregistrer toutes les photos (.zip) {{ ui.icon('archive') }}</a>
+            </div>
+            <div class="event-photo-grid">
+            {% for photo in photos %}
+                <figure>
+                    <a href="{{ path('photo_album_photo_view', {id: album.id, filename: photo.filename}) }}" target="_blank">
+                        <img src="{{ path('photo_album_photo_view', {id: album.id, filename: photo.filename}) }}" alt="{{ photo.originalName|e }}" loading="lazy" decoding="async">
+                    </a>
+                    <figcaption>
+                        <span>{{ photo.originalName }}</span>
+                        <a class="button button-outline" href="{{ path('photo_album_photo_download', {id: album.id, filename: photo.filename}) }}" download="{{ photo.originalName }}">{{ ui.icon('download') }} Télécharger cette photo</a>
+                    </figcaption>
+                </figure>
+            {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-state">Aucune photo n’est disponible dans cet album.</p>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+{% import '_icons.html.twig' as ui %}
+
+{% block title %}{{ album ? album.title : 'Nouvel album photo' }}{% endblock %}
+
+{% block body %}
+<main id="contenu" tabindex="-1" class="admin-page-main">
+    {% include 'admin/_tabs.html.twig' with {active: 'admin_photo_albums'} %}
+    <div class="page-topbar">
+        <p class="eyebrow">Album photo</p>
+        <a class="button button-outline page-back" href="{{ path('admin_photo_albums') }}">← Albums</a>
+    </div>
+    <h1>{{ album ? 'Modifier' : 'Créer' }} <span>l’album.</span></h1>
+    {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
+
+    <div class="admin-photo-album-layout">
+    <section class="admin-card album-details-card">
+        {{ form_start(form, {attr: {class: 'contact-form'}}) }}
+            {{ form_row(form.title, {attr: {class: 'form-control'}}) }}
+            {{ form_row(form.description, {attr: {class: 'form-control'}}) }}
+            <button class="button button-primary btn" type="submit">Enregistrer {{ ui.icon('save') }}</button>
+        {{ form_end(form) }}
+    </section>
+
+    {% if album %}
+    <section class="admin-card admin-photos-card album-photos-card" id="album-photos">
+        <h2>Photos de l’album</h2>
+        <p class="field-help">JPEG, PNG, WebP, HEIC ou HEIF, 25 Mo maximum par photo.</p>
+        <form class="event-photo-upload album-photo-upload" method="post" action="{{ path('admin_photo_album_upload', {id: album.id}) }}" enctype="multipart/form-data">
+            <input type="hidden" name="_token" value="{{ csrf_token('upload-photo-album-' ~ album.id) }}">
+            <label class="photo-dropzone" for="album-photos-input">
+                <strong>Dépose tes photos ici</strong>
+                <span>JPEG, PNG, WebP, HEIC ou HEIF · 25 Mo maximum</span>
+                <input id="album-photos-input" name="photos[]" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+            </label>
+            <div class="photo-upload-status" aria-live="polite">Aucune photo sélectionnée</div>
+            <div class="photo-upload-preview" aria-live="polite"></div>
+            <button class="button button-primary btn" type="submit">Ajouter les photos {{ ui.icon('upload') }}</button>
+        </form>
+        {% if photos is not empty %}
+            <div class="event-photo-grid">
+            {% for photo in photos %}
+                <figure>
+                    <img src="{{ path('photo_album_photo_view', {id: album.id, filename: photo.filename}) }}" alt="{{ photo.originalName|e }}" loading="lazy" decoding="async">
+                    <figcaption>
+                        <span title="{{ photo.originalName|e }}">{{ photo.originalName }}</span>
+                        <div class="photo-actions">
+                            <a class="button button-outline" href="{{ path('photo_album_photo_download', {id: album.id, filename: photo.filename}) }}" title="Télécharger">{{ ui.icon('download') }} <span class="photo-action-label">Télécharger</span></a>
+                            <form method="post" action="{{ path('admin_photo_album_photo_delete', {id: album.id, photoId: photo.id}) }}" data-confirm="Supprimer cette photo de l’album ?">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete-album-photo-' ~ photo.id) }}">
+                                <button class="button button-danger" type="submit" title="Supprimer">{{ ui.icon('trash') }} <span class="photo-action-label">Supprimer</span></button>
+                            </form>
+                        </div>
+                    </figcaption>
+                </figure>
+            {% endfor %}
+            </div>
+        {% else %}
+            <p class="field-help">Aucune photo dans cet album.</p>
+        {% endif %}
+    </section>
+    {% endif %}
+    </div>
+</main>
+{% endblock %}

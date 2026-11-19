@@ -41,9 +41,8 @@
                             {% if event.description %}<span>{{ event.description }}</span>{% endif %}
                         </div>
                         <div class="admin-row-actions">
-                            <a class="button button-primary" href="{{ path('admin_event_edit', {id: event.id}) }}#event-photos">Photos {{ ui.icon('photos') }}</a>
                             <a class="button button-outline" href="{{ path('admin_event_edit', {id: event.id}) }}">Modifier {{ ui.icon('edit') }}</a>
-                            <a class="button button-outline" href="{{ path('admin_event_attendance_pdf', {id: event.id}) }}" title="Télécharger la feuille de présences (PDF)">Présences {{ ui.icon('attendance') }}</a>
+                            <a class="button button-outline" href="{{ path('admin_event_attendances', {id: event.id}) }}" title="Afficher le tableau des présences">Présences {{ ui.icon('attendance') }}</a>
                             <form method="post" action="{{ path('admin_event_delete', {id: event.id}) }}" data-confirm="Supprimer l’événement « {{ event.title }} » ?">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete-event-' ~ event.id) }}">
                                 <button class="button button-danger" type="submit">Supprimer {{ ui.icon('trash') }}</button>
@@ -60,15 +59,12 @@
                         <summary>Événements passés ({{ pastEvents|length }})</summary>
                         <div class="admin-content-list">
                         {% for event in pastEvents %}
-                            {% set photoCount = photoCounts[event.id] ?? 0 %}
                             <article class="admin-event-row is-past">
                                 <div class="admin-event-info">
                                     <time class="admin-event-date" datetime="{{ event.date|date('Y-m-d') }}">{{ event.date|format_datetime(pattern='EEE dd/MM/y', locale='fr') }}</time>
                                     <strong>{{ event.title }}</strong>
-                                    <span>{{ photoCount ? photoCount ~ ' photo' ~ (photoCount > 1 ? 's') : 'Aucune photo' }}</span>
                                 </div>
                                 <div class="admin-row-actions">
-                                    <a class="button button-primary" href="{{ path('admin_event_edit', {id: event.id}) }}#event-photos">Photos {{ ui.icon('photos') }}</a>
                                     <a class="button button-outline" href="{{ path('admin_event_edit', {id: event.id}) }}">Modifier {{ ui.icon('edit') }}</a>
                                 </div>
                             </article>
@@ -78,26 +74,11 @@
                 {% endif %}
             </section>
             <section class="admin-card admin-albums-card">
-                <h2>Photos des événements</h2>
-                <p class="field-help">Tous les événements qui ont des photos, y compris les événements passés.</p>
-                <div class="admin-content-list">
-                {% for album in photoAlbums %}
-                    <article class="admin-event-row">
-                        <div class="admin-event-info">
-                            {% if album.event.date %}<time class="admin-event-date" datetime="{{ album.event.date|date('Y-m-d') }}">{{ album.event.date|format_datetime(pattern='EEE dd/MM/y', locale='fr') }}</time>{% endif %}
-                            <strong>{{ album.event.title }}</strong>
-                            <span>{{ album.photoCount }} photo{{ album.photoCount > 1 ? 's' }}</span>
-                        </div>
-                        <div class="admin-row-actions">
-                            <a class="button button-primary desktop-only" href="{{ path('admin_event_photos_zip', {id: album.event.id}) }}">Tout télécharger {{ ui.icon('archive') }}</a>
-                            <a class="button button-primary mobile-only" href="{{ path('admin_event_edit', {id: album.event.id}) }}#event-photos">Enregistrer {{ ui.icon('phone') }}</a>
-                            <a class="button button-outline" href="{{ path('admin_event_edit', {id: album.event.id}) }}#event-photos">Voir {{ ui.icon('view') }}</a>
-                        </div>
-                    </article>
-                {% else %}
-                    <p class="field-help">Aucune photo pour le moment.</p>
-                {% endfor %}
+                <div class="admin-card-head">
+                    <h2>Albums photos</h2>
+                    <a class="button button-primary" href="{{ path('admin_photo_albums') }}">Gérer les albums {{ ui.icon('photos') }}</a>
                 </div>
+                <p class="field-help">Les albums sont indépendants des événements.</p>
             </section>
         </div>
     </div>

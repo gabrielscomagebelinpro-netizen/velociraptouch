@@ -50,9 +50,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastLoginAt = null;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $passwordResetTokenHash = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $passwordResetExpiresAt = null;
+
     public function getId(): ?int { return $this->id; }
     public function getLastLoginAt(): ?\DateTimeImmutable { return $this->lastLoginAt; }
     public function setLastLoginAt(?\DateTimeImmutable $lastLoginAt): self { $this->lastLoginAt = $lastLoginAt; return $this; }
+    public function getPasswordResetTokenHash(): ?string { return $this->passwordResetTokenHash; }
+    public function setPasswordResetTokenHash(?string $passwordResetTokenHash): self { $this->passwordResetTokenHash = $passwordResetTokenHash; return $this; }
+    public function getPasswordResetExpiresAt(): ?\DateTimeImmutable { return $this->passwordResetExpiresAt; }
+    public function setPasswordResetExpiresAt(?\DateTimeImmutable $passwordResetExpiresAt): self { $this->passwordResetExpiresAt = $passwordResetExpiresAt; return $this; }
     public function getUserIdentifier(): string { return $this->email; }
     public function getRoles(): array { return array_values(array_unique(array_merge($this->roles, ['ROLE_USER']))); }
     public function setRoles(array $roles): self { $this->roles = $roles; return $this; }

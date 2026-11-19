@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Event;
+use App\Entity\PhotoAlbum;
 use App\Entity\EventPhoto;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,51 +15,43 @@ final class EventPhotoRepository extends ServiceEntityRepository
         parent::__construct($registry, EventPhoto::class);
     }
 
+    // Ancienne API conservée uniquement pour les contrôleurs liés aux événements encore en transition.
     public function findForEvent(Event $event): array
     {
         return $this->findBy(['event' => $event], ['createdAt' => 'DESC']);
     }
 
-    /**
-     * Nombre de photos par identifiant d'événement (les événements sans photo sont absents).
-     *
-     * @return array<int, int>
-     */
     public function countByEvent(): array
     {
         $rows = $this->createQueryBuilder('photo')
             ->select('IDENTITY(photo.event) AS eventId', 'COUNT(photo.id) AS photoCount')
+            ->where('photo.event IS NOT NULL')
             ->groupBy('photo.event')
+            ->getQuery()->getArrayResult();
+        $counts = [];
+        foreach ($rows as $row) $counts[(int) $row['eventId']] = (int) $row['photoCount'];
+        return $counts;
+    }
+
+    public function findForAlbum(PhotoAlbum $album): array
+    {
+        return $this->findBy(['album' => $album], ['createdAt' => 'DESC']);
+    }
+
+    /** @return array<int, int> */
+    public function countByAlbum(): array
+    {
+        $rows = $this->createQueryBuilder('photo')
+            ->select('IDENTITY(photo.album) AS albumId', 'COUNT(photo.id) AS photoCount')
+            ->groupBy('photo.album')
             ->getQuery()
             ->getArrayResult();
 
         $counts = [];
         foreach ($rows as $row) {
-            $counts[(int) $row['eventId']] = (int) $row['photoCount'];
+            $counts[(int) $row['albumId']] = (int) $row['photoCount'];
         }
 
         return $counts;
-    }
-
-    /**
-     * Événements ayant au moins une photo, du plus récent au plus ancien, avec leur nombre de photos.
-     *
-     * @return list<array{event: Event, photoCount: int}>
-     */
-    public function findEventsWithPhotos(): array
-    {
-        $rows = $this->getEntityManager()->createQueryBuilder()
-            ->select('event AS eventEntity', 'COUNT(photo.id) AS photoCount')
-            ->from(Event::class, 'event')
-            ->join(EventPhoto::class, 'photo', 'WITH', 'photo.event = event')
-            ->groupBy('event.id')
-            ->orderBy('event.date', 'DESC')
-            ->getQuery()
-            ->getResult();
-
-        return array_map(
-            static fn (array $row): array => ['event' => $row['eventEntity'], 'photoCount' => (int) $row['photoCount']],
-            $rows,
-        );
     }
 }

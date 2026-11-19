@@ -12,9 +12,13 @@ class EventPhoto
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(targetEntity: PhotoAlbum::class, inversedBy: 'photos')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    private ?PhotoAlbum $album = null;
+
     #[ORM\ManyToOne(targetEntity: Event::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private Event $event;
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    private ?Event $event = null;
 
     #[ORM\Column(length: 255)]
     private string $filename;
@@ -31,9 +35,13 @@ class EventPhoto
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct(Event $event, string $filename, string $originalName, string $mimeType, int $fileSize)
+    public function __construct(PhotoAlbum|Event $albumOrEvent, string $filename, string $originalName, string $mimeType, int $fileSize)
     {
-        $this->event = $event;
+        if ($albumOrEvent instanceof PhotoAlbum) {
+            $this->album = $albumOrEvent;
+        } else {
+            $this->event = $albumOrEvent;
+        }
         $this->filename = $filename;
         $this->originalName = $originalName;
         $this->mimeType = $mimeType;
@@ -42,7 +50,8 @@ class EventPhoto
     }
 
     public function getId(): ?int { return $this->id; }
-    public function getEvent(): Event { return $this->event; }
+    public function getAlbum(): ?PhotoAlbum { return $this->album; }
+    public function getEvent(): ?Event { return $this->event; }
     public function getFilename(): string { return $this->filename; }
     public function getOriginalName(): string { return $this->originalName; }
     public function getMimeType(): string { return $this->mimeType; }

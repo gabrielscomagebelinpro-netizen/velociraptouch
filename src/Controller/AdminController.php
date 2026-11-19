@@ -52,8 +52,6 @@ final class AdminController extends AbstractController
             'form' => $form,
             'events' => $events->findUpcoming(),
             'pastEvents' => $events->findPast(),
-            'photoCounts' => $photos->countByEvent(),
-            'photoAlbums' => $photos->findEventsWithPhotos(),
         ]);
     }
 
@@ -68,7 +66,7 @@ final class AdminController extends AbstractController
             $this->addFlash('success', 'Événement modifié.');
             return $this->redirectToRoute('admin_dashboard');
         }
-        return $this->render('admin/event_form.html.twig', ['form' => $form, 'event' => $event, 'photos' => $photos->findForEvent($event)]);
+        return $this->render('admin/event_form.html.twig', ['form' => $form, 'event' => $event]);
     }
 
     #[Route('/events/{id}/photos', name: 'admin_event_photos_upload', methods: ['POST'])]
@@ -370,6 +368,15 @@ final class AdminController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_users');
+    }
+
+    #[Route('/events/{id}/presences', name: 'admin_event_attendances', methods: ['GET'])]
+    public function attendances(Event $event, AttendanceRepository $attendances): Response
+    {
+        return $this->render('admin/attendances.html.twig', [
+            'event' => $event,
+            'attendances' => $attendances->findForEvent($event),
+        ]);
     }
 
     #[Route('/events/{id}/attendance.pdf', name: 'admin_event_attendance_pdf', methods: ['GET'])]
