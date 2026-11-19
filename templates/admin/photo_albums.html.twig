@@ -5,17 +5,13 @@
 
 {% block body %}
 <main id="contenu" tabindex="-1" class="admin-page-main">
+    <div class="page-topbar"><p class="eyebrow">Espace administration</p><a class="button button-outline" href="{{ path('photo_albums') }}">Voir les photos ↗</a></div>
+    <div class="admin-page-header"><div><h1>La <span>photothèque.</span></h1><p class="admin-page-intro">Crée les albums, ajoute leurs photos et suis les souvenirs publiés sur le site.</p></div></div>
     {% include 'admin/_tabs.html.twig' with {active: 'admin_photo_albums'} %}
-    <div class="page-topbar photo-albums-admin-header">
-        <div>
-            <p class="eyebrow">Albums photos</p>
-            <h1>La <span>photothèque.</span></h1>
-            <a class="button button-primary photo-albums-create-button" href="{{ path('admin_photo_album_new') }}">Créer un album {{ ui.icon('plus') }}</a>
-        </div>
-    </div>
+    <div class="admin-shop-create-action"><a class="button button-primary" href="{{ path('admin_photo_album_new') }}">Créer un album {{ ui.icon('plus') }}</a></div>
     {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
     {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
-    <section class="admin-card">
+    <section class="admin-card" id="albums"><h2>Albums <span class="admin-count">({{ albums|length }})</span></h2>
         <div class="admin-content-list">
         {% for album in albums %}
             {% set count = photoCounts[album.id] ?? 0 %}
