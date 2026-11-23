@@ -13,6 +13,12 @@
     <meta name="application-name" content="Vélociraptouch" />
     <meta name="theme-color" content="#163545" />
     {# RGPD : polices hébergées localement, aucune ressource tierce chargée sans consentement. #}
+    {# Préchargement des 4 polices du site : elles arrivent avant le premier affichage, sans passer
+       quelques millisecondes par une police de secours (visible surtout dans l'administration). #}
+    <link rel="preload" href="/assets/fonts/dm-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/barlow-condensed-500-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/racing-sans-one-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/pinyon-script-400-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="{{ versioned_asset('/assets/css/fonts.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('/assets/css/site.css') }}" />
     {% block stylesheets %}{% endblock %}
