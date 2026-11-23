@@ -5223,11 +5223,31 @@ a.month-calendar-event.is-past:hover {
 
 .join-steps {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     list-style: none;
     margin: 0;
     padding: 0
+}
+
+/* Petite précision sous une étape (ex. mail Oval-e non reçu) : lien lisible sur le fond bleu nuit. */
+.join-step .join-step-note {
+    font-size: 14px;
+    opacity: .85
+}
+
+.join-step-note a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px
+}
+
+/* Tablette et petit PC : les quatre étapes de la licence passent en 2 × 2 pour rester lisibles. */
+@media (min-width: 761px) and (max-width: 1100px) {
+    .join-steps {
+        grid-template-columns: repeat(2, 1fr);
+        row-gap: 34px
+    }
 }
 
 .join-step {
@@ -5612,4 +5632,146 @@ a.month-calendar-event.is-past:hover {
     min-width: 0;
     max-width: 100%;
     overflow-wrap: anywhere;
+}
+
+/* Menu : les onglets ne passent jamais sur deux lignes. Quand ils ne tiennent plus sur une ligne
+   (tablette, ou admin connecté avec plus d'onglets), site.js ajoute .nav-compact et le menu passe en burger. */
+.main-nav a,
+.main-nav .nav-logout {
+    white-space: nowrap
+}
+
+.site-header.nav-compact .main-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: max-content;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    padding: 20px 5vw 20px 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    font-size: 15px;
+    z-index: 20
+}
+
+.site-header.nav-compact .main-nav.open {
+    display: flex
+}
+
+.site-header.nav-compact .main-nav a::before,
+.site-header.nav-compact .main-nav .nav-logout::before {
+    content: "›";
+    display: inline-block;
+    margin-right: .55em;
+    color: var(--orange);
+    font-size: 1.35em;
+    line-height: 0;
+    vertical-align: -.08em
+}
+
+.site-header.nav-compact .nav-admin {
+    border: 0;
+    padding: 0
+}
+
+.site-header.nav-compact .menu-toggle {
+    display: block
+}
+
+/* Tablette : boutons du hero l'un sous l'autre et tampon posé en bas à gauche de la photo,
+   pour qu'il ne recouvre plus « Découvrir le collectif ». */
+@media (min-width: 761px) and (max-width: 1050px) {
+    .hero-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 18px
+    }
+
+    .hero-stamp {
+        right: auto;
+        left: 46%;
+        bottom: 4%;
+        width: 100px;
+        height: 100px
+    }
+}
+
+/* Téléphone et tablette : liens du pied de page et des partenaires assez hauts pour le doigt (24 px minimum). */
+@media (max-width: 1050px) {
+    footer div a,
+    .footer-legal a {
+        display: inline-block;
+        padding-top: 5px;
+        padding-bottom: 5px
+    }
+
+    .sponsor-link {
+        padding-top: 5px;
+        padding-bottom: 5px
+    }
+}
+
+/* Boutique : l'animation d'entrée de l'autocollant ne doit pas créer de scroll horizontal. */
+.shop-hero {
+    overflow-x: clip
+}
+
+/* Très petits écrans : les longs titres (« Confidentialité ») restent dans la largeur. */
+@media (max-width: 380px) {
+    .admin-page-main h1 {
+        font-size: clamp(38px, 13vw, 50px);
+        overflow-wrap: break-word
+    }
+}
+
+@media (max-width: 760px) {
+    .hero-actions .text-link {
+        padding-top: 4px;
+        padding-bottom: 4px
+    }
+}
+
+/* « Le collectif » : 39 % + 61 % + l'espacement dépassaient 100 % et créaient un scroll horizontal sur PC.
+   Les colonnes se partagent maintenant la place restante après l'espacement. */
+@media (min-width: 1051px) {
+    .collective {
+        grid-template-columns: minmax(0, 39fr) minmax(0, 61fr)
+    }
+}
+
+@media (min-width: 761px) and (max-width: 1050px) {
+    .collective {
+        grid-template-columns: minmax(0, 42fr) minmax(0, 58fr)
+    }
+}
+
+/* Lien « Ouvrir le lien » de l'admin : zone cliquable de 24 px minimum au doigt. */
+@media (max-width: 1050px) {
+    .admin-link-test {
+        display: inline-block;
+        padding-top: 4px;
+        padding-bottom: 4px
+    }
+}
+
+/* Menu burger : l'en-tête est collant, donc un menu plus haut que l'écran (téléphone en paysage,
+   admin connecté) doit défiler à l'intérieur pour que les derniers onglets restent accessibles. */
+.site-header.nav-compact .main-nav {
+    max-height: calc(100vh - 82px);
+    max-height: calc(100dvh - 82px);
+    overflow-y: auto;
+    overscroll-behavior: contain
+}
+
+@media (max-width: 760px) {
+    .main-nav {
+        max-height: calc(100vh - 68px);
+        max-height: calc(100dvh - 68px);
+        overflow-y: auto;
+        overscroll-behavior: contain
+    }
 }

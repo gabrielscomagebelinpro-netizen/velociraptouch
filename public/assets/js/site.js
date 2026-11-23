@@ -8,6 +8,26 @@ const setMenuOpen = (open) => {
     menuToggle?.setAttribute("aria-label", open ? "Fermer le menu" : "Ouvrir le menu");
 };
 menuToggle?.addEventListener("click", () => setMenuOpen(!navigation?.classList.contains("open")));
+
+// Sur PC, si les onglets ne tiennent plus sur une ligne, le menu passe en burger (classe .nav-compact).
+const siteHeader = document.querySelector(".site-header");
+const siteBrand = siteHeader?.querySelector(".brand");
+const fitNav = () => {
+    if (!siteHeader || !navigation) return;
+    const wasCompact = siteHeader.classList.contains("nav-compact");
+    siteHeader.classList.remove("nav-compact");
+    let compact = false;
+    if (getComputedStyle(navigation).position !== "absolute") {
+        const navLeft = navigation.getBoundingClientRect().left;
+        const brandRight = siteBrand ? siteBrand.getBoundingClientRect().right : 0;
+        compact = siteHeader.scrollWidth > siteHeader.clientWidth + 1 || navLeft < brandRight + 24;
+    }
+    siteHeader.classList.toggle("nav-compact", compact);
+    if (wasCompact && !compact) setMenuOpen(false);
+};
+fitNav();
+window.addEventListener("resize", fitNav);
+document.fonts?.ready.then(fitNav);
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && navigation?.classList.contains("open")) {
         setMenuOpen(false);
