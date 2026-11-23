@@ -437,7 +437,8 @@ if (isShopLandingPage) {
     window.addEventListener("load", resetShopScroll, {once: true});
 }
 
-const savedScrollPosition = isShopLandingPage ? null : savedScrollPositions[window.location.pathname];
+// Une adresse avec ancre (/#rejoindre…) gagne toujours sur la position mémorisée : on va à la section demandée.
+const savedScrollPosition = isShopLandingPage || window.location.hash ? null : savedScrollPositions[window.location.pathname];
 if (savedScrollPosition) {
     delete savedScrollPositions[window.location.pathname];
     writeScrollPositions(savedScrollPositions);
@@ -731,3 +732,129 @@ document.querySelectorAll('input[type="password"]').forEach((input) => {
     // Par sécurité, le mot de passe repasse en masqué à l'envoi du formulaire (le navigateur ne le mémorise pas en clair).
     input.form?.addEventListener("submit", () => setVisible(false));
 });
+
+// Présence aux événements sans rechargement de page : le formulaire part en arrière-plan (fetch),
+// puis le bouton est remplacé sur place par le nouvel état, avec une petite animation.
+// Sans JavaScript, le formulaire classique continue de fonctionner.
+const rsvpCheckIcon = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+let rsvpLiveRegion = null;
+const announceRsvp = (message) => {
+    if (!rsvpLiveRegion) {
+        rsvpLiveRegion = document.createElement("div");
+        rsvpLiveRegion.setAttribute("role", "status");
+        rsvpLiveRegion.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap";
+        document.body.appendChild(rsvpLiveRegion);
+    }
+    rsvpLiveRegion.textContent = "";
+    setTimeout(() => { rsvpLiveRegion.textContent = message; }, 50);
+};
+
+const renderRsvp = (form, attending) => {
+    const title = form.closest(".event")?.querySelector("h3")?.textContent.trim() || "cet événement";
+    form.querySelectorAll(":scope > :not(input[type=hidden])").forEach((node) => node.remove());
+
+    if (attending) {
+        const status = document.createElement("p");
+        status.className = "rsvp-status";
+        status.innerHTML = `<span class="rsvp-check" aria-hidden="true">${rsvpCheckIcon}</span>Tu y vas déjà&nbsp;!`;
+        const cancel = document.createElement("button");
+        cancel.className = "rsvp rsvp-cancel";
+        cancel.type = "submit";
+        cancel.textContent = "Annuler ma présence";
+        cancel.setAttribute("aria-label", `Annuler ma présence à ${title}`);
+        form.append(status, cancel);
+    } else {
+        const join = document.createElement("button");
+        join.className = "rsvp rsvp-button rsvp-join";
+        join.type = "submit";
+        join.innerHTML = 'Je serai là <span class="rsvp-icon" aria-hidden="true">+</span>';
+        join.setAttribute("aria-label", `Je serai là : m’inscrire à ${title}`);
+        form.append(join);
+    }
+
+    form.classList.toggle("is-confirmed", attending);
+    form.closest(".event")?.classList.toggle("is-attending", attending);
+    // Rejoue l'animation d'entrée à chaque changement.
+    form.classList.remove("rsvp-enter");
+    void form.offsetWidth;
+    form.classList.add("rsvp-enter");
+    form.closest(".event")?.classList.add("rsvp-changed");
+};
+
+document.querySelectorAll(".event-rsvp-form").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (form.classList.contains("is-busy")) return;
+        const hadFocus = form.contains(document.activeElement);
+        form.classList.add("is-busy");
+        form.setAttribute("aria-busy", "true");
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: {Accept: "application/json"},
+                credentials: "same-origin",
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                if (data.login) {
+                    window.location.href = data.login;
+                    return;
+                }
+                announceRsvp(data.error || "Impossible d’enregistrer ta présence. Réessaie.");
+                form.classList.add("rsvp-error");
+                setTimeout(() => form.classList.remove("rsvp-error"), 600);
+                return;
+            }
+            renderRsvp(form, Boolean(data.attending));
+            announceRsvp(data.attending ? "Ta présence est enregistrée." : "Ta présence a été annulée.");
+            // Le focus clavier reste sur le bouton de la ligne au lieu de se perdre.
+            if (hadFocus) form.querySelector("button")?.focus({preventScroll: true});
+        } catch {
+            // Problème réseau : on retombe sur l'envoi classique du formulaire.
+            form.submit();
+        } finally {
+            form.classList.remove("is-busy");
+            form.removeAttribute("aria-busy");
+        }
+    });
+});
+
+// Arrivée sur une page avec une ancre (ex. /#rejoindre depuis une autre page) : saut direct à la section,
+// sans le long défilement animé depuis le haut (le défilement doux reste pour les clics dans la page).
+// On recale une fois les polices et les images chargées, sauf si le visiteur a déjà fait défiler lui-même.
+const jumpToHashTarget = () => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    const target = id ? document.getElementById(id) : null;
+    if (!target) return false;
+    const root = document.documentElement;
+    const previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    target.scrollIntoView({block: "start", behavior: "instant"});
+    root.style.scrollBehavior = previous;
+    return true;
+};
+
+if (window.location.hash && jumpToHashTarget()) {
+    let userScrolled = false;
+    const stopFollowing = () => { userScrolled = true; };
+    ["wheel", "touchstart", "keydown", "mousedown"].forEach((type) => window.addEventListener(type, stopFollowing, {once: true, passive: true}));
+    const settle = () => { if (!userScrolled) jumpToHashTarget(); };
+    document.fonts?.ready.then(settle);
+    window.addEventListener("load", () => {
+        settle();
+        // Dernier recalage après les images chargées tardivement (lazy-loading).
+        setTimeout(settle, 400);
+    }, {once: true});
+}
+
+// Transitions entre pages : quand le navigateur annule une transition (navigation tapée dans la barre d'adresse,
+// clics très rapprochés…), il rejette ses promesses. Rien de grave : on les absorbe pour garder la console propre.
+const ignoreAbortedTransition = (event) => {
+    const transition = event.viewTransition;
+    if (!transition) return;
+    [transition.ready, transition.finished, transition.updateCallbackDone].forEach((promise) => promise?.catch(() => {}));
+};
+window.addEventListener("pageswap", ignoreAbortedTransition);
+window.addEventListener("pagereveal", ignoreAbortedTransition);

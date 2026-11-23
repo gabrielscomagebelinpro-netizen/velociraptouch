@@ -20,6 +20,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -181,29 +182,44 @@ final class SiteController
     }
 
     #[Route('/events/{id}/attendance', name: 'event_attendance_toggle', methods: ['POST'])]
-    public function toggleAttendance(Event $event, Request $request): RedirectResponse
+    public function toggleAttendance(Event $event, Request $request): Response
     {
+        // Appel depuis site.js (fetch) : réponse JSON, la page met à jour le bouton sur place sans se recharger.
+        $wantsJson = str_contains((string) $request->headers->get('Accept'), 'application/json');
+
         $user = $this->security->getUser();
         if (!$user instanceof User) {
-            return new RedirectResponse('/connexion');
+            return $wantsJson
+                ? new JsonResponse(['error' => 'Connecte-toi pour indiquer ta présence.', 'login' => '/connexion'], Response::HTTP_UNAUTHORIZED)
+                : new RedirectResponse('/connexion');
         }
 
         if (!$this->csrfTokens->isTokenValid(new CsrfToken('attendance-'.$event->getId(), (string) $request->request->get('_token')))) {
+            if ($wantsJson) {
+                return new JsonResponse(['error' => 'La page a expiré. Recharge-la puis réessaie.'], Response::HTTP_FORBIDDEN);
+            }
             throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException('Jeton CSRF invalide.');
         }
 
         $attendance = $this->attendanceRepository->findOneBy(['event' => $event, 'user' => $user]);
         if ($attendance instanceof Attendance) {
             $this->entityManager->remove($attendance);
+            $attending = false;
             $message = 'Votre présence a été annulée.';
         } else {
             $this->entityManager->persist(new Attendance($event, $user));
+            $attending = true;
             $message = 'Votre présence est enregistrée.';
         }
         $this->entityManager->flush();
 
+        if ($wantsJson) {
+            return new JsonResponse(['attending' => $attending, 'message' => $message]);
+        }
+
+        // Sans JavaScript : retour sur la ligne de l'événement plutôt qu'en haut de la page.
         $request->getSession()->getFlashBag()->add('attendance', $message);
-        return new RedirectResponse($this->safeReferer($request, '/#agenda'));
+        return new RedirectResponse($this->safeReferer($request, '/').'#event-'.$event->getId());
     }
 
     /**

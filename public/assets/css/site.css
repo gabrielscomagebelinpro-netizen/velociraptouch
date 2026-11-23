@@ -6234,3 +6234,92 @@ a.month-calendar-event.is-past:hover {
     display: inline-flex;
     align-items: center
 }
+
+/* Présence : transition quand l'état change sans rechargement (site.js). */
+.event-rsvp-form.is-busy button {
+    opacity: .6;
+    cursor: progress
+}
+
+@keyframes rsvp-in {
+    from { opacity: 0; transform: translateY(6px) }
+    to { opacity: 1; transform: none }
+}
+
+@keyframes rsvp-pop {
+    0% { transform: scale(0) }
+    70% { transform: scale(1.18) }
+    100% { transform: scale(1) }
+}
+
+@keyframes rsvp-bar {
+    from { transform: scaleY(0) }
+    to { transform: scaleY(1) }
+}
+
+@keyframes rsvp-shake {
+    0%, 100% { transform: none }
+    25% { transform: translateX(-4px) }
+    75% { transform: translateX(4px) }
+}
+
+.event-rsvp-form.rsvp-enter > :not(input) {
+    animation: rsvp-in .35s cubic-bezier(.22, 1, .36, 1) both
+}
+
+.event-rsvp-form.rsvp-enter > .rsvp-cancel {
+    animation-delay: .08s
+}
+
+.event-rsvp-form.rsvp-enter .rsvp-check {
+    animation: rsvp-pop .45s cubic-bezier(.34, 1.56, .64, 1) .05s both
+}
+
+.event.rsvp-changed.is-attending::before {
+    transform-origin: center;
+    animation: rsvp-bar .4s cubic-bezier(.22, 1, .36, 1) both
+}
+
+.event-rsvp-form.rsvp-error {
+    animation: rsvp-shake .3s ease
+}
+
+/* ===== Transitions entre les pages =====
+   View Transitions du navigateur (Chrome, Edge, Safari récents) : l'ancienne page s'efface en remontant légèrement,
+   la nouvelle arrive en fondu par en dessous. L'en-tête garde sa place et ne clignote pas.
+   Les navigateurs qui ne connaissent pas cette fonction changent de page normalement. */
+@view-transition {
+    navigation: auto;
+}
+
+.site-header {
+    view-transition-name: site-header
+}
+
+::view-transition-group(site-header) {
+    animation-duration: 0s
+}
+
+::view-transition-old(root) {
+    animation: page-out .22s cubic-bezier(.4, 0, 1, 1) both
+}
+
+::view-transition-new(root) {
+    animation: page-in .42s cubic-bezier(.22, 1, .36, 1) .06s both
+}
+
+@keyframes page-out {
+    to { opacity: 0; transform: translateY(-10px) }
+}
+
+@keyframes page-in {
+    from { opacity: 0; transform: translateY(14px) }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important
+    }
+}
