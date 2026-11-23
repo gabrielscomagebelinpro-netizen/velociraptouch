@@ -2,12 +2,49 @@ const menuToggle = document.querySelector(".menu-toggle");
 const navigation = document.querySelector(".main-nav");
 
 // Le bouton annonce aux lecteurs d'écran si le menu est ouvert ou fermé ; Échap le referme.
+// Ouverture et fermeture sont animées en CSS : à la fermeture, la classe .is-closing joue l'animation
+// de repli, puis le panneau est retiré. Sans animation si l'appareil demande moins de mouvement.
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let menuCloseTimer = null;
+const isMenuOpen = () => Boolean(navigation?.classList.contains("open") && !navigation.classList.contains("is-closing"));
 const setMenuOpen = (open) => {
-    navigation?.classList.toggle("open", open);
+    if (!navigation) return;
     menuToggle?.setAttribute("aria-expanded", String(open));
     menuToggle?.setAttribute("aria-label", open ? "Fermer le menu" : "Ouvrir le menu");
+    menuToggle?.classList.toggle("is-open", open);
+    clearTimeout(menuCloseTimer);
+
+    if (open) {
+        navigation.classList.remove("is-closing");
+        navigation.classList.add("open");
+        return;
+    }
+    if (!navigation.classList.contains("open")) return;
+    // Menu affiché en ligne (PC large) ou mouvement réduit : on ferme tout de suite.
+    if (reducedMotion.matches || getComputedStyle(navigation).position !== "absolute") {
+        navigation.classList.remove("open", "is-closing");
+        return;
+    }
+    navigation.classList.add("is-closing");
+    const finish = () => {
+        if (navigation.classList.contains("is-closing")) navigation.classList.remove("open", "is-closing");
+    };
+    navigation.addEventListener("animationend", (event) => {
+        if (event.target === navigation) finish();
+    }, {once: true});
+    menuCloseTimer = setTimeout(finish, 400);
 };
-menuToggle?.addEventListener("click", () => setMenuOpen(!navigation?.classList.contains("open")));
+menuToggle?.addEventListener("click", () => setMenuOpen(!isMenuOpen()));
+
+// Le menu se referme quand on choisit un onglet ou qu'on clique ailleurs sur la page.
+navigation?.addEventListener("click", (event) => {
+    if (event.target instanceof Element && event.target.closest("a") && isMenuOpen()) setMenuOpen(false);
+});
+document.addEventListener("click", (event) => {
+    if (!isMenuOpen() || !(event.target instanceof Node)) return;
+    if (navigation?.contains(event.target) || menuToggle?.contains(event.target)) return;
+    setMenuOpen(false);
+});
 
 // Sur PC, si les onglets ne tiennent plus sur une ligne, le menu passe en burger (classe .nav-compact).
 const siteHeader = document.querySelector(".site-header");
@@ -662,3 +699,35 @@ if (monthCalendar) {
         monthCalendar.hidden = false;
     }
 }
+
+// Œil des champs mot de passe : un bouton à droite du champ affiche ou masque ce qui est saisi.
+// Ajouté ici pour tous les formulaires (connexion, inscription, Mon compte, réinitialisation).
+const eyeIcon = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const eyeOffIcon = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.7 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-2.6 3.6"/><path d="M6.6 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m2 2 20 20"/></svg>';
+
+document.querySelectorAll('input[type="password"]').forEach((input) => {
+    const wrapper = document.createElement("span");
+    wrapper.className = "password-field";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "password-toggle";
+    const setVisible = (visible) => {
+        input.type = visible ? "text" : "password";
+        toggle.innerHTML = visible ? eyeOffIcon : eyeIcon;
+        toggle.setAttribute("aria-pressed", String(visible));
+        toggle.setAttribute("aria-label", visible ? "Masquer le mot de passe" : "Afficher le mot de passe");
+        toggle.title = visible ? "Masquer le mot de passe" : "Afficher le mot de passe";
+    };
+    setVisible(false);
+    toggle.addEventListener("click", () => {
+        setVisible(input.type === "password");
+        input.focus({preventScroll: true});
+    });
+    wrapper.appendChild(toggle);
+
+    // Par sécurité, le mot de passe repasse en masqué à l'envoi du formulaire (le navigateur ne le mémorise pas en clair).
+    input.form?.addEventListener("submit", () => setVisible(false));
+});

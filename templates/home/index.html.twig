@@ -86,19 +86,24 @@
         </div>
         <div class="events-list container-fluid px-0" id="events-list">
           {% for event in events %}
-            <article class="event" id="event-{{ event.id }}">
+            {% set attending = app.user and event.id in attendance_event_ids %}
+            <article class="event{{ attending ? ' is-attending' : '' }}" id="event-{{ event.id }}">
               <div class="event-date"><strong>{{ event.date|date('d') }}</strong>{{ event.date|format_datetime(pattern='EEEE MMM', locale='fr')|upper }}</div>
               <div class="event-main"><h3>{{ event.title }}</h3><p>{{ event.date|format_datetime(pattern='EEEE d MMMM y', locale='fr')|capitalize }} · {{ event.description }}</p></div>
               <span class="event-tag">Agenda</span>
               {% if app.user %}
-                <form method="post" action="{{ path('event_attendance_toggle', {id: event.id}) }}" class="event-rsvp-form">
+                <form method="post" action="{{ path('event_attendance_toggle', {id: event.id}) }}" class="event-rsvp-form{{ attending ? ' is-confirmed' : '' }}">
                   <input type="hidden" name="_token" value="{{ csrf_token('attendance-' ~ event.id) }}">
-                  <button class="rsvp rsvp-button btn {{ event.id in attendance_event_ids ? 'confirmed' : '' }}" type="submit">
-                    {{ event.id in attendance_event_ids ? 'Annuler ma présence' : 'Je serai là' }} <span aria-hidden="true">{{ event.id in attendance_event_ids ? '×' : '＋' }}</span>
-                  </button>
+                  {% if attending %}
+                    {# Inscrit·e : l'état se lit d'un coup d'œil (coche + texte), l'annulation reste une action secondaire. #}
+                    <p class="rsvp-status"><span class="rsvp-check" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Tu y vas déjà&nbsp;!</p>
+                    <button class="rsvp rsvp-cancel" type="submit" aria-label="Annuler ma présence à {{ event.title }}">Annuler ma présence</button>
+                  {% else %}
+                    <button class="rsvp rsvp-button rsvp-join" type="submit" aria-label="Je serai là : m’inscrire à {{ event.title }}">Je serai là <span class="rsvp-icon" aria-hidden="true">+</span></button>
+                  {% endif %}
                 </form>
               {% else %}
-                <a class="rsvp rsvp-button btn" href="{{ path('app_login') }}">Se connecter pour participer <span aria-hidden="true">＋</span></a>
+                <a class="rsvp rsvp-button rsvp-login" href="{{ path('app_login') }}">Se connecter pour participer <span class="rsvp-icon" aria-hidden="true">→</span></a>
               {% endif %}
             </article>
           {% else %}

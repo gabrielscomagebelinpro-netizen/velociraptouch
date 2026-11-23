@@ -501,9 +501,38 @@ body {
     box-shadow: 0 16px 30px rgba(22, 53, 69, .18)
 }
 
-.event:hover {
-    padding-left: 12px;
-    border-color: var(--lime)
+/* Survol d'un événement : la date et le texte glissent (transform, fluide, sans recalcul de mise en page),
+   le trait du bas et un léger fond passent au turquoise. Les boutons restent fixes sous le curseur. */
+.event {
+    transition: opacity .7s ease var(--reveal-delay, 0s), transform .7s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0s), border-color .4s ease, background-color .4s ease
+}
+
+.event > .event-date,
+.event > .event-main {
+    transition: transform .5s cubic-bezier(.22, 1, .36, 1)
+}
+
+.event-date strong {
+    transition: color .4s ease
+}
+
+@media (hover: hover) {
+    .event:hover,
+    .event:focus-within {
+        border-color: var(--line);
+        background-color: rgba(1, 175, 181, .06)
+    }
+
+    .event:hover > .event-date,
+    .event:hover > .event-main,
+    .event:focus-within > .event-date,
+    .event:focus-within > .event-main {
+        transform: translateX(10px)
+    }
+
+    .event:hover .event-date strong {
+        color: var(--line)
+    }
 }
 
 .button:hover {
@@ -5774,4 +5803,434 @@ a.month-calendar-event.is-past:hover {
         overflow-y: auto;
         overscroll-behavior: contain
     }
+}
+
+/* Œil des champs mot de passe (ajouté par site.js). */
+.password-field {
+    position: relative;
+    display: block;
+    width: 100%
+}
+
+.password-field input {
+    width: 100%;
+    padding-right: 48px
+}
+
+.contact-form > label + .password-field,
+.admin-card form > label + .password-field,
+.admin-panel > label + .password-field {
+    margin-top: 6px
+}
+
+.contact-form .password-toggle,
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    background: none;
+    border: 0;
+    color: var(--muted);
+    cursor: pointer;
+    align-self: auto
+}
+
+.password-toggle:hover,
+.password-toggle[aria-pressed="true"] {
+    color: var(--teal)
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: -4px
+}
+
+/* Edge affiche déjà son propre œil : on le masque pour n'en garder qu'un. */
+.password-field input::-ms-reveal,
+.password-field input::-ms-clear {
+    display: none
+}
+
+/* ===== Boutons de présence aux événements =====
+   « Je serai là » : bouton plein turquoise clair, le plus visible de la ligne.
+   Inscrit·e : coche + « Tu y vas déjà ! » et liseré turquoise sur l'événement ; « Annuler » reste un lien secondaire.
+   Format compact : il accompagne la ligne de l'événement sans la dominer. */
+.rsvp.rsvp-button {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 0 0 14px;
+    background: var(--line);
+    color: var(--ink) !important;
+    border: 2px solid var(--line);
+    border-radius: 0;
+    box-shadow: none;
+    font: 600 13px "Barlow Condensed", "DM Sans", sans-serif !important;
+    letter-spacing: .08em;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease
+}
+
+.rsvp.rsvp-button .rsvp-icon {
+    align-self: stretch;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    background: var(--ink);
+    color: var(--line);
+    font-size: 16px;
+    line-height: 1;
+    transition: background .2s ease, color .2s ease
+}
+
+.rsvp.rsvp-button:hover,
+.rsvp.rsvp-button:focus-visible {
+    background: var(--paper);
+    border-color: var(--paper);
+    color: var(--ink) !important;
+    transform: translateY(-2px);
+    box-shadow: none
+}
+
+.rsvp.rsvp-button:hover .rsvp-icon,
+.rsvp.rsvp-button:focus-visible .rsvp-icon {
+    background: var(--line);
+    color: var(--ink)
+}
+
+.rsvp.rsvp-button:active {
+    transform: translateY(0);
+    box-shadow: none
+}
+
+.rsvp.rsvp-button:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 3px
+}
+
+/* Visiteur non connecté : même forme, en contour, pour ne pas voler la vedette aux membres. */
+.rsvp.rsvp-login {
+    background: transparent;
+    color: var(--paper) !important;
+    border-color: var(--line)
+}
+
+.rsvp.rsvp-login .rsvp-icon {
+    background: transparent;
+    border-left: 2px solid var(--line);
+    color: var(--line)
+}
+
+/* État « inscrit·e » */
+.event-rsvp-form.is-confirmed {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0
+}
+
+.rsvp-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--paper);
+    font: 700 15px "Barlow Condensed", "DM Sans", sans-serif;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap
+}
+
+.rsvp-check {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--line);
+    color: var(--ink)
+}
+
+.rsvp.rsvp-cancel {
+    min-height: 28px;
+    padding: 2px 0 2px 30px;
+    background: none;
+    border: 0;
+    color: rgba(255, 251, 251, .72) !important;
+    font: 500 12px "Barlow Condensed", "DM Sans", sans-serif !important;
+    letter-spacing: .06em;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 251, 251, .35);
+    text-underline-offset: 4px;
+    cursor: pointer;
+    transition: color .2s ease, text-decoration-color .2s ease
+}
+
+.rsvp.rsvp-cancel:hover,
+.rsvp.rsvp-cancel:focus-visible {
+    color: var(--paper) !important;
+    text-decoration-color: var(--line)
+}
+
+.rsvp.rsvp-cancel:focus-visible {
+    outline: 2px solid var(--line);
+    outline-offset: 2px
+}
+
+/* Ligne de l'événement auquel on participe : liseré et léger fond turquoise. */
+.event.is-attending {
+    position: relative;
+    background: linear-gradient(90deg, rgba(1, 175, 181, .12), rgba(1, 175, 181, 0) 70%)
+}
+
+.event.is-attending::before {
+    content: "";
+    position: absolute;
+    left: -14px;
+    top: 16px;
+    bottom: 16px;
+    width: 4px;
+    background: var(--line)
+}
+
+.event.is-attending .event-date strong {
+    color: var(--line)
+}
+
+@media (max-width: 760px) {
+    /* Téléphone : la description prend toute la largeur, la présence passe sur sa propre ligne en dessous. */
+    .events-list .event {
+        grid-template-columns: 56px minmax(0, 1fr)
+    }
+
+    .events-list .event-tag {
+        display: none
+    }
+
+    .events-list .event-rsvp-form,
+    .events-list .event > .rsvp-login {
+        grid-column: 2 / -1;
+        grid-row: auto;
+        justify-self: start;
+        width: auto;
+        margin-top: 6px
+    }
+
+    .rsvp.rsvp-button {
+        min-width: 0;
+        width: auto;
+        max-width: none;
+        font-size: 14px !important;
+        padding-left: 14px
+    }
+
+    .rsvp.rsvp-button .rsvp-icon {
+        width: 32px
+    }
+
+    .event-rsvp-form.is-confirmed {
+        min-width: 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 18px
+    }
+
+    .rsvp-status {
+        font-size: 14px;
+        gap: 8px
+    }
+
+    .rsvp-check {
+        width: 22px;
+        height: 22px
+    }
+
+    .rsvp.rsvp-cancel {
+        padding-left: 0
+    }
+
+    .event.is-attending::before {
+        left: -10px
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rsvp.rsvp-button,
+    .rsvp.rsvp-button:hover {
+        transition: none;
+        transform: none
+    }
+}
+
+/* ===== Menu burger animé =====
+   Icône : trois barres qui se croisent en ✕. Panneau : se déroule depuis l'en-tête, onglets en cascade ;
+   à la fermeture (.is-closing ajoutée par site.js), il se replie avant de disparaître. */
+.menu-toggle {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    color: var(--ink);
+    cursor: pointer
+}
+
+.menu-toggle-bars {
+    position: relative;
+    display: block;
+    width: 24px;
+    height: 16px;
+    margin: 0 auto
+}
+
+.menu-toggle-bars span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform .35s cubic-bezier(.22, 1, .36, 1), opacity .2s ease, top .35s cubic-bezier(.22, 1, .36, 1)
+}
+
+.menu-toggle-bars span:nth-child(1) { top: 0 }
+.menu-toggle-bars span:nth-child(2) { top: 7px }
+.menu-toggle-bars span:nth-child(3) { top: 14px }
+
+.menu-toggle.is-open .menu-toggle-bars span:nth-child(1) { top: 7px; transform: rotate(45deg) }
+.menu-toggle.is-open .menu-toggle-bars span:nth-child(2) { opacity: 0; transform: scaleX(.2) }
+.menu-toggle.is-open .menu-toggle-bars span:nth-child(3) { top: 7px; transform: rotate(-45deg) }
+
+.menu-toggle:hover,
+.menu-toggle.is-open {
+    color: var(--teal)
+}
+
+.menu-toggle:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px
+}
+
+@keyframes menu-panel-open {
+    from { clip-path: inset(0 0 100% 0); opacity: .6 }
+    to { clip-path: inset(0 0 0 0); opacity: 1 }
+}
+
+@keyframes menu-panel-close {
+    from { clip-path: inset(0 0 0 0); opacity: 1 }
+    to { clip-path: inset(0 0 100% 0); opacity: 0 }
+}
+
+@keyframes menu-item-in {
+    from { opacity: 0; transform: translateX(14px) }
+    to { opacity: 1; transform: none }
+}
+
+.main-nav.open {
+    animation: menu-panel-open .38s cubic-bezier(.22, 1, .36, 1) both;
+    box-shadow: 0 18px 40px rgba(22, 53, 69, .14)
+}
+
+.main-nav.open.is-closing {
+    animation: menu-panel-close .24s ease-in both
+}
+
+.main-nav.open > a,
+.main-nav.open > .nav-logout-form .nav-logout {
+    animation: menu-item-in .4s cubic-bezier(.22, 1, .36, 1) both
+}
+
+.main-nav.open > :nth-child(1), .main-nav.open > :nth-child(1) .nav-logout { animation-delay: .05s }
+.main-nav.open > :nth-child(2), .main-nav.open > :nth-child(2) .nav-logout { animation-delay: .09s }
+.main-nav.open > :nth-child(3), .main-nav.open > :nth-child(3) .nav-logout { animation-delay: .13s }
+.main-nav.open > :nth-child(4), .main-nav.open > :nth-child(4) .nav-logout { animation-delay: .17s }
+.main-nav.open > :nth-child(5), .main-nav.open > :nth-child(5) .nav-logout { animation-delay: .21s }
+.main-nav.open > :nth-child(6), .main-nav.open > :nth-child(6) .nav-logout { animation-delay: .25s }
+.main-nav.open > :nth-child(7), .main-nav.open > :nth-child(7) .nav-logout { animation-delay: .29s }
+.main-nav.open > :nth-child(8), .main-nav.open > :nth-child(8) .nav-logout { animation-delay: .33s }
+.main-nav.open > :nth-child(n+9), .main-nav.open > :nth-child(n+9) .nav-logout { animation-delay: .37s }
+
+.main-nav.open.is-closing > a,
+.main-nav.open.is-closing > .nav-logout-form .nav-logout {
+    animation: none
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .menu-toggle-bars span { transition: none }
+
+    .main-nav.open,
+    .main-nav.open > a,
+    .main-nav.open > .nav-logout-form .nav-logout {
+        animation: none
+    }
+}
+
+/* ===== Corrections de l'audit responsive ===== */
+
+/* Listes déroulantes des formulaires (tailles de maillot/short…) : même style et même hauteur que les autres champs,
+   au lieu du rendu natif de 20 px de haut, trop petit au doigt. */
+.contact-form select {
+    width: 100%;
+    min-height: 42px;
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ink);
+    border-radius: 0;
+    padding: 9px 28px 9px 0;
+    font: 15px "DM Sans", sans-serif;
+    color: var(--ink);
+    cursor: pointer
+}
+
+/* Guide des tailles : la colonne peut rétrécir, le tableau défile dans son cadre au lieu d'élargir la page. */
+.size-guide-tables > div {
+    min-width: 0
+}
+
+@media (max-width: 760px) {
+    .size-guide-table {
+        min-width: 260px
+    }
+
+    /* En-tête de page (titre + bouton retour) : le bouton passe sous le titre s'il n'y a plus la place. */
+    .page-topbar {
+        flex-wrap: wrap;
+        align-items: flex-start
+    }
+
+    .page-topbar > div {
+        flex: 1 1 200px;
+        min-width: 0
+    }
+
+    .page-topbar h1 {
+        overflow-wrap: anywhere
+    }
+}
+
+/* Petits liens isolés (« Découvrir le collectif », événements du calendrier) : au moins 24 px de haut au doigt. */
+.text-link,
+.month-calendar-event {
+    min-height: 24px
+}
+
+.text-link {
+    display: inline-flex;
+    align-items: center
 }
