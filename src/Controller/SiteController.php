@@ -257,6 +257,11 @@ final class SiteController
         if (!$this->shopEnabled || !$product->isActive()) {
             throw new NotFoundHttpException();
         }
+        // Produit vendu sur HelloAsso : l'ancienne adresse de précommande du site y renvoie aussi.
+        $helloassoUrl = $product->getHelloassoUrl();
+        if ($helloassoUrl !== null && Product::isHelloassoUrl($helloassoUrl)) {
+            return new RedirectResponse($helloassoUrl);
+        }
         $user = $this->security->getUser();
         if (!$user instanceof User) {
             $request->getSession()->getFlashBag()->add('shop_error', 'Connecte-toi pour préparer une précommande.');
@@ -276,13 +281,15 @@ final class SiteController
         }
 
         $redirect = new RedirectResponse('/boutique');
+        // En cas d'erreur, retour sur le formulaire du produit, qui affiche le message (« shop_error »).
+        $backToForm = new RedirectResponse('/boutique/'.$product->getId().'/precommander');
         if ($existingPreorder instanceof Preorder) {
             $request->getSession()->getFlashBag()->add('error', 'Tu as déjà une précommande pour ce produit. Tu peux la modifier depuis ton compte.');
             return new RedirectResponse('/mon-compte#precommandes');
         }
         if (!$this->csrfTokens->isTokenValid(new CsrfToken('preorder-'.$product->getId(), (string) $request->request->get('_token')))) {
             $request->getSession()->getFlashBag()->add('shop_error', 'Le formulaire a expiré. Merci de réessayer.');
-            return $redirect;
+            return $backToForm;
         }
         $name = $user->getFirstName().' '.$user->getLastName();
         $email = $user->getEmail();
@@ -297,8 +304,8 @@ final class SiteController
             || ($product->isRequiresJerseySize() && $jerseyNumber === false)
             || ($product->isRequiresShortSize() && !in_array($shortSize, ['XS', 'S', 'M', 'L', 'XL', 'XXL'], true))
             || mb_strlen($notes) > 1000) {
-            $request->getSession()->getFlashBag()->add('shop_error', 'Vérifie les informations et les tailles choisies.');
-            return $redirect;
+            $request->getSession()->getFlashBag()->add('shop_error', 'Vérifie la quantité (1 à 20), les tailles et le numéro choisis.');
+            return $backToForm;
         }
         $order = (new Preorder($product))
             ->setName($name)->setEmail($email)->setQuantity($quantity)

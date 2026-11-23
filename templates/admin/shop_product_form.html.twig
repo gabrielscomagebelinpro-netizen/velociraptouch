@@ -24,6 +24,11 @@
           </div>
 
           <div class="admin-form-section">
+            <p class="eyebrow">Paiement HelloAsso</p>
+            <label>Lien HelloAsso de précommande <span class="field-help">Copie l’adresse de la page HelloAsso du produit. Si ce champ est rempli, le bouton « Précommander » de la boutique y envoie directement ; laissé vide, la précommande se fait avec le formulaire du site.</span><input class="form-control" name="helloasso_url" type="url" inputmode="url" maxlength="500" pattern="https://([A-Za-z0-9-]+\.)*helloasso\.com(/.*)?" placeholder="https://www.helloasso.com/associations/…" value="{{ product.helloassoUrl }}"></label>
+          </div>
+
+          <div class="admin-form-section">
             <p class="eyebrow">Options de précommande</p>
             <div class="admin-checkbox-list">
               <label><input type="checkbox" name="requires_jersey_size" value="1"{% if product.requiresJerseySize %} checked{% endif %}><span>Demander une taille de maillot</span></label>

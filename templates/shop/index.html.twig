@@ -15,7 +15,15 @@
     <div>
       <p class="eyebrow"><span class="live-dot"></span> Précommandes · tenue officielle</p>
       <h1>La boutique<br /><em>des vélos.</em></h1>
-      <p>Choisis ton équipement, indique les tailles et la quantité souhaitée. L’équipe te recontactera pour confirmer la commande et le règlement.</p>
+      {# Le texte suit le mode de précommande des produits en vente : HelloAsso, formulaire du site, ou les deux. #}
+      {% set helloassoCount = products|filter(p => p.helloassoUrl)|length %}
+      {% if helloassoCount > 0 and helloassoCount == products|length %}
+        <p>Choisis ton équipement et précommande-le en ligne sur HelloAsso : tailles, quantité et paiement sécurisé se font directement là-bas.</p>
+      {% elseif helloassoCount > 0 %}
+        <p>Choisis ton équipement : selon le produit, la précommande et le paiement se font sur HelloAsso, ou via notre formulaire et l’équipe te recontacte pour le règlement.</p>
+      {% else %}
+        <p>Choisis ton équipement, indique les tailles et la quantité souhaitée. L’équipe te recontactera pour confirmer la commande et le règlement.</p>
+      {% endif %}
     </div>
     <div class="shop-hero-sticker"><img class="lightbox-trigger" src="/assets/images/brand/logo-velo-svg.png" alt="Logo Vélociraptouch" tabindex="0" /></div>
   </section>
@@ -23,9 +31,11 @@
   <section class="shop-section" id="produits">
     <div class="section-heading heading-row">
       <div><p class="eyebrow">01 — les produits</p><h2>Choisis ton<br /><span>équipement.</span></h2></div>
-      <p class="shop-intro">Les prix affichés sont ceux de la précommande en cours. Chaque demande est ensuite confirmée par l’association.</p>
+      <p class="shop-intro">Les prix affichés sont ceux de la précommande en cours.{% if helloassoCount > 0 %} Le bouton ↗ t’emmène sur HelloAsso, la plateforme de paiement de l’association.{% else %} Chaque demande est ensuite confirmée par l’association.{% endif %}</p>
     </div>
-    {% if shopSuccess %}<p class="form-note">{{ shopSuccess }}</p>{% endif %}
+    {% if shopSuccess %}<p class="form-note" role="status">{{ shopSuccess }}</p>{% endif %}
+    {# Confirmations envoyées depuis « Mon compte » (précommande modifiée ou supprimée). #}
+    {% for message in app.flashes('success') %}<p class="form-note" role="status">{{ message }}</p>{% endfor %}
     <div class="product-grid">
       {% for product in products %}
         <article class="product-card" id="produit-{{ product.id }}">
@@ -39,7 +49,10 @@
             <div class="product-bottom">
               <strong>{{ product.priceEuros }} €</strong>
               {% set existingPreorder = preordersByProduct[product.id] ?? null %}
-              {% if existingPreorder %}
+              {% if product.helloassoUrl %}
+                {# Précommande et paiement sur HelloAsso : pas besoin de compte sur le site. #}
+                <a class="button button-primary" href="{{ product.helloassoUrl }}" rel="noopener noreferrer" aria-label="Précommander {{ product.name }} sur HelloAsso (site externe)">Précommander <span aria-hidden="true">↗</span></a>
+              {% elseif existingPreorder %}
                 <a class="button button-outline" href="{{ path('account_preorder_edit', {id: existingPreorder.id}) }}">Voir ma précommande <span>→</span></a>
               {% else %}
                 <a class="button button-primary" href="{{ path('site_shop_preorder', {id: product.id}) }}">Précommander <span>→</span></a>

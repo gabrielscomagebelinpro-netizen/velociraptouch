@@ -9,6 +9,9 @@
         <a class="button button-outline page-back" href="{{ path('site_home') }}">← Accueil</a>
     </div>
     <h1>Connexion <span>à votre compte.</span></h1>
+    {# Messages laissés par les pages qui renvoient ici (compte créé, boutique réservée aux membres…). #}
+    {% for message in app.flashes('success') %}<p class="form-note" role="status">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('shop_error') %}<p class="form-note" role="status">{{ message }}</p>{% endfor %}
     {% if error %}
         {# Messages en français ; le message ne dit jamais si c'est le nom ou le mot de passe qui est faux. #}
         {% if error.messageKey starts with 'Too many failed login attempts' %}

@@ -7,6 +7,7 @@
   <section class="shop-order-panel">
     <p class="eyebrow">Ma précommande</p>
     <h1>{{ product.name }} <span>{{ product.priceEuros }} €.</span></h1>
+    {% for message in app.flashes('error') %}<p class="form-note form-note-error" role="alert">{{ message }}</p>{% endfor %}
     <form id="edit-preorder-form" class="contact-form shop-order-form" method="post">
       <input type="hidden" name="_token" value="{{ csrf_token('edit-preorder-' ~ preorder.id) }}">
       <div class="shop-order-grid">

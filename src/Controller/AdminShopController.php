@@ -71,10 +71,16 @@ final class AdminShopController extends AbstractController
             $description = trim((string) $request->request->get('description'));
             $price = str_replace(',', '.', trim((string) $request->request->get('price')));
             $priceCents = is_numeric($price) ? (int) round((float) $price * 100) : -1;
+            $helloassoUrl = trim((string) $request->request->get('helloasso_url'));
             if ($name === '' || mb_strlen($name) > 120 || $description === '' || mb_strlen($description) > 2000 || $priceCents < 0 || $priceCents > 1000000) {
                 $this->addFlash('error', 'Vérifie le nom, la description et le prix du produit.');
+            } elseif ($helloassoUrl !== '' && !Product::isHelloassoUrl($helloassoUrl)) {
+                // On garde la saisie à l'écran pour que l'admin puisse la corriger.
+                $product->setHelloassoUrl($helloassoUrl);
+                $this->addFlash('error', 'Le lien HelloAsso doit commencer par https:// et pointer vers helloasso.com (par exemple https://www.helloasso.com/associations/…).');
             } else {
                 $product->setName($name)->setDescription($description)->setPriceCents($priceCents)
+                    ->setHelloassoUrl($helloassoUrl)
                     ->setImageAlt((string) $request->request->get('image_alt'))
                     ->setRequiresJerseySize($request->request->getBoolean('requires_jersey_size'))
                     ->setRequiresShortSize($request->request->getBoolean('requires_short_size'))
@@ -111,6 +117,10 @@ final class AdminShopController extends AbstractController
         if (!$this->isCsrfTokenValid('delete-shop-product-'.$product->getId(), (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
+        // Les précommandes du produit partent avec lui, même si la base n'applique pas la cascade (SQLite de preview).
+        $this->entityManager->createQuery('DELETE FROM '.Preorder::class.' p WHERE p.product = :product')
+            ->setParameter('product', $product)
+            ->execute();
         $this->entityManager->remove($product);
         $this->entityManager->flush();
         $this->images->remove($product->getImagePath());

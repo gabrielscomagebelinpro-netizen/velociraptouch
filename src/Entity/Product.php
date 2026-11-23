@@ -44,6 +44,24 @@ class Product
     #[ORM\Column]
     private int $position = 0;
 
+    // Lien HelloAsso de la précommande : s'il est renseigné, le bouton « Précommander » y envoie directement.
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $helloassoUrl = null;
+
+    /** Accepte uniquement une adresse https sur helloasso.com (ou un sous-domaine), pour ne jamais rediriger ailleurs. */
+    public static function isHelloassoUrl(string $url): bool
+    {
+        if (mb_strlen($url) > 500 || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+        $parts = parse_url($url);
+        $host = strtolower((string) ($parts['host'] ?? ''));
+
+        return ($parts['scheme'] ?? '') === 'https'
+            && !isset($parts['user'])
+            && ($host === 'helloasso.com' || str_ends_with($host, '.helloasso.com'));
+    }
+
     public function getId(): ?int { return $this->id; }
     public function getName(): string { return $this->name; }
     public function setName(string $value): self { $this->name = trim($value); return $this; }
@@ -64,4 +82,6 @@ class Product
     public function setActive(bool $value): self { $this->active = $value; return $this; }
     public function getPosition(): int { return $this->position; }
     public function setPosition(int $value): self { $this->position = $value; return $this; }
+    public function getHelloassoUrl(): ?string { return $this->helloassoUrl; }
+    public function setHelloassoUrl(?string $value): self { $value = trim((string) $value); $this->helloassoUrl = $value !== '' ? $value : null; return $this; }
 }
