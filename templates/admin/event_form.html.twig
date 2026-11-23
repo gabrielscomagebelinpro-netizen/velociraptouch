@@ -1,15 +1,21 @@
 {% extends 'base.html.twig' %}
 {% import '_icons.html.twig' as ui %}
 
-{% block title %}Modifier un événement{% endblock %}
+{% set isNew = event.id is null %}
+
+{% block title %}{{ isNew ? 'Créer un événement' : 'Modifier un événement' }} — Administration{% endblock %}
 
 {% block body %}
 <main id="contenu" tabindex="-1" class="admin-page-main">
     <div class="page-topbar">
         <p class="eyebrow">Espace administration</p>
-        <a class="button button-outline page-back" href="{{ path('admin_dashboard') }}">← Panel</a>
+        <a class="button button-outline page-back" href="{{ path('admin_dashboard') }}">← Agenda</a>
     </div>
-    <h1>Modifier <span>l’événement.</span></h1>
+    {% if isNew %}
+        <h1>Créer un <span>événement.</span></h1>
+    {% else %}
+        <h1>Modifier <span>l’événement.</span></h1>
+    {% endif %}
     {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
     {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
     <section class="admin-card admin-edit-card">
@@ -18,15 +24,21 @@
         {{ form_row(form.title, {attr: {class: 'form-control'}}) }}
         {{ form_row(form.description, {attr: {class: 'form-control'}}) }}
         <div class="admin-form-actions">
-            <button class="button button-primary btn" type="submit">Enregistrer {{ ui.icon('save') }}</button>
+            {% if isNew %}
+                <button class="button button-primary btn" type="submit">Ajouter à l’agenda {{ ui.icon('calendar_add') }}</button>
+            {% else %}
+                <button class="button button-primary btn" type="submit">Enregistrer {{ ui.icon('save') }}</button>
+            {% endif %}
             <a class="button button-outline" href="{{ path('admin_dashboard') }}">Annuler</a>
         </div>
         {{ form_end(form) }}
     </section>
-    <section class="admin-card admin-photos-card" id="event-photos">
-        <h2>Albums photos</h2>
-        <p class="field-help">Les photos sont gérées dans des albums indépendants des événements.</p>
-        <a class="button button-primary" href="{{ path('admin_photo_albums') }}">Gérer les albums {{ ui.icon('photos') }}</a>
-    </section>
+    {% if not isNew %}
+        <section class="admin-card admin-photos-card" id="event-photos">
+            <h2>Albums photos</h2>
+            <p class="field-help">Les photos sont gérées dans des albums indépendants des événements.</p>
+            <a class="button button-primary" href="{{ path('admin_photo_albums') }}">Gérer les albums {{ ui.icon('photos') }}</a>
+        </section>
+    {% endif %}
 </main>
 {% endblock %}

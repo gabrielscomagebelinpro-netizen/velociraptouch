@@ -14,21 +14,14 @@
     <div class="admin-page-header">
         <div>
             <h1>Gérer <span>l'agenda.</span></h1>
-            <p class="admin-page-intro">Gère ici le contenu du site, les événements{% if shop_enabled %} et bientôt les produits de la boutique{% endif %}.</p>
+            <p class="admin-page-intro">Crée les événements de l’agenda, modifie-les et suis les présences des membres.</p>
         </div>
     </div>
     {% include 'admin/_tabs.html.twig' with {active: 'admin_dashboard'} %}
+    {# Même parcours que la boutique et les albums : un bouton ouvre la page de création. #}
+    <div class="admin-shop-create-action"><a class="button button-primary" href="{{ path('admin_event_new') }}">Créer un événement {{ ui.icon('plus') }}</a></div>
     {% for message in app.flashes('success') %}<p class="form-note">{{ message }}</p>{% endfor %}
-    <div class="admin-page-grid">
-        <section class="admin-card admin-create-card">
-            <h2>Ajouter un événement</h2>
-            {{ form_start(form, {attr: {class: 'contact-form'}}) }}
-            {{ form_row(form.date, {attr: {class: 'form-control'}}) }}
-            {{ form_row(form.title, {attr: {class: 'form-control'}}) }}
-            {{ form_row(form.description, {attr: {class: 'form-control'}}) }}
-            <button class="button button-primary btn" type="submit">Ajouter à l’agenda {{ ui.icon('calendar_add') }}</button>
-            {{ form_end(form) }}
-        </section>
+    {% for message in app.flashes('error') %}<p class="form-note form-note-error">{{ message }}</p>{% endfor %}
         <div class="admin-stack">
             <section class="admin-card admin-events-card">
                 <h2>Événements à venir <span class="admin-count">({{ events|length }})</span></h2>
@@ -81,6 +74,5 @@
                 <p class="field-help">Les albums sont indépendants des événements.</p>
             </section>
         </div>
-    </div>
 </main>
 {% endblock %}

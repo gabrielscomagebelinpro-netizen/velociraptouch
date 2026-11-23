@@ -32,10 +32,21 @@ final class AdminController extends AbstractController
     ) {
     }
 
-    #[Route('', name: 'admin_dashboard', methods: ['GET', 'POST'])]
-    public function dashboard(Request $request, EntityManagerInterface $entityManager, EventRepository $events, AttendanceRepository $attendances, EventPhotoRepository $photos): Response
+    #[Route('', name: 'admin_dashboard', methods: ['GET'])]
+    public function dashboard(EventRepository $events, AttendanceRepository $attendances): Response
     {
         $attendances->removeForPastEvents(new \DateTimeImmutable('today'));
+
+        return $this->render('admin/dashboard.html.twig', [
+            'events' => $events->findUpcoming(),
+            'pastEvents' => $events->findPast(),
+        ]);
+    }
+
+    // Création sur une page dédiée, comme pour un produit de la boutique ou un album photo.
+    #[Route('/events/nouveau', name: 'admin_event_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
         $event = new Event();
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
@@ -48,11 +59,7 @@ final class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard');
         }
 
-        return $this->render('admin/dashboard.html.twig', [
-            'form' => $form,
-            'events' => $events->findUpcoming(),
-            'pastEvents' => $events->findPast(),
-        ]);
+        return $this->render('admin/event_form.html.twig', ['form' => $form, 'event' => $event]);
     }
 
     #[Route('/events/{id}/edit', name: 'admin_event_edit', methods: ['GET', 'POST'])]
